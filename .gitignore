@@ -1,0 +1,10 @@
+_targets/
+_testing/
+data/2_INTERIM
+data/3_MERGED
+data/GGIR/output_WAVES-FIELD
+data/GGIR/output_WAVES-VISIT
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
