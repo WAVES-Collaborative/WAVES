@@ -217,9 +217,8 @@ ellis2016.wrist <- function(raw,
 
     # nonwear ----
     if(nrow(acc)>=(Fs*60*60*1)) { #need at least 1hr of data to calculate nonwear
-      # nw<-nonwear_vm(acc,Fs=Fs,window=win)
-      nw <-
-        actimetric::detectNonWear(acc, sf = Fs, epoch = win)
+      # nw <- nonwear_vm(acc,Fs=Fs,window=win)
+      nw <- detectNonWear(acc, sf = Fs, epoch = win)
 
       #nw<-rep(nw,each=4) #need to adjust according to window size
       if(length(nw)<nrow(acc2)){
