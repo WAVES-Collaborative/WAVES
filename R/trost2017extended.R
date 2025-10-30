@@ -167,7 +167,7 @@ trost2017.extended <- function(raw,
       / (pi / 180)
     )
     # (atan(raw[, 3] / (sqrt(raw[, 1]^2 + raw[, 2]^2)))) / (pi/180)
-    s.anglez <- actimetric::slide(
+    s.anglez <- slide(
       s.anglez,
       width = 5 * Fs,
       FUN = mean

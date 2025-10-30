@@ -110,9 +110,17 @@ ellis2016.wrist <- function(raw,
                             start.time) {
 
   # sleep variables ----
-  if(sleep==T){
-    s.anglez = (atan(raw[,3]/ (sqrt(raw[,1]^2 + raw[,2]^2)))) / (pi/180)
-    s.anglez<- actimetric::slide(s.anglez,width=5*Fs,FUN=mean)
+  if (sleep == TRUE) {
+    s.anglez <- (
+      atan(raw[, 3] / sqrt(raw[, 1]^2 + raw[, 2]^2))
+      / (pi / 180)
+    )
+    # (atan(raw[, 3] / (sqrt(raw[, 1]^2 + raw[, 2]^2)))) / (pi/180)
+    s.anglez <- slide(
+      s.anglez,
+      width = 5 * Fs,
+      FUN = mean
+    )
     s.t2<-start.time + 5*(0:(length(s.anglez)-1))
     class(s.t2) = c('POSIXt','POSIXct')
     #s.t2<-.POSIXct(s.t2,tz='UTC')
