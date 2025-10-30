@@ -501,8 +501,13 @@ trost2017.extended <- function(raw,
         x<-x-1
         ga<-anglez[z:x,]
         ga<-ga[is.na(ga$s.anglez)==FALSE,] #For last day when monitor is plugged in and acc is 0's
-        sleepw <- actimetric::inbed(
-          ga$s.anglez,outofbedsize = 30,ws3=5,bedblocksize = 30,k=60)
+        sleepw <- inbed(
+          ga$s.anglez,
+          k = 60,
+          bedblocksize = 30,
+          outofbedsize = 30,
+          ws3 = 5
+        )
 
         if(sleepw$lightsout[1]==0){sleepw$lightsout[1]<-1}
 
