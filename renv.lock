@@ -39,26 +39,6 @@
       "Source": "Repository",
       "Repository": "CRAN"
     },
-    "actimetric": {
-      "Package": "actimetric",
-      "Version": "0.1.5",
-      "Source": "GitHub",
-      "RemoteUsername": "PhysicalActivityOpenTools",
-      "RemoteRepo": "actimetric",
-      "RemoteRef": "main",
-      "RemoteSha": "a21222f0",
-      "RemoteHost": "api.github.com"
-    },
-    "actimetricModels": {
-      "Package": "actimetricModels",
-      "Version": "0.1.1",
-      "Source": "GitHub",
-      "RemoteUsername": "PhysicalActivityOpenTools",
-      "RemoteRepo": "actimetricModels",
-      "RemoteRef": "master",
-      "RemoteSha": "30b323de",
-      "RemoteHost": "api.github.com"
-    },
     "adept": {
       "Package": "adept",
       "Version": "1.2",

@@ -167,7 +167,7 @@ trost2017.extended <- function(raw,
       / (pi / 180)
     )
     # (atan(raw[, 3] / (sqrt(raw[, 1]^2 + raw[, 2]^2)))) / (pi/180)
-    s.anglez <- actimetric::slide(
+    s.anglez <- slide(
       s.anglez,
       width = 5 * Fs,
       FUN = mean
@@ -310,10 +310,8 @@ trost2017.extended <- function(raw,
     if (nrow(acc) >= (Fs * 60 * 60 * 1)) {
 
       #need at least 1hr of data to calculate nonwear
-      # nw <-
-      #   nonwear_vm(acc, Fs = Fs, window = win)
-      nw <-
-        actimetric::detectNonWear(acc, sf = Fs, epoch = win)
+      # nw <- nonwear_vm(acc, Fs = Fs, window = win)
+      nw <- detectNonWear(acc, sf = Fs, epoch = win)
 
       #nw<-rep(nw,each=4) #need to adjust according to window size
       if(length(nw)<nrow(acc2)){
@@ -503,8 +501,13 @@ trost2017.extended <- function(raw,
         x<-x-1
         ga<-anglez[z:x,]
         ga<-ga[is.na(ga$s.anglez)==FALSE,] #For last day when monitor is plugged in and acc is 0's
-        sleepw <- actimetric::inbed(
-          ga$s.anglez,outofbedsize = 30,ws3=5,bedblocksize = 30,k=60)
+        sleepw <- inbed(
+          ga$s.anglez,
+          k = 60,
+          bedblocksize = 30,
+          outofbedsize = 30,
+          ws3 = 5
+        )
 
         if(sleepw$lightsout[1]==0){sleepw$lightsout[1]<-1}
 
