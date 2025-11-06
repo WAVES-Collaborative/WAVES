@@ -1822,42 +1822,55 @@ get_equal.behavior_uwm <- function(vct_behavior,
         df_collapse$event_env
       )
 
-      for (i in seq_along(df_occupation$event_env)) {
+      for (i in seq_along(lst_collapse)) {
 
-        ind <-
-          df_occupation$event_env[i]
-        le_type <-
-          df_occupation$type_occupation[i]
-        le_maj <-
-          df_occupation$collapse2[i]
+        if (lst_collapse[[i]]$environment[1] != "occupation") {
 
-        # The two vectors below are codes to NOT roll over depending on type. The
-        # majority code is removed from the appropriate vector.
-        vct_dont_roll <- c(
-          "care non-personal",
-          "care personal",
-          "eating/drinking",
-          "housework",
-          "food prep",
-          "leisure active",
-          "travel driving",
-          "travel passenger",
-          "travel active",
-          "travel other"
-        )
-        vct_dont_roll <- vct_dont_roll[!grepl(
-          x = vct_dont_roll,
-          pattern = le_maj
-        )]
-        lst_collapse[[ind]] <-
-          lst_collapse[[ind]] |>
-          mutate(
-            collapse3 = ifelse(
-              collapse2 %in% vct_dont_roll,
-              yes = collapse2,
-              no  = paste("occupation", le_type)
+          lst_collapse[[i]] <-
+            lst_collapse[[i]] |>
+            mutate(
+              collapse3 = collapse2
             )
+
+        } else {
+
+          ind <-
+            df_occupation$event_env[i]
+          le_type <-
+            df_occupation$type_occupation[i]
+          le_maj <-
+            df_occupation$collapse2[i]
+
+          # The two vectors below are codes to NOT roll over depending on type. The
+          # majority code is removed from the appropriate vector.
+          vct_dont_roll <- c(
+            "care non-personal",
+            "care personal",
+            "eating/drinking",
+            "housework",
+            "food prep",
+            "leisure active",
+            "travel driving",
+            "travel passenger",
+            "travel active",
+            "travel other"
           )
+          vct_dont_roll <- vct_dont_roll[!grepl(
+            x = vct_dont_roll,
+            pattern = le_maj
+          )]
+          lst_collapse[[ind]] <-
+            lst_collapse[[ind]] |>
+            mutate(
+              collapse3 = ifelse(
+                collapse2 %in% vct_dont_roll,
+                yes = collapse2,
+                no  = paste("occupation", le_type)
+              )
+            )
+
+        }
+
 
       }
 
