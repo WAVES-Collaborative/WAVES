@@ -1518,17 +1518,17 @@ get_equal.behavior_calpoly <- function(vct_behavior,
     "OTHER-nocode"        ~ "not coded",
     .default = "RECHECK CODE"
   )
-  case_match(
-    vct_activity,
-    "FJ-farm"          ~ " active",
-    "GP-mining"        ~ " active",
-    "GP-construction"  ~ " active",
-    "GP-manufacturing" ~ " active",
-    "SP-util"          ~ " general",
-    "SP-office"        ~ " general",
-    "SP-edu"           ~ " general",
-    "SP-leisure"       ~ " general",
-    "SP-other"         ~ " general",
+  case_when(
+    vct_equal == "occupation" & vct_activity == "FJ-farm"          ~ " active",
+    vct_equal == "occupation" & vct_activity == "GP-mining"        ~ " active",
+    vct_equal == "occupation" & vct_activity == "GP-construction"  ~ " active",
+    vct_equal == "occupation" & vct_activity == "GP-manufacturing" ~ " active",
+    vct_equal == "occupation" & vct_activity == "SP-util"          ~ " general",
+    vct_equal == "occupation" & vct_activity == "SP-office"        ~ " general",
+    vct_equal == "occupation" & vct_activity == "SP-edu"           ~ " general",
+    vct_equal == "occupation" & vct_activity == "SP-leisure"       ~ " general",
+    vct_equal == "occupation" & vct_activity == "SP-other"         ~ " general",
+    vct_equal == "occupation" & vct_activity == "Other"         ~ " general",
     .default = ""
   ) |>
     paste0(vct_equal, ... = _) |>
