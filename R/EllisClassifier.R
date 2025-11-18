@@ -1,95 +1,96 @@
 Ellis.feat.extraction <- function(w, Fs) {
-  g = matrix(0, nrow(w), 3)
-  x = 0.9
-  g[1, ] = (1 - x) * w[1, ]
-  for (n in 2:nrow(w)) {
-    g[n, ] = x * g[n - 1] + (1 - x) * w[n, ]
-  }
-  g = g[Fs:nrow(g), ]
-  gg = colMeans(g)
-  w = w - gg
-  v = sqrt(rowSums(w^2))
-  fMean = mean(v)
-  fStd = sd(v)
-  if (fMean > 0) {
-    fCoefVariation = fStd/fMean
-  }
-  else {
-    fCoefVariation = 0
-  }
-  fMedian = median(v)
-  fMin = min(v)
-  fMax = max(v)
-  f25thP = quantile(v, 0.25)[[1]]
-  f75thP = quantile(v, 0.75)[[1]]
-  a = acf(v, plot = FALSE)
-  fAutocorr = which.max(abs(a$acf[2:length(a$acf)]))/(nrow(w)/Fs)
+  g <- matrix(0, nrow(w), 3)
+  x <- 0.9
+  g[1, ] <- (1 - x) * w[1, ]
+
+  for (n in 2:nrow(w)) g[n, ] <- x * g[n - 1] + (1 - x) * w[n, ]
+
+  g <- g[Fs:nrow(g), ]
+  gg <- colMeans(g)
+  w <- w - gg
+  v <- sqrt(rowSums(w^2))
+  fMean <- mean(v)
+  fStd <- sd(v)
+  fCoefVariation <- ifelse(test = fMean > 0, yes = fStd / fMean, no = 0)
+  fMedian <- median(v)
+  fMin <- min(v)
+  fMax <- max(v)
+  f25thP <- quantile(v, 0.25)[[1]]
+  f75thP <- quantile(v, 0.75)[[1]]
+  a <- acf(v, plot = FALSE)
+  fAutocorr <- which.max(abs(a$acf[2:length(a$acf)])) / (nrow(w) / Fs)
+
   if ((sd(w[, 3]) > 0) & (sd(w[, 2]) > 0)) {
-    fCorrxy = cor(w[, 3], w[, 2])
+    fCorrxy <- cor(w[, 3], w[, 2])
   } else {
-    fCorrxy = 0
+    fCorrxy <- 0
   }
   if ((sd(w[, 3]) > 0) & (sd(w[, 1]) > 0)) {
-    fCorrxz = cor(w[, 3], w[, 1])
+    fCorrxz <- cor(w[, 3], w[, 1])
   } else {
-    fCorrxz = 0
+    fCorrxz <- 0
   }
   if ((sd(w[, 2]) > 0) & (sd(w[, 1]) > 0)) {
-    fCorryz = cor(w[, 2], w[, 1])
+    fCorryz <- cor(w[, 2], w[, 1])
   } else {
-    fCorryz = 0
+    fCorryz <- 0
   }
-  if (is.na(fCorrxy)) fCorrxy = 0
-  if (is.na(fCorrxz)) fCorrxz = 0
-  if (is.na(fCorryz)) fCorryz = 0
-  fAvgRoll = mean(atan2(w[, 2], w[, 1]))
-  fAvgPitch = mean(atan2(w[, 1], w[, 3]))
-  fAvgYaw = mean(atan2(w[, 2], w[, 3]))
-  fSdRoll = sd(atan2(w[, 2], w[, 1]))
-  fSdPitch = sd(atan2(w[, 1], w[, 3]))
-  fSdYaw = sd(atan2(w[, 2], w[, 3]))
-  fRollG = atan2(gg[2], gg[1])
-  fPitchG = atan2(gg[1], gg[3])
-  fYawG = atan2(gg[2], gg[3])
-  s = signal::specgram(v, n = length(v), Fs = Fs)
-  S = abs(s$S)
-  f = S/max(S)
-  freq = s$f
-  f1 = f[freq >= 0.1]
-  freq1 = freq[freq >= 0.1]
-  fFmax = freq1[which.max(f1)]
-  fPmax = max(f1)
-  band = f[freq > 0.3 & freq < 3]
-  fPmaxBand = max(band)
-  freqband = freq[freq > 0.3 & freq < 3]
-  fFmaxBand = freqband[which.max(band)]
-  fEntropy = -sum(f * log(f))
-  s = specgram(v, n = round(Fs), Fs = Fs)
-  S = abs(s$S)
-  f = S/max(S)
-  freq = s$f
-  f = rowSums(f)/ncol(f)
-  FFT0 = f[1]
-  FFT1 = f[2]
-  FFT2 = f[3]
-  FFT3 = f[4]
-  FFT4 = f[5]
-  FFT5 = f[6]
-  FFT6 = f[7]
-  FFT7 = f[8]
-  FFT8 = f[9]
-  FFT9 = f[10]
-  FFT10 = f[11]
-  FFT11 = f[12]
-  FFT12 = f[13]
-  FFT13 = f[14]
-  FFT14 = f[15]
-  return(c(fMean, fStd, fCoefVariation, fMedian, fMin, fMax,
-           f25thP, f75thP, fAutocorr, fCorrxy, fCorrxz, fCorryz,
-           fAvgRoll, fAvgPitch, fAvgYaw, fSdRoll, fSdPitch, fSdYaw,
-           fRollG, fPitchG, fYawG, fFmax, fPmax, fFmaxBand, fPmaxBand,
-           fEntropy, FFT0, FFT1, FFT2, FFT3, FFT4, FFT5, FFT6,
-           FFT7, FFT8, FFT9, FFT10, FFT11, FFT12, FFT13, FFT14))
+  if (is.na(fCorrxy)) fCorrxy <- 0
+  if (is.na(fCorrxz)) fCorrxz <- 0
+  if (is.na(fCorryz)) fCorryz <- 0
+
+  fAvgRoll <- mean(atan2(w[, 2], w[, 1]))
+  fAvgPitch <- mean(atan2(w[, 1], w[, 3]))
+  fAvgYaw <- mean(atan2(w[, 2], w[, 3]))
+  fSdRoll <- sd(atan2(w[, 2], w[, 1]))
+  fSdPitch <- sd(atan2(w[, 1], w[, 3]))
+  fSdYaw <- sd(atan2(w[, 2], w[, 3]))
+  fRollG <- atan2(gg[2], gg[1])
+  fPitchG <- atan2(gg[1], gg[3])
+  fYawG <- atan2(gg[2], gg[3])
+
+  s <- signal::specgram(v, n = length(v), Fs = Fs)
+  S <- abs(s$S)
+  f <- S / max(S)
+  freq <- s$f
+  f1 <- f[freq >= 0.1]
+  freq1 <- freq[freq >= 0.1]
+  fFmax <- freq1[which.max(f1)]
+  fPmax <- max(f1)
+  band <- f[freq > 0.3 & freq < 3]
+  fPmaxBand <- max(band)
+  freqband <- freq[freq > 0.3 & freq < 3]
+  fFmaxBand <- freqband[which.max(band)]
+  fEntropy <- -sum(f * log(f))
+
+  s <- specgram(v, n = round(Fs), Fs = Fs)
+  S <- abs(s$S)
+  f <- S / max(S)
+  freq <- s$f
+  f <- rowSums(f) / ncol(f)
+  FFT0 <- f[1]
+  FFT1 <- f[2]
+  FFT2 <- f[3]
+  FFT3 <- f[4]
+  FFT4 <- f[5]
+  FFT5 <- f[6]
+  FFT6 <- f[7]
+  FFT7 <- f[8]
+  FFT8 <- f[9]
+  FFT9 <- f[10]
+  FFT10 <- f[11]
+  FFT11 <- f[12]
+  FFT12 <- f[13]
+  FFT13 <- f[14]
+  FFT14 <- f[15]
+  return(c(
+    fMean, fStd, fCoefVariation, fMedian, fMin, fMax, f25thP, f75thP, fAutocorr,
+    fCorrxy, fCorrxz, fCorryz,
+    fAvgRoll, fAvgPitch, fAvgYaw, fSdRoll, fSdPitch, fSdYaw, fRollG, fPitchG, fYawG,
+    fFmax, fPmax, fFmaxBand, fPmaxBand, fEntropy,
+    FFT0, FFT1, FFT2, FFT3, FFT4, FFT5, FFT6, FFT7, FFT8, FFT9, FFT10, FFT11,
+    FFT12, FFT13, FFT14
+  ))
 }
 # raw         = mtx_data
 # Fs          = I$sf
@@ -99,7 +100,6 @@ Ellis.feat.extraction <- function(w, Fs) {
 # sleep       = TRUE
 # Classifier  = "Ellis Wrist RF"
 # start.time  = rec_start_sec
-
 ellis2016.wrist <- function(raw,
                             Fs,
                             ID,
@@ -110,9 +110,17 @@ ellis2016.wrist <- function(raw,
                             start.time) {
 
   # sleep variables ----
-  if(sleep==T){
-    s.anglez = (atan(raw[,3]/ (sqrt(raw[,1]^2 + raw[,2]^2)))) / (pi/180)
-    s.anglez<- actimetric::slide(s.anglez,width=5*Fs,FUN=mean)
+  if (sleep == TRUE) {
+    s.anglez <- (
+      atan(raw[, 3] / sqrt(raw[, 1]^2 + raw[, 2]^2))
+      / (pi / 180)
+    )
+    # (atan(raw[, 3] / (sqrt(raw[, 1]^2 + raw[, 2]^2)))) / (pi/180)
+    s.anglez <- slide(
+      s.anglez,
+      width = 5 * Fs,
+      FUN = mean
+    )
     s.t2<-start.time + 5*(0:(length(s.anglez)-1))
     class(s.t2) = c('POSIXt','POSIXct')
     #s.t2<-.POSIXct(s.t2,tz='UTC')
@@ -189,29 +197,30 @@ ellis2016.wrist <- function(raw,
       # The actimetric function is the same as the provided code in R/sydney,
       # but in the actimetric package its applied on a sliding window. Implement?
       # https://github.com/PhysicalActivityOpenTools/actimetric/blob/4b806607d54d49d8cded01563b7d61e55d24aca8/R/ExtractFeatures.R#L61
-      w <- actimetric::featuresEllis2016(
-        x = ax[, ii],
-        y = ay[, ii],
-        z = az[, ii],
-        sf = Fs
-      )
-      # w <- as.matrix(cbind(ax[,ii],ay[,ii],az[,ii]))
-      # w <- Ellis.feat.extraction(w,Fs)
+      # w <- actimetric::featuresEllis2016(
+      #   x = ax[, ii],
+      #   y = ay[, ii],
+      #   z = az[, ii],
+      #   sf = Fs
+      # )
+      w <- as.matrix(cbind(ax[,ii],ay[,ii],az[,ii]))
+      w <- Ellis.feat.extraction(w,Fs)
       w <- c(w,Enmo,tilt)
+
       if(length(w)<43){
         s<-43-length(w)
         s<-rep(0,s)
         w<-c(w,s)
       }
-      acc2[ii,]<-w
-      ii<-ii+1
+
+      acc2[ii,] <- w
+      ii <- ii+1
     }
 
     # nonwear ----
     if(nrow(acc)>=(Fs*60*60*1)) { #need at least 1hr of data to calculate nonwear
-      # nw<-nonwear_vm(acc,Fs=Fs,window=win)
-      nw <-
-        actimetric::detectNonWear(acc, sf = Fs, epoch = win)
+      # nw <- nonwear_vm(acc,Fs=Fs,window=win)
+      nw <- detectNonWear(acc, sf = Fs, epoch = win)
 
       #nw<-rep(nw,each=4) #need to adjust according to window size
       if(length(nw)<nrow(acc2)){
@@ -309,7 +318,13 @@ ellis2016.wrist <- function(raw,
       x<-x-1
       ga<-anglez[z:x,]
       ga<-ga[is.na(ga$s.anglez)==FALSE,] #For last day when monitor is plugged in and acc is 0's
-      sleepw<-actimetric::inbed(ga$s.anglez,outofbedsize = 30,ws3=5,bedblocksize = 30,k=60)
+      sleepw <- inbed(
+        ga$s.anglez,
+        k = 60,
+        bedblocksize = 30,
+        outofbedsize = 30,
+        ws3 = 5
+      )
 
       if(sleepw$lightsout[1]==0){sleepw$lightsout[1]<-1}
 
