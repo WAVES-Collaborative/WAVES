@@ -140,7 +140,7 @@ fs::dir_create(c(
   fdr_output.cutpoint,
   fdr_output.raw,
   fdr_stepcount,
-  fdr_accelerometer,
+  fdr_walmsley,
   fdr_actinet,
   fdr_merged
 ))
@@ -230,6 +230,34 @@ tar_plan(
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                               DEMOGRAPHICS                             ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  ##                           PROCESS - OXWEARABLES                        ----
+  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  tar_target(
+    name    = vct_ox_step,
+    command = apply_ox_stepcount(
+      vct_raw = vct_raw,
+      fdr_write = file.path(getwd(), dir_stepcount)
+    ),
+    format = "file"
+  ),
+  tar_target(
+    name    = vct_ox_wlms,
+    command = apply_ox_walmsley(
+      vct_raw = vct_raw,
+      fdr_write = file.path(getwd(), dir_walmsley),
+      my_tz = my_tz
+    ),
+    format = "file"
+  ),
+  tar_target(
+    name    = vct_ox_acti,
+    command = apply_ox_stepcount(
+      vct_raw = vct_raw,
+      fdr_write = file.path(getwd(), dir_actinet)
+    ),
+    format = "file"
+  ),
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                              PROCESS - GGIR                            ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
