@@ -221,89 +221,70 @@ tar_plan(
   ##                                FILE PATHS                              ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   tar_files_input(
-    name  = vct_raw_visit,
+    name  = vct_raw,
     files = vct_raw_fpa_visit
     # files = vct_raw_fpa_visit[3] # For testing on one file
-  ),
-  tar_files_input(
-    name  = vct_raw_field,
-    files = vct_raw_fpa_field
+    # files = vct_raw_fpa_field
     # files = vct_raw_fpa_field[3] # For testing on one file
   ),
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                               DEMOGRAPHICS                             ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  tar_map(
-    values = list(
-      # name = c("visit"), # for testing since JM's computer is a potato
-      name = c("visit", "field"),
-      vct_raw = rlang::syms(c(
-        # "vct_raw_visit" # for testing since JM's computer is a potato
-        "vct_raw_visit", "vct_raw_field"
-      ))
+  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  ##                              PROCESS - GGIR                            ----
+  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  tar_files(
+    name    = vct_basic,
+    command = wrapper_GGIR(vct_raw)
+  ),
+  tar_qs(
+    name      = lst_out.cut,
+    command   = apply_methods_cutpoints(
+      fpa_basic = vct_basic,
+      dir_write = dir_out.cut,
+      my_tz     = my_tz
     ),
-    names = "name",
-    ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    ##                              PROCESS - GGIR                            ----
-    ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    tar_files(
-      name    = vct_basic,
-      command = wrapper_GGIR(vct_raw)
+    pattern   = map(vct_basic),
+    iteration = "list"
+  ),
+  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  ##                             PROCESS - CUSTOM                           ----
+  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  tar_qs(
+    name      = vct_cal,
+    command   = read_acc_raw(
+      fpa_read      = vct_raw,
+      vct_fpa_basic = vct_basic,
+      dir_cal       = dir_cal,
+      my_tz         = my_tz
     ),
-    tar_qs(
-      name      = lst_out.cut,
-      command   = apply_methods_cutpoints(
-        fpa_basic = vct_basic,
-        dir_write = dir_out.cut,
-        my_tz     = my_tz
-      ),
-      pattern   = map(vct_basic),
-      iteration = "list"
+    pattern   = map(vct_raw),
+    iteration = "vector"
+  ),
+  tar_qs(
+    name      = lst_out.raw,
+    command   = apply_methods_raw(
+      fpa_read      = vct_cal,
+      vct_fpa_basic = vct_basic,
+      dir_models    = dir_models,
+      dir_write     = dir_out.raw,
+      my_tz         = my_tz
     ),
-    ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    ##                             PROCESS - CUSTOM                           ----
-    ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    tar_qs(
-      name      = vct_cal,
-      command   = read_acc_raw(
-        fpa_read      = vct_raw,
-        vct_fpa_basic = vct_basic,
-        dir_cal       = dir_cal,
-        my_tz         = my_tz
-      ),
-      pattern   = map(vct_raw),
-      iteration = "vector"
-    ),
-    tar_qs(
-      name      = lst_out.raw,
-      command   = apply_methods_raw(
-        fpa_read      = vct_cal,
-        vct_fpa_basic = vct_basic,
-        dir_models    = dir_models,
-        dir_write     = dir_out.raw,
-        my_tz         = my_tz
-      ),
-      pattern   = map(vct_cal_visit),
-      iteration = "list"
-    )
+    pattern   = map(vct_cal_visit),
+    iteration = "list"
   ),
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                                   MERGE                                ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   tar_target(
-    name    = fpa_merged_visit,
-    command = merge_output(lst_out.raw = lst_out.raw_visit,
-                           lst_out.cut = lst_out.cut_visit,
-                           dir_merged  = dir_merged,
-                           le_type     = "visit"),
-    format = "file"
-  ),
-  tar_target(
-    name    = fpa_merged_field,
-    command = merge_output(lst_out.raw = lst_out.raw_field,
-                           lst_out.cut = lst_out.cut_field,
-                           dir_merged  = dir_merged,
-                           le_type     = "field"),
+    name    = fpa_merged,
+    command = merge_output(
+      lst_out.raw = lst_out.raw,
+      lst_out.cut = lst_out.cut,
+      dir_merged  = dir_merged,
+      le_type     = "visit"
+      # le_type     = "field"
+    ),
     format = "file"
   )
 )
