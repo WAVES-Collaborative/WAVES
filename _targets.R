@@ -57,7 +57,7 @@ vct_raw_fpa_visit <- list.files(
   path = file.path(
     "S:", "_R_CHS_Research", "PAHRL", "Student Access", "4_Research",
     "2017 Strath R01 FLAC", "Data", "ActiGraph_GT3X", c("V1", "V2", "V3"),
-    "LW", "LW_CSV_RAW"
+    "LW", "LW_RAW"
   ),
   pattern    = ".*",
   full.names = TRUE,
@@ -67,7 +67,7 @@ vct_raw_fpa_field <- list.files(
   path = file.path(
     "S:", "_R_CHS_Research", "PAHRL", "Student Access", "4_Research",
     "2017 Strath R01 FLAC", "Data", "ActiGraph_GT3X", "7 Day",
-    "LW", "LW_CSV_RAW"
+    "LW", "LW_RAW"
   ),
   pattern    = ".*",
   full.names = TRUE,
@@ -83,8 +83,6 @@ vct_raw_fpa_field <- list.files(
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Load packages required to define the pipeline:
 pkgs <- c(
-  "actimetricModels",
-  "actimetric",
   # "adept",
   # "adeptdata",
   "arrow",
@@ -98,6 +96,7 @@ pkgs <- c(
   "nnet",
   "qs2",
   "randomForest",
+  "reticulate",
   "stringi",
   "tarchetypes",
   "targets",
@@ -123,6 +122,15 @@ fdr_output.cutpoint <- file.path(
 fdr_output.raw <- file.path(
   "data", "2_INTERIM", "OUTPUT-RAW_PARQUET"
 )
+fdr_stepcount <- file.path(
+  "data", "stepcount"
+)
+fdr_walmsley <- file.path(
+  "data", "walmsley"
+)
+fdr_actinet <- file.path(
+  "data", "actinet"
+)
 fdr_merged <- file.path(
   "data", "3_MERGED"
 )
@@ -131,6 +139,9 @@ fs::dir_create(c(
   fdr_calibrated,
   fdr_output.cutpoint,
   fdr_output.raw,
+  fdr_stepcount,
+  fdr_accelerometer,
+  fdr_actinet,
   fdr_merged
 ))
 
@@ -203,6 +214,9 @@ tar_plan(
   dir_cal     = fdr_calibrated,
   dir_out.cut = fdr_output.cutpoint,
   dir_out.raw = fdr_output.raw,
+  dir_stepcount = fdr_stepcount,
+  dir_walmsley  = fdr_walmsley,
+  dir_actinet   = fdr_actinet,
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                                FILE PATHS                              ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
