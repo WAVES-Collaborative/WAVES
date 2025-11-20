@@ -7,6 +7,7 @@ data/GGIR/output_WAVES-FIELD
 data/GGIR/output_WAVES-VISIT
 data/stepcount
 data/walmsley
+logs/
 .Rproj.user
 .Rhistory
 .RData

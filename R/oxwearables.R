@@ -1,8 +1,9 @@
-
 # tar_load(vct_raw)
 # fdr_write = file.path(getwd(), tar_read(dir_stepcount))
+# fdr_log = tar_read(dir_logs)
 apply_ox_stepcount <- function(vct_raw,
-                               fdr_write) {
+                               fdr_write,
+                               fdr_log) {
 
   chk_windows <- grepl(
     x = Sys.getenv("OS"),
@@ -25,13 +26,28 @@ apply_ox_stepcount <- function(vct_raw,
                pattern = "/",
                replacement = "\\\\"),
         collapse = ""
-      )
+      ),
+      stdout = file.path(fdr_log, "stepcount_out.txt"),
+      stderr = file.path(fdr_log, "stepcount_err.txt")
     )
   } else {
-    # the `system2` command uses a shell within MAC.
-    # During miniconda install, if the user opts to not add miniconda on PATH, will
-    # it show up on the shell regardless? Ask Kirsten for testing this.
-    stop("TODO")
+    # The `system2` command uses a shell within MacOS and Linux.
+    # TODO Ask Kirsten for testing this.
+    # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_stepcount ; stepcount stepcountTest.gt3x -o ~/WAVES/data/stepcount
+    system2(
+      command = "source",
+      args = paste(
+        paste0('"', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
+        "conda activate WHO_WAVES_stepcount",
+        paste0(
+          'stepcount "', vct_raw, '" -o "', fdr_write, '"',
+          collapse = " ; "
+        ),
+        sep = " ; "
+      ),
+      stdout = file.path(fdr_log, "stepcount_out.txt"),
+      stderr = file.path(fdr_log, "stepcount_err.txt")
+    )
   }
 
   list.files(
@@ -44,9 +60,11 @@ apply_ox_stepcount <- function(vct_raw,
 }
 # tar_load(vct_raw)
 # fdr_write = file.path(getwd(), tar_read(dir_walmsley))
+# fdr_log = tar_read(dir_logs)
 # tar_load(my_tz)
 apply_ox_walmsley <- function(vct_raw,
                               fdr_write,
+                              fdr_log,
                               my_tz) {
 
   chk_windows <- grepl(
@@ -76,14 +94,30 @@ apply_ox_walmsley <- function(vct_raw,
                pattern = sub(my_tz, pattern = "/", replacement = "\\\\\\\\"),
                replacement = my_tz),
         collapse = ""
-      )
+      ),
+      stdout = file.path(fdr_log, "walmsley_out.txt"),
+      stderr = file.path(fdr_log, "walmsley_err.txt")
     )
 
   } else {
-    # the `system2` command uses a shell within MAC.
-    # During miniconda install, if the user opts to not add miniconda on PATH, will
-    # it show up on the shell regardless? Ask Kirsten for testing this.
-    stop("TODO")
+    # The `system2` command uses a shell within MacOS and Linux.
+    # TODO Ask Kirsten for testing this.
+    # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_accelerometer ; accProcess stepcountTest.gt3x -o ~/WAVES/data/stepcount --timeZone America/Chicago
+    system2(
+      command = "source",
+      args = paste(
+        paste0('"', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
+        "conda activate WHO_WAVES_accelerometer",
+        paste0(
+          'accProcess "', vct_raw, '" -o "', fdr_write, '"',
+          " --timeZone ", my_tz,
+          collapse = " ; "
+        ),
+        sep = " ; "
+      ),
+      stdout = file.path(fdr_log, "walmsley_out.txt"),
+      stderr = file.path(fdr_log, "walmsley_err.txt")
+    )
   }
 
   list.files(
@@ -95,8 +129,10 @@ apply_ox_walmsley <- function(vct_raw,
 }
 # tar_load(vct_raw)
 # fdr_write = file.path(getwd(), tar_read(dir_actinet))
+# fdr_log = tar_read(dir_logs)
 apply_ox_actinet <- function(vct_raw,
-                             fdr_write) {
+                             fdr_write,
+                             fdr_log) {
 
   chk_windows <- grepl(
     x = Sys.getenv("OS"),
@@ -120,14 +156,29 @@ apply_ox_actinet <- function(vct_raw,
                pattern = "/",
                replacement = "\\\\"),
         collapse = ""
-      )
+      ),
+      stdout = file.path(fdr_log, "actinet_out.txt"),
+      stderr = file.path(fdr_log, "actinet_err.txt")
     )
 
   } else {
-    # the `system2` command uses a shell within MAC.
-    # During miniconda install, if the user opts to not add miniconda on PATH, will
-    # it show up on the shell regardless? Ask Kirsten for testing this.
-    stop("TODO")
+    # The `system2` command uses a shell within MacOS and Linux.
+    # TODO Ask Kirsten for testing this.
+    # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_actinet ; actinet stepcountTest.gt3x -o ~/WAVES/data/stepcount
+    system2(
+      command = "source",
+      args = paste(
+        paste0('"', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
+        "conda activate WHO_WAVES_actinet",
+        paste0(
+          'actinet "', vct_raw, '" -o "', fdr_write, '"',
+          collapse = " ; "
+        ),
+        sep = " ; "
+      ),
+      stdout = file.path(fdr_log, "actinet_out.txt"),
+      stderr = file.path(fdr_log, "actinet_err.txt")
+    )
   }
 
   list.files(

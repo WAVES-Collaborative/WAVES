@@ -113,6 +113,9 @@ pkgs <- c(
 # for (package in pkgs) library(package, character.only = TRUE)
 
 # Define directories
+fdr_logs <- file.path(
+  "logs"
+)
 fdr_calibrated <- file.path(
   "data", "2_INTERIM", "RAW-CALIBRATED_QS2"
 )
@@ -211,6 +214,7 @@ tar_plan(
   ##                             FILE DIRECTORIES                           ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   dir_models  = "models",
+  dir_logs    = fdr_logs,
   dir_cal     = fdr_calibrated,
   dir_out.cut = fdr_output.cutpoint,
   dir_out.raw = fdr_output.raw,
@@ -237,7 +241,8 @@ tar_plan(
     name    = vct_ox_step,
     command = apply_ox_stepcount(
       vct_raw = vct_raw,
-      fdr_write = file.path(getwd(), dir_stepcount)
+      fdr_write = file.path(getwd(), dir_stepcount),
+      fdr_log = dir_logs
     ),
     format = "file"
   ),
@@ -246,15 +251,17 @@ tar_plan(
     command = apply_ox_walmsley(
       vct_raw = vct_raw,
       fdr_write = file.path(getwd(), dir_walmsley),
+      fdr_log = dir_logs,
       my_tz = my_tz
     ),
     format = "file"
   ),
   tar_target(
     name    = vct_ox_acti,
-    command = apply_ox_stepcount(
+    command = apply_ox_actinet(
       vct_raw = vct_raw,
-      fdr_write = file.path(getwd(), dir_actinet)
+      fdr_write = file.path(getwd(), dir_actinet),
+      fdr_log = dir_logs
     ),
     format = "file"
   ),
