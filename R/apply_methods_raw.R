@@ -206,6 +206,7 @@ apply_methods_raw <- function(fpa_read,
     class_trost = NA_character_,
     class_ellis = NA_character_,
     steps_adept              = NA,
+    steps_oak                = NA,
     steps_sdt                = NA_integer_,
     steps_verisense.original = NA_integer_,
     steps_verisense.revised  = NA_integer_
@@ -558,6 +559,43 @@ apply_methods_raw <- function(fpa_read,
     df_ellis$class
   rm(df_ellis, ind_ellis)
   gc()
+
+  ## Steps: oak ----
+  use_condaenv("WHO_WAVES_oak")
+  forest <- import("forest")
+  np <- import("numpy")
+
+  # time (t_bout) has to be in double format AND contain fractional seconds.
+  # The below won't work if your vector just repeats the time value throughout
+  # the sampling frequency.
+  # Correct: 1512410340.00 1512410340.01 1512410340.02 1512410340.03 1512410340.04
+  # Incorrect: 1512410340 1512410340 1512410340 1512410340 1512410340
+  vm_bout <- forest$oak$base$preprocess_bout(
+    t_bout = np$array(
+      seq(
+        from = rec_start_sec,
+        by = 1 / I$sf,
+        length.out = nrow_data
+      ),
+      dtype = "float64"
+    ),
+    x_bout = np$array(mtx_data[, "x"], dtype = "float64"),
+    y_bout = np$array(mtx_data[, "y"], dtype = "float64"),
+    z_bout = np$array(mtx_data[, "z"], dtype = "float64"),
+    fs     = as.integer(I$sf)
+  )
+
+  # defaults except for fs
+  df_all$steps_oak <- forest$oak$base$find_walking(
+    vm_bout = vm_bout[[2]],
+    fs = as.integer(I$sf),
+    min_amp = 0.3,
+    step_freq = c(1.4, 2.3),
+    alpha = 0.6,
+    beta = 2.5,
+    min_t = 3L,
+    delta = 20L
+  )
 
   # Return ----
   df_all <-
