@@ -265,7 +265,9 @@ merge_ox <- function(vct_ox_step,
           sep = ","
         ) |>
           mutate(
-            datetime = force_tz(time, tzone = my_tz),
+            datetime =
+              floor_date(time, unit = "seconds") |>
+              force_tz(tzone  = my_tz),
             intensity = case_when(
               sedentary == 1 ~ "sedentary",
               light == 1     ~ "light",
