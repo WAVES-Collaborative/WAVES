@@ -12,7 +12,7 @@ set -e
 # =====================================================
 	# Define the input and output folders
 		input_folder="C:\Users\benm\WAVES\data" # Where the raw data is stored
-		output_folder="C:\Users\benm\WAVES\outputs" # Where you want the outputs stored
+		output_folder="C:\Users\benm\WAVES\data" # Where you want the outputs stored
 # =====================================================
 
 
@@ -23,7 +23,7 @@ set -e
 
 	# Create outputs environment
 		mkdir -p "$output_folder"
-		mkdir -p "$output_folder"/{stepcount,walmsley,ssl}
+		mkdir -p "$output_folder"/{stepcount,walmsley,actinet}
 
 	# Source conda environments
 		source "$(conda info --base)/etc/profile.d/conda.sh"
@@ -49,7 +49,7 @@ set -e
 	### ACTINET - SSL ###
 		conda activate WHO_WAVES_actinet
 		for file in "$input_folder"/*; do
-		  actinet "$file" -o "$output_folder/ssl"
+		  actinet "$file" -o "$output_folder/actinet"
 		done
 
 # =====================================================
