@@ -22,6 +22,32 @@ apply_methods_cutpoints <- function(fpa_basic,
       id = fnm_sans_ext,
       datetime = ymd_hms(timestamp,
                          tz = my_tz),
+      intensity_bakrania.enmo.simple = switch(
+        I$monn,
+        "actigraph" = {cut(
+          ENMO * 1000,
+          breaks = c(-Inf, 25.8, Inf),
+          labels = c("sedentary", "light")
+        )},
+        "geneactive" = {cut(
+          ENMO * 1000,
+          breaks = c(-Inf, 30.7, Inf),
+          labels = c("sedentary", "light")
+        )}
+      ),
+      intensity_bakrania.enmo.average = switch(
+        I$monn,
+        "actigraph" = {cut(
+          ENMO * 1000,
+          breaks = c(-Inf, 26.85, Inf),
+          labels = c("sedentary", "light")
+        )},
+        "geneactive" = {cut(
+          ENMO * 1000,
+          breaks = c(-Inf, 32.55, Inf),
+          labels = c("sedentary", "light")
+        )}
+      ),
       intensity_hildebrand = cut(
         ENMO * 1000,
         breaks = c(-Inf, 44.8, 100.6, # 428.8,
@@ -75,6 +101,32 @@ apply_methods_cutpoints <- function(fpa_basic,
                    Inf),
         labels = c("sedentary", "light", # "moderate", "vigorous",
                    "mvpa")
+      ),
+      intensity_bakrania.mad.simple = switch(
+        I$monn,
+        "actigraph" = {cut(
+          ENMO * 1000,
+          breaks = c(-Inf, 33.4, Inf),
+          labels = c("sedentary", "light")
+        )},
+        "geneactive" = {cut(
+          ENMO * 1000,
+          breaks = c(-Inf, 39.6, Inf),
+          labels = c("sedentary", "light")
+        )}
+      ),
+      intensity_bakrania.mad.average = switch(
+        I$monn,
+        "actigraph" = {cut(
+          ENMO * 1000,
+          breaks = c(-Inf, 34.65, Inf),
+          labels = c("sedentary", "light")
+        )},
+        "geneactive" = {cut(
+          ENMO * 1000,
+          breaks = c(-Inf, 42.4, Inf),
+          labels = c("sedentary", "light")
+        )}
       ),
       .keep = "none"
     )

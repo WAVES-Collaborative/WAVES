@@ -79,7 +79,7 @@ do.zcz,FALSE,params_metrics
 do.enmo,TRUE,params_metrics
 do.lfenmo,FALSE,params_metrics
 do.en,FALSE,params_metrics
-do.mad,FALSE,params_metrics
+do.mad,TRUE,params_metrics
 do.enmoa,TRUE,params_metrics
 do.roll_med_acc_x,FALSE,params_metrics
 do.roll_med_acc_y,FALSE,params_metrics
