@@ -1,4 +1,4 @@
-# fpa_basic = tar_read(vct_basic_visit)[1]
+# fpa_basic = tar_read(vct_basic)[1]
 # dir_write = tar_read(dir_out.cut)
 # my_tz    = tar_read(my_tz)
 apply_methods_cutpoints <- function(fpa_basic,
@@ -105,12 +105,12 @@ apply_methods_cutpoints <- function(fpa_basic,
       intensity_bakrania.mad.simple = switch(
         I$monn,
         "actigraph" = {cut(
-          ENMO * 1000,
+          MAD * 1000,
           breaks = c(-Inf, 33.4, Inf),
           labels = c("sedentary", "light")
         )},
         "geneactive" = {cut(
-          ENMO * 1000,
+          MAD * 1000,
           breaks = c(-Inf, 39.6, Inf),
           labels = c("sedentary", "light")
         )}
@@ -118,12 +118,12 @@ apply_methods_cutpoints <- function(fpa_basic,
       intensity_bakrania.mad.average = switch(
         I$monn,
         "actigraph" = {cut(
-          ENMO * 1000,
+          MAD * 1000,
           breaks = c(-Inf, 34.65, Inf),
           labels = c("sedentary", "light")
         )},
         "geneactive" = {cut(
-          ENMO * 1000,
+          MAD * 1000,
           breaks = c(-Inf, 42.4, Inf),
           labels = c("sedentary", "light")
         )}
