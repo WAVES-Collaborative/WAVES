@@ -19,8 +19,8 @@ set -e
 	source "$(conda info --base)/etc/profile.d/conda.sh"
 	conda activate $ENV_NAME
 
-	pip install stepcount==3.5
 	echo "Installing stepcount"
+	pip install stepcount==3.5
 	echo "'$ENV_NAME' setup complete!"
 # =====================================================
 
@@ -34,8 +34,8 @@ set -e
 	echo "Activating environment..."
 	conda activate $ENV_NAME
 
-	pip install actinet==0.4.2
 	echo "Installing actinet"
+	pip install actinet==0.4.2
 	echo "'$ENV_NAME' setup complete!"
 # =====================================================
 
@@ -49,8 +49,23 @@ set -e
 	echo "Activating environment..."
 	conda activate $ENV_NAME
 
+	echo "Installing accelerometer"
 	pip install accelerometer==7.3.0
-	echo "Installing actinet"
+	echo "'$ENV_NAME' setup complete!"
+# =====================================================
+
+### Forest ###
+# =====================================================
+	ENV_NAME="WHO_WAVES_oak"
+
+	echo "Creating conda environment: $ENV_NAME"
+	conda create -y -n $ENV_NAME python=3.12 timezonefinder==8.1.0
+
+	echo "Activating environment..."
+	conda activate $ENV_NAME
+
+	echo "Installing forest"
+  pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d
 	echo "'$ENV_NAME' setup complete!"
 # =====================================================
 
