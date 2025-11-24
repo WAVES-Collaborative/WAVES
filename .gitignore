@@ -8,7 +8,10 @@ data/GGIR/output_WAVES-VISIT
 data/stepcount
 data/walmsley
 logs/
+reports/
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
+
+/.quarto/

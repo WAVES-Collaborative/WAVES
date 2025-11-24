@@ -714,3 +714,53 @@ config_miniconda <- function(...) {
   )
 
 }
+config_pipeline <- function(vct_raw,
+                            vct_basic,
+                            vct_cal,
+                            lst_out.raw,
+                            lst_out.cut,
+                            vct_ox_step,
+                            vct_ox_wlms,
+                            vct_ox_acti,
+                            fpa_merged) {
+  tibble(
+    file =
+      basename(vct_raw) |>
+      file_path_sans_ext(),
+    GGIR = grepl(
+      x = vct_basic,
+      pattern = paste0(file, collapse = "|")
+    ),
+    calibration = grepl(
+      x = vct_cal,
+      pattern = paste0(file, collapse = "|")
+    ),
+    `raw methods` = grepl(
+      x = sapply(lst_out.raw, \(.x) .x$id[1]),
+      pattern = paste0(file, collapse = "|")
+    ),
+    `cutpoints` = grepl(
+      x = sapply(lst_out.cut, \(.x) .x$id[1]),
+      pattern = paste0(file, collapse = "|")
+    ),
+    stepcount = grepl(
+      x = vct_ox_step,
+      pattern = paste0(file, collapse = "|")
+    ),
+    walmsley = grepl(
+      x = vct_ox_wlms,
+      pattern = paste0(file, collapse = "|")
+    ),
+    actinet = grepl(
+      x = vct_ox_acti,
+      pattern = paste0(file, collapse = "|")
+    ),
+    merged = grepl(
+      x =
+        read_parquet(fpa_merged, col_select = "id") |>
+        unique() |>
+        unlist(),
+      pattern = paste0(file, collapse = "|")
+    )
+  )
+}

@@ -137,6 +137,9 @@ fdr_actinet <- file.path(
 fdr_merged <- file.path(
   "data", "3_MERGED"
 )
+fdr_reports <- file.path(
+  "reports"
+)
 # fdr_merged_
 fs::dir_create(c(
   fdr_calibrated,
@@ -145,7 +148,8 @@ fs::dir_create(c(
   fdr_stepcount,
   fdr_walmsley,
   fdr_actinet,
-  fdr_merged
+  fdr_merged,
+  fdr_reports
 ))
 
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -327,5 +331,10 @@ tar_plan(
       # le_type     = "field"
     ),
     format = "file"
+  ),
+  tar_render(
+    name = pipeline_summary,
+    path = "quarto/pipeline.qmd",
+    output_file = file.path(getwd(), fdr_reports, "summary_pipeline.html")
   )
 )

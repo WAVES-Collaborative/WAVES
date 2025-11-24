@@ -1,0 +1,44 @@
+---
+title: "Configuration"
+format: 
+  html: 
+    embed-resources: true
+    output-file: "summary_config"
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+#| label: setup
+#| echo: false
+#| warning: false
+
+library(reticulate)
+library(dplyr)
+library(tidyr)
+library(knitr)
+list.files(
+  path       = "R",
+  pattern    = "\\.R$",
+  full.names = TRUE
+) |>
+  grep(x       = _,
+       pattern = "^R\\/_",
+       value   = TRUE,
+       invert  = TRUE) |>
+  sapply(FUN = source) |>
+  invisible()
+
+```
+
+## Miniconda Configuration
+
+```{r}
+#| label: miniconda
+#| echo: false
+kable(config_miniconda())
+
+```
+
+## Test Files
