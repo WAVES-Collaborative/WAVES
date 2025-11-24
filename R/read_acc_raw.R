@@ -139,7 +139,11 @@ read_acc_raw <- function(fpa_read,
   # C$scale
 
   ## While loop ----
-  if (C$cal.error.end < C$cal.error.start) {
+  chk_cal <-
+    C$cal.error.end < C$cal.error.start
+  if (is.null(C$cal.error.end)) chk_cal <- FALSE
+
+  if (chk_cal) {
     # variables used to read data in 24 hr increment
     chunk_is_last <-
       FALSE
