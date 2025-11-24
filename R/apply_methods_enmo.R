@@ -16,6 +16,10 @@ apply_methods_cutpoints <- function(fpa_basic,
     sub(x = _,
         pattern = "meta_",
         replacement = "")
+  brand <- case_when(
+    !I$monn %in% c("actigraph", "geneactive") ~ "other",
+    .default = I$monn
+  )
   df_cutpoint <-
     M$metashort |>
     mutate(
@@ -28,7 +32,7 @@ apply_methods_cutpoints <- function(fpa_basic,
       MAD = MAD * 1000,
       # ENMO cutpoints
       intensity_bakrania.enmo.simple = switch(
-        I$monn,
+        brand,
         "actigraph" = {cut(
           ENMO,
           breaks = c(-Inf, 25.8, Inf),
@@ -38,10 +42,11 @@ apply_methods_cutpoints <- function(fpa_basic,
           ENMO,
           breaks = c(-Inf, 30.7, Inf),
           labels = c("sedentary", "light")
-        )}
+        )},
+        "other" = stop("FUDGE. Not ActiGraph or GENEactiv")
       ),
       intensity_bakrania.enmo.average = switch(
-        I$monn,
+        brand,
         "actigraph" = {cut(
           ENMO,
           breaks = c(-Inf, 26.85, Inf),
@@ -51,14 +56,44 @@ apply_methods_cutpoints <- function(fpa_basic,
           ENMO,
           breaks = c(-Inf, 32.55, Inf),
           labels = c("sedentary", "light")
-        )}
+        )},
+        "other" = stop("FUDGE. Not ActiGraph or GENEactiv")
       ),
-      intensity_hildebrand = cut(
-        ENMO,
-        breaks = c(-Inf, 44.8, 100.6, # 428.8,
-                   Inf),
-        labels = c("sedentary", "light", # "moderate", "vigorous",
-                   "mvpa")
+      intensity_hildebrand = switch(
+        brand,
+        "actigraph" = {cut(
+          ENMO,
+          breaks = c(-Inf, 44.8, 100.6, # 428.8,
+                     Inf),
+          labels = c("sedentary", "light", # "moderate", "vigorous",
+                     "mvpa")
+        )},
+        "geneactive" = {cut(
+          ENMO,
+          breaks = c(-Inf, 45.8, 93.2, # 418.3,
+                     Inf),
+          labels = c("sedentary", "light", # "moderate", "vigorous",
+                     "mvpa")
+        )},
+        "other" = stop("FUDGE. Not ActiGraph or GENEactiv")
+      ),
+      intensity_mielke = switch(
+        brand,
+        "actigraph" = {cut(
+          ENMO,
+          breaks = c(-Inf, 25.0, 78.0, # 249.0,
+                     Inf),
+          labels = c("sedentary", "light", # "moderate", "vigorous",
+                     "mvpa")
+        )},
+        "geneactive" = {cut(
+          ENMO,
+          breaks = c(-Inf, 36.0, 92.0, # 283.0,
+                     Inf),
+          labels = c("sedentary", "light", # "moderate", "vigorous",
+                     "mvpa")
+        )},
+        "other" = stop("FUDGE. Not ActiGraph or GENEactiv")
       ),
       intensity_mielke = cut(
         ENMO,
@@ -111,7 +146,7 @@ apply_methods_cutpoints <- function(fpa_basic,
       ),
       # MAD cutpoints
       intensity_bakrania.mad.simple = switch(
-        I$monn,
+        brand,
         "actigraph" = {cut(
           MAD,
           breaks = c(-Inf, 33.4, Inf),
@@ -121,10 +156,11 @@ apply_methods_cutpoints <- function(fpa_basic,
           MAD,
           breaks = c(-Inf, 39.6, Inf),
           labels = c("sedentary", "light")
-        )}
+        )},
+        "other" = stop("FUDGE. Not ActiGraph or GENEactiv")
       ),
       intensity_bakrania.mad.average = switch(
-        I$monn,
+        brand,
         "actigraph" = {cut(
           MAD,
           breaks = c(-Inf, 34.65, Inf),
@@ -134,7 +170,8 @@ apply_methods_cutpoints <- function(fpa_basic,
           MAD,
           breaks = c(-Inf, 42.4, Inf),
           labels = c("sedentary", "light")
-        )}
+        )},
+        "other" = stop("FUDGE. Not ActiGraph or GENEactiv")
       )
     ) |>
     reframe(
