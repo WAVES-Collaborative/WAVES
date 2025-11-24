@@ -57,6 +57,12 @@
       "Source": "Repository",
       "Repository": "CRAN"
     },
+    "caret": {
+      "Package": "caret",
+      "Version": "7.0-1",
+      "Source": "Repository",
+      "Repository": "CRAN"
+    },
     "crew": {
       "Package": "crew",
       "Version": "1.3.0",

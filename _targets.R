@@ -103,6 +103,7 @@ pkgs <- c(
   "tidyr",
   "tzdb",
   # sydney --
+  "caret",
   "HMM",
   "rattle",
   #"GENEAread",
