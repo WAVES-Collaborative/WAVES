@@ -19,18 +19,23 @@ apply_methods_cutpoints <- function(fpa_basic,
   df_cutpoint <-
     M$metashort |>
     mutate(
-      id = fnm_sans_ext,
       datetime = ymd_hms(timestamp,
                          tz = my_tz),
+      # To millig
+      ENMO = ENMO * 1000,
+      ENMOa = ENMOa * 1000,
+      HFEN = HFEN * 1000,
+      MAD = MAD * 1000,
+      # ENMO cutpoints
       intensity_bakrania.enmo.simple = switch(
         I$monn,
         "actigraph" = {cut(
-          ENMO * 1000,
+          ENMO,
           breaks = c(-Inf, 25.8, Inf),
           labels = c("sedentary", "light")
         )},
         "geneactive" = {cut(
-          ENMO * 1000,
+          ENMO,
           breaks = c(-Inf, 30.7, Inf),
           labels = c("sedentary", "light")
         )}
@@ -38,79 +43,82 @@ apply_methods_cutpoints <- function(fpa_basic,
       intensity_bakrania.enmo.average = switch(
         I$monn,
         "actigraph" = {cut(
-          ENMO * 1000,
+          ENMO,
           breaks = c(-Inf, 26.85, Inf),
           labels = c("sedentary", "light")
         )},
         "geneactive" = {cut(
-          ENMO * 1000,
+          ENMO,
           breaks = c(-Inf, 32.55, Inf),
           labels = c("sedentary", "light")
         )}
       ),
       intensity_hildebrand = cut(
-        ENMO * 1000,
+        ENMO,
         breaks = c(-Inf, 44.8, 100.6, # 428.8,
                    Inf),
         labels = c("sedentary", "light", # "moderate", "vigorous",
                    "mvpa")
       ),
       intensity_mielke = cut(
-        ENMO * 1000,
+        ENMO,
         breaks = c(-Inf, 25.0, 78.0, # 249.0,
                    Inf),
         labels = c("sedentary", "light", # "moderate", "vigorous",
                    "mvpa")
       ),
       intensity_white.enmo.lin = cut(
-        ENMO * 1000,
+        ENMO,
         breaks = c(-Inf, 30.6, 137.4, # 351.1,
                    Inf),
         labels = c("sedentary", "light", # "moderate", "vigorous",
                    "mvpa")
       ),
       intensity_white.enmo.pol = cut(
-        ENMO * 1000,
+        ENMO,
         breaks = c(-Inf, 27.8, 115.7, # 341.2,
                    Inf),
         labels = c("sedentary", "light", # "moderate", "vigorous",
                    "mvpa")
       ),
+      # ENMOa cutpoints
       intensity_esliger = cut(
-        ENMOa * 1000,
+        ENMOa,
         breaks = c(-Inf, 45.0, 134.0, # 377.0,
                    Inf),
         labels = c("sedentary", "light", # "moderate", "vigorous",
                    "mvpa")
       ),
       intensity_fraysee = cut(
-        ENMOa * 1000,
+        ENMOa,
         breaks = c(-Inf, 42.5, 98.0, Inf),
         labels = c("sedentary", "light", "mvpa")
       ),
+      # HPFVM cutpoints
       intensity_white.hpfvm.lin = cut(
-        HFEN * 1000,
+        HFEN,
         breaks = c(-Inf, 47.1, 172.3, # 422.6,
                    Inf),
         labels = c("sedentary", "light", # "moderate", "vigorous",
                    "mvpa")
       ),
       intensity_white.hpfvm.pol = cut(
-        HFEN * 1000,
+        HFEN,
         breaks = c(-Inf, 48.1, 163.3, # 421.8,
                    Inf),
         labels = c("sedentary", "light", # "moderate", "vigorous",
                    "mvpa")
       ),
+      # MAD cutpoints
       intensity_bakrania.mad.simple = switch(
         I$monn,
         "actigraph" = {cut(
-          MAD * 1000,
+          MAD,
           breaks = c(-Inf, 33.4, Inf),
           labels = c("sedentary", "light")
         )},
         "geneactive" = {cut(
-          MAD * 1000,
+          MAD,
           breaks = c(-Inf, 39.6, Inf),
           labels = c("sedentary", "light")
         )}
@@ -118,17 +126,28 @@ apply_methods_cutpoints <- function(fpa_basic,
       intensity_bakrania.mad.average = switch(
         I$monn,
         "actigraph" = {cut(
-          MAD * 1000,
+          MAD,
           breaks = c(-Inf, 34.65, Inf),
           labels = c("sedentary", "light")
         )},
         "geneactive" = {cut(
-          MAD * 1000,
+          MAD,
           breaks = c(-Inf, 42.4, Inf),
           labels = c("sedentary", "light")
         )}
+      )
+    ) |>
+    reframe(
+      id = fnm_sans_ext,
+      datetime = seq.POSIXt(
+        from = datetime[1],
+        to = last(datetime) + 4,
+        by = "1 sec"
       ),
-      .keep = "none"
+      across(
+        .cols = starts_with("intensity"),
+        .fns = ~rep(.x, each = 5)
+      )
     )
 
   # Return ----
