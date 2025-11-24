@@ -27,7 +27,7 @@ The data wrangling/processing pipeline is mostly be the same for both studies, w
 
 1.  Run GGIR on raw accelerometer data
 
-    a.  Tested only on RAW CSV exported from ActiLife. Files will ideally be files that are "clean". That is, these files:
+    a.  Tested on RAW .gt3x files. Files will ideally be "clean". That is, these files:
 
         i.  All have the same file naming scheme/format
 
@@ -43,8 +43,6 @@ The data wrangling/processing pipeline is mostly be the same for both studies, w
 
     a.  Re-calibrate data using GGIR auto-calibration output.
 
-    b.  Save visit data into parquet file format under "data/2_INTERIM/OUTPUT-RAW_PARQUET"
-
 3.  Apply methods to metric and visit data
 
     a.  Cutpoints to metric data from GGIR
@@ -57,8 +55,9 @@ The data wrangling/processing pipeline is mostly be the same for both studies, w
         iv. Verisense
         v.  Trost
         vi. Ellis
+        vii. oak
 
-    c.  Python models to raw csv data (actinet , accelerometer, stepcount(?), forest/oak(?))
+    c.  Python models to raw csv data (actinet , accelerometer, stepcount(?)
 
     d.  Variable names will be:
 
@@ -72,75 +71,43 @@ The data wrangling/processing pipeline is mostly be the same for both studies, w
 
         ii. data/2_INTERIM/OUTPUT-MODEL_PARQUET
 
-        iii. ??data/oxwearables/actinet??; ??data/oxwearables/accelerometer??, ??data/oxwearables/stepcount??, ??data/forest??
+        iii. data/actinet
+
+        iv. data/stepcount
+
+        v.  data/walmsley
 
 ## Methods Implemented
 
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| Processing                                                                                            | Method                                                                                                                                            | Output                           | In Pipeline?  |
-+=======================================================================================================+===================================================================================================================================================+==================================+===============+
-| Custom + actimetric                                                                                   | Ellis 2016                                                                                                                                        | Posture/Movement -\> Intensity   | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| Custom + actimetric                                                                                   | Trost Extended                                                                                                                                    | Posture/Movement -\> Intensity   | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| Custom + actimetric (??)                                                                              | SydneyGroup Model (??)                                                                                                                            | ??                               | ❌            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| Custom (Adapt Lily Koff's code / `adept` R package)                                                   | ADEPT (Karas 2021)                                                                                                                                | Steps                            | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| Custom (Adapt Lily Koffs's code / muschelli's `walking` R package                                     | Oak (Straczkiewicz 2023)                                                                                                                          | Steps                            | ❌            |
-|                                                                                                       |                                                                                                                                                   |                                  |               |
-| OR                                                                                                    |                                                                                                                                                   |                                  |               |
-|                                                                                                       |                                                                                                                                                   |                                  |               |
-| Python `forest`                                                                                       |                                                                                                                                                   |                                  |               |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| Custom (Adapt Lily Koff's code / muschelli's `walking` R package                                      | Step Detection Threshold (SDT, Ducharme 2021)                                                                                                     | Steps                            | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| Muschelli's `walking` R package                                                                       | Verisense                                                                                                                                         | Steps                            | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| Custom (Adapt Lily Koff's code / `stepcount` R package that is a wrapper around OxWearables stepcount | stepcount 3.16.2 (Chan 2023)                                                                                                                      | Steps                            | ❌            |
-|                                                                                                       |                                                                                                                                                   |                                  |               |
-| OR                                                                                                    |                                                                                                                                                   |                                  |               |
-|                                                                                                       |                                                                                                                                                   |                                  |               |
-| Python `stepcount`                                                                                    |                                                                                                                                                   |                                  |               |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| GGIR                                                                                                  | Bakrania 2016                                                                                                                                     | Intensity (Sed only)             | (In Progress) |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| GGIR                                                                                                  | Esliger 2011                                                                                                                                      | Intensity                        | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| GGIR                                                                                                  | Fraysse 2020                                                                                                                                      | Intensity                        | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| GGIR                                                                                                  | Hildebrand 2014/2016 AG wrist                                                                                                                     | Intensity                        | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| GGIR                                                                                                  | Mielke 2023 AG wrist                                                                                                                              | Intensity                        | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| GGIR                                                                                                  | White 2016 ENMO linear                                                                                                                            | Intensity                        | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| GGIR                                                                                                  | White 2016 ENMO polynomial                                                                                                                        | Intensity                        | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| GGIR                                                                                                  | White 2016 HPFVM linear                                                                                                                           | Intensity                        | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| GGIR                                                                                                  | White 2016 HPFVM polynomial                                                                                                                       | Intensity                        | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| GGIR + custom                                                                                         | Montoye 2018 (get metrics from `myfun` that will also get Verisense steps)                                                                        | Intensity                        | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| Python `actinet`                                                                                      | OxWearables SSL (Yuan et al, 2024) OxWearables/ssl-wearables: Self-supervised learning for wearables using the UK-Biobank (\>700,000 person-days) | Posture (Extrapolate Intensity?) | ❌            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| Python `accelerometer`                                                                                | OxWearables Bio Bank Accelerometer Analysis                                                                                                       | Intensity                        | ❌            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
+| Processing                                                       | Method                                                                                                                                            | Output                           | In Pipeline? |
+|-------------------|----------------------------|-------------|-------------|
+| Custom + actimetric                                              | Ellis 2016                                                                                                                                        | Posture/Movement -\> Intensity   | ✔️           |
+| Custom + actimetric                                              | Trost Extended                                                                                                                                    | Posture/Movement -\> Intensity   | ✔️           |
+| Custom (Adapt Lily Koff's code / `adept` R package)              | ADEPT (Karas 2021)                                                                                                                                | Steps                            | ✔️           |
+| Python `forest`                                                  | Oak (Straczkiewicz 2023)                                                                                                                          | Steps                            | ✔️           |
+| Custom (Adapt Lily Koff's code / muschelli's `walking` R package | Step Detection Threshold (SDT, Ducharme 2021)                                                                                                     | Steps                            | ✔️           |
+| Adapted from Muschelli's `walking` R package                     | Verisense                                                                                                                                         | Steps                            | ✔️           |
+| Python `stepcount`                                               | stepcount 3.16.2 (Chan 2023)                                                                                                                      | Steps                            | ✔️           |
+| GGIR                                                             | Bakrania 2016                                                                                                                                     | Intensity (Sed only)             | ✔️           |
+| GGIR                                                             | Esliger 2011                                                                                                                                      | Intensity                        | ✔️           |
+| GGIR                                                             | Fraysse 2020                                                                                                                                      | Intensity                        | ✔️           |
+| GGIR                                                             | Hildebrand 2014/2016 AG wrist                                                                                                                     | Intensity                        | ✔️           |
+| GGIR                                                             | Mielke 2023 AG wrist                                                                                                                              | Intensity                        | ✔️           |
+| GGIR                                                             | White 2016 ENMO linear                                                                                                                            | Intensity                        | ✔️           |
+| GGIR                                                             | White 2016 ENMO polynomial                                                                                                                        | Intensity                        | ✔️           |
+| GGIR                                                             | White 2016 HPFVM linear                                                                                                                           | Intensity                        | ✔️           |
+| GGIR                                                             | White 2016 HPFVM polynomial                                                                                                                       | Intensity                        | ✔️           |
+| GGIR + custom                                                    | Montoye 2018                                                                                                                                      | Intensity                        | ✔️           |
+| Python `actinet`                                                 | OxWearables SSL (Yuan et al, 2024) OxWearables/ssl-wearables: Self-supervised learning for wearables using the UK-Biobank (\>700,000 person-days) | Posture (Extrapolate Intensity?) | ✔️           |
+| Python `accelerometer`                                           | OxWearables Bio Bank Accelerometer Analysis                                                                                                       | Intensity                        | ✔️           |
 
 ## TODO
 
--   Implement Python methods
+-   Test RAW CSV files against OxWearable methods.
 
-    -   I added a "src" directory to save any python scripts, but this can easily be changed
+    -   CSVs need to be pre-formatted to not include metadata within the first few lines
 
--   Have a function to convert criterion data into a parquet for sending to JM?
-
-    -   My idea is to have site users provide a file path to the csv that holds the DO/activPAL/WearableCamera/whatever criterion measures for ALL visit/field data where the function just simply converts it to parquet file format to send to JM, along with "WAVES_OUTPUT-[VISIT/FIELD].parquet" and Python output
-
--   Control/checks if field and visit data have same filenames?
-
-    -   The whole reason why there is visit and field distinctions is due to the FLAC UWM dataset (Strath) has both DO "visit" data and 7-day "field" data where participants where also asked to wear activpal. Visit and 7day data are named distinctly from each other, and will not overlap. If another site that contributes to WAVES also have visit and field data, the filenames should also be different...hopefully.
+-   In "config.qmd", run WAVES functions against configuration files.
 
 -   Create "user-facing" readme with the following:
 
@@ -150,12 +117,14 @@ The data wrangling/processing pipeline is mostly be the same for both studies, w
 4.  Download WAVES repository.
 5.  Open WAVES.RProj
 6.  In Console, run renv::restore()
-7.  In console, type `tar_make()` and make sure pipeline works against test data (TODO).
+7.  Open "quarto/config.qmd" file and "knit" to create "summary_config.html" under reports.
+    1.  This will make sure miniconda is setup
+    2.  This will also run WAVES functions against
 8.  Put in directory paths to raw accelerometer data within "INPUT" section.
 9.  Change study_sampling_frequency and my_tz as needed.
 10. Select all lines within "INPUT" section, then Ctrl+Enter.
 11. In console, type `tar_make()` and press Enter.
-12. Share `WAVES_OUTPUT` file(s) with WAVES working group, criterion data, and demographic data
+12. Share `WAVES_OUTPUT` file(s) with WAVES working group, criterion data, and meta data
 
 -   Work on making a WAVES website using pkgdown? Doesn't have to be fancy but I can see it being really helpful than a readme, or making a private youtube video?
 
