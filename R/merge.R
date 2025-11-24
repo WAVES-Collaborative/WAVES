@@ -1,36 +1,31 @@
 # lst_out.raw = tar_read(lst_out.raw_visit)
 # lst_out.cut = tar_read(lst_out.cut_visit)
 # dir_merged = tar_read(dir_merged)
-# le_type = "visit"
 merge_output <- function(lst_out.raw,
                          lst_out.cut,
-                         dir_merged,
-                         le_type) {
+                         lst_ox,
+                         dir_merged) {
 
   # Merge ----
-  df <- left_join(
-    rbindlist(lst_out.raw),
-    rbindlist(lst_out.cut) |>
-      mutate(across(
-        .cols = !id:datetime,
-        .fns = ~forcats::fct_expand(.x, "sleep", "nonwear")
-      )),
-    by = join_by(id, datetime)
-  ) |>
-    fill(.direction = "down") |>
-  # Make all classes/labels the same.
-    mutate(across(
-      .cols = starts_with("intensity_montoye"),
-      .fns = ~factor(
-        .x,
-        levels = c("SED", "LPA", "MPA", "VPA",
-                   # These are not classes from montoye methods but adding them
-                   # in now to maintain consistency
-                   "sleep", "nonwear"),
-        labels = c("sedentary", "light", "mvpa", "mvpa", "sleep", "nonwear")
-      )
-    )) |>
+  df <-
+    full_join(
+      rbindlist(lst_out.raw),
+      rbindlist(lst_out.cut),
+      by = join_by(id, datetime)
+    ) |>
+    left_join(
+      rbindlist(lst_ox),
+      by = join_by(id, datetime)
+    ) |>
     mutate(
+      across(
+        .cols = starts_with("intensity_montoye"),
+        .fns = ~factor(
+          .x,
+          levels = c("SED", "LPA", "MPA", "VPA"),
+          labels = c("sedentary", "light", "mvpa", "mvpa")
+        )
+      ),
       intensity_trost = factor(
         class_trost,
         levels = c("1",
@@ -73,12 +68,18 @@ merge_output <- function(lst_out.raw,
     select(id, datetime,
            starts_with("intensity"),
            starts_with("steps"),
-           starts_with("class"))
+           starts_with("class")) |>
+    # Make all intensity variables have the same levels
+    mutate(across(
+      .cols = starts_with("intensity"),
+      .fns = ~factor(.x, levels = c("sedentary", "light", "mvpa", "sleep", "nonwear"))
+    ))
+
 
   # Return ----
-  fnm_write <- paste0("WAVES_OUTPUT-", toupper(le_type), ".parquet")
+  fnm_write <- "WAVES_OUTPUT_ALL.parquet"
   fpa_write <- file.path(dir_merged, fnm_write)
-  arrow::write_feather(df, fpa_write)
+  arrow::write_parquet(df, fpa_write)
   return(fpa_write)
 
 }
