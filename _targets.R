@@ -86,12 +86,11 @@ pkgs <- c(
   # "adept",
   # "adeptdata",
   "arrow",
-  "C50",
   "crew",
   "data.table",
   "dplyr",
   "GGIR",
-  "kernlab",
+  "knitr",
   "lubridate",
   "nnet",
   "qs2",
@@ -101,14 +100,15 @@ pkgs <- c(
   "tarchetypes",
   "targets",
   "tidyr",
-  "tzdb",
+  "tools",
   # sydney --
+  "C50",
   "caret",
   "HMM",
+  "kernlab",
   "rattle",
-  #"GENEAread",
   "signal",
-  "tools"
+  "tzdb"
 )
 # Interactive use
 # for (package in pkgs) library(package, character.only = TRUE)
@@ -143,6 +143,7 @@ fdr_reports <- file.path(
 )
 # fdr_merged_
 fs::dir_create(c(
+  fdr_logs,
   fdr_calibrated,
   fdr_output.cutpoint,
   fdr_output.raw,
@@ -169,7 +170,7 @@ options(datatable.print.keys = TRUE)
 tar_option_set(
   packages   = pkgs,
   format     = "qs",
-  controller = crew_controller_local(workers = 2)
+  controller = crew_controller_local(workers = parallel::detectCores() - 1)
   # trust_timestamps = TRUE
 )
 
@@ -226,15 +227,16 @@ tar_plan(
   dir_stepcount = fdr_stepcount,
   dir_walmsley  = fdr_walmsley,
   dir_actinet   = fdr_actinet,
+  dir_merged    = fdr_merged,
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                                FILE PATHS                              ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   tar_files_input(
     name  = vct_raw,
-    files = vct_raw_fpa_visit
-    # files = vct_raw_fpa_visit[3] # For testing on one file
+    # files = vct_raw_fpa_visit
+    files = vct_raw_fpa_visit[5:6] # For testing on one file
     # files = vct_raw_fpa_field
-    # files = vct_raw_fpa_field[3] # For testing on one file
+    # files = vct_raw_fpa_field[3] # For testing on one file+
   ),
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                               DEMOGRAPHICS                             ----
@@ -316,7 +318,7 @@ tar_plan(
       dir_write     = dir_out.raw,
       my_tz         = my_tz
     ),
-    pattern   = map(vct_cal_visit),
+    pattern   = map(vct_cal),
     iteration = "list"
   ),
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -327,9 +329,8 @@ tar_plan(
     command = merge_output(
       lst_out.raw = lst_out.raw,
       lst_out.cut = lst_out.cut,
-      dir_merged  = dir_merged,
-      le_type     = "visit"
-      # le_type     = "field"
+      lst_ox      = lst_ox,
+      dir_merged  = dir_merged
     ),
     format = "file"
   ),
