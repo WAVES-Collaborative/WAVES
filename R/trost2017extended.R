@@ -135,14 +135,6 @@ detect_sleep_periods<-function(data, window){
   }
   return(sleepperiod)
 }
-# raw         = mtx_data
-# Fs          = I$sf
-# ID          = fnm_sans_ext
-# dir_models  = dir_models
-# win         = 10
-# sleep       = TRUE
-# Classifier  = "Trost Adult Wrist RF"
-# start.time  = rec_start_sec
 trost2017.extended <- function(raw,
                                Fs,
                                ID,

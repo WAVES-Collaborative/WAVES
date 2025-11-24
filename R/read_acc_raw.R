@@ -1,9 +1,3 @@
-## fpa_read  = tar_read(vct_raw_visit)[1]
-# fpa_read = tar_read(vct_raw_field)[1]
-## vct_fpa_basic = tar_read(vct_basic_fpa)
-# vct_fpa_basic = tar_read(vct_basic_fpa_field)
-# dir_cal = tar_read(dir_cal)
-# my_tz = tar_read(my_tz)
 read_acc_raw <- function(fpa_read,
                          vct_fpa_basic,
                          dir_cal,

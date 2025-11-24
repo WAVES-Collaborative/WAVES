@@ -1,6 +1,3 @@
-# fpa_basic = tar_read(vct_basic)[1]
-# dir_write = tar_read(dir_out.cut)
-# my_tz    = tar_read(my_tz)
 apply_methods_cutpoints <- function(fpa_basic,
                                     dir_write,
                                     my_tz) {

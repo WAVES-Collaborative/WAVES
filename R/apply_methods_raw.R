@@ -62,14 +62,6 @@ estimate_steps_sdtnew <- function(data,
     as.integer()
 
 }
-
-# fpa_read      = tar_read(vct_cal_visit)[1]
-# # fpa_read      = tar_read(vct_cal_field)[1]
-# # vct_fpa_basic = tar_read(vct_basic_field)
-# vct_fpa_basic = tar_read(vct_basic_visit)
-# dir_models = tar_read(dir_models)
-# dir_write = tar_read(dir_out.mdl)
-# my_tz    = tar_read(my_tz)
 apply_methods_raw <- function(fpa_read,
                               vct_fpa_basic,
                               dir_models,

@@ -92,14 +92,6 @@ Ellis.feat.extraction <- function(w, Fs) {
     FFT12, FFT13, FFT14
   ))
 }
-# raw         = mtx_data
-# Fs          = I$sf
-# ID          = fnm_sans_ext
-# dir_models  = dir_models
-# win         = 10
-# sleep       = TRUE
-# Classifier  = "Ellis Wrist RF"
-# start.time  = rec_start_sec
 ellis2016.wrist <- function(raw,
                             Fs,
                             ID,

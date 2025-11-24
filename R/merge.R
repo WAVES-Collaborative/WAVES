@@ -1,6 +1,3 @@
-# lst_out.raw = tar_read(lst_out.raw_visit)
-# lst_out.cut = tar_read(lst_out.cut_visit)
-# dir_merged = tar_read(dir_merged)
 merge_output <- function(lst_out.raw,
                          lst_out.cut,
                          lst_ox,

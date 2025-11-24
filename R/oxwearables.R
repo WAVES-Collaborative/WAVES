@@ -1,6 +1,3 @@
-# tar_load(vct_raw)
-# fdr_write = file.path(getwd(), tar_read(dir_stepcount))
-# fdr_log = tar_read(dir_logs)
 apply_ox_stepcount <- function(vct_raw,
                                fdr_write,
                                fdr_log) {
@@ -58,10 +55,6 @@ apply_ox_stepcount <- function(vct_raw,
   )
 
 }
-# tar_load(vct_raw)
-# fdr_write = file.path(getwd(), tar_read(dir_walmsley))
-# fdr_log = tar_read(dir_logs)
-# tar_load(my_tz)
 apply_ox_walmsley <- function(vct_raw,
                               fdr_write,
                               fdr_log,
@@ -127,9 +120,6 @@ apply_ox_walmsley <- function(vct_raw,
   )
 
 }
-# tar_load(vct_raw)
-# fdr_write = file.path(getwd(), tar_read(dir_actinet))
-# fdr_log = tar_read(dir_logs)
 apply_ox_actinet <- function(vct_raw,
                              fdr_write,
                              fdr_log) {
@@ -189,10 +179,6 @@ apply_ox_actinet <- function(vct_raw,
   )
 
 }
-# tar_load(vct_ox_step)
-# tar_load(vct_ox_wlms)
-# tar_load(vct_ox_acti)
-# tar_load(my_tz)
 merge_ox <- function(vct_ox_step,
                      vct_ox_wlms,
                      vct_ox_acti,
