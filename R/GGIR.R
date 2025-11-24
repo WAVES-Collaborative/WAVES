@@ -1,44 +1,40 @@
 # vct_raw_csv = tar_read(vct_gt3x.raw_csv_field)
 # sf          = tar_read(sf)
-wrapper_GGIR <- function(vct_raw_csv) {
+wrapper_GGIR <- function(vct_raw) {
 
-  if (is.null(vct_raw_csv)) return(NULL)
+  if (is.null(vct_raw)) return(NULL)
 
   # Determine average file size. If >= 1GB, its most likely field data.
   dbl_fsize <-
-    file.size(vct_raw_csv) |>
+    file.size(vct_raw) |>
     mean() / 2^30
 
   if (dbl_fsize >= 1) {
     le_mode <-
       1:5
-    le_studyname <-
-      "WAVES-FIELD"
   } else {
     le_mode <-
       1
-    le_studyname <-
-      "WAVES-VISIT"
   }
 
   GGIR::GGIR(
     mode       = le_mode,
-    datadir    = vct_raw_csv,
+    datadir    = vct_raw,
     outputdir  = "data/GGIR",
-    studyname  = le_studyname,
+    studyname  = "WAVES",
     # fo         = 1,
     # f1         = 2,
     do.report  = c(),
     configfile = "data/GGIR/config_WAVES.csv"
   )
-
-  le_output <-
-    paste0("output_", le_studyname)
   list.files(
-    file.path("data", "GGIR", le_output, "meta", "basic"),
-    pattern = "RData$",
+    file.path("data", "GGIR", "output_WAVES", "meta", "basic"),
+    pattern =
+      basename(vct_raw) |>
+      paste0(collapse = "|"),
     full.names = TRUE
   )
+
 }
 # df = data.table::fread(
 #   vct_gt3x.raw.csv_visit[5],
