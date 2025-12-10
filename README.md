@@ -5,6 +5,15 @@
 
 Julian says helpme, my potato is a computer.
 
+## Proposed Flow Diagram 
+
+The proposed flow diagram outlines the process for how the validation data and data pipeline will work with the WAVES team and groups who have potentially available validation data. 
+
+![Flow Diagram](WAVES Diagram.png)
+
+
+__Full description of the flow diagram coming soon__
+
 ## General Pipeline
 
 For the WAVES project, two “studies” are conceptualized to address the
