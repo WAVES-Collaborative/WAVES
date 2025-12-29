@@ -2,13 +2,13 @@ config_miniconda <- function(...) {
 
   # conda ----
   chk_conda <-
-    class(tryCatch(conda_version(), error = \(e) e)) == "simpleError"
+    class(tryCatch(conda_version(), error = \(e) e))[1] == "simpleError"
 
   if (chk_conda) {
 
     install_miniconda()
     chk_successful <-
-      class(tryCatch(conda_version(), error = \(e) e)) != "simpleError"
+      class(tryCatch(conda_version(), error = \(e) e))[1] != "simpleError"
 
     if (chk_successful) {msg_conda <- paste0(
       "Not previously installed. Installed at ", '"',
@@ -44,15 +44,23 @@ config_miniconda <- function(...) {
     "certifi_2025.11.12",
     "charset-normalizer_3.4.4",
     "colorama_0.4.6",
+    "contourpy_1.3.0",
+    "cycler_0.12.1",
+    "fonttools_4.60.2",
     "hmmlearn_0.3.3",
     "idna_3.11",
     "imbalanced-learn_0.9.1",
+    "importlib-resources_6.5.2",
     "joblib_1.2.0",
-    "libexpat_2.7.1",
+    "kiwisolver_1.4.7",
+    "libexpat_2.7.3",
     "libffi_3.5.2",
     "liblzma_5.8.1",
-    "libsqlite_3.51.0",
+    "libsqlite_3.51.1",
     "libzlib_1.3.1",
+    "llvmlite_0.41.1",
+    "matplotlib_3.7.5",
+    "numba_0.58.1",
     "numpy_1.24.4",
     "openjdk_25.0.1",
     "openssl_3.6.0",
@@ -61,28 +69,34 @@ config_miniconda <- function(...) {
     "patsy_1.0.2",
     "pillow_11.3.0",
     "pip_25.2",
+    "pyparsing_3.3.1",
     "python_3.9.23",
+    "python-dateutil_2.9.0.post0",
+    "pytz_2025.2",
     "requests_2.32.5",
     "scikit-learn_1.1.1",
     "scipy_1.10.1",
     "setuptools_80.9.0",
-    "statsmodels_0.14.5",
-    "stepcount_3.5.0",
+    "six_1.17.0",
+    "statsmodels_0.14.6",
+    "stepcount_3.17.0",
     "symlink-exe-runtime_1.0",
+    "threadpoolctl_3.6.0",
     "tk_8.6.13",
     "torch_1.13.1",
     "torchvision_0.14.1",
     "tqdm_4.64.1",
     "transforms3d_0.4.2",
     "typing-extensions_4.15.0",
-    "tzdata_2025.2",
+    "tzdata_2025.3",
     "ucrt_10.0.26100.0",
-    "urllib3_2.5.0",
+    "urllib3_2.6.2",
     "vc_14.3",
     "vc14_runtime_14.44.35208",
     "vcomp14_14.44.35208",
     "vs2015_runtime_14.44.35208",
-    "wheel_0.45.1"
+    "wheel_0.45.1",
+    "zipp_3.23.0"
   )
   vct_pkg_acc <- c(
     "accelerometer_7.3.0",
@@ -266,7 +280,7 @@ config_miniconda <- function(...) {
       msg_step_env <- "Successfuly created"
       conda_install(
         envname  = "WHO_WAVES_stepcount",
-        packages = "stepcount==3.5",
+        packages = "stepcount==3.17.0",
         forge    = FALSE,
         pip      = TRUE
       )
