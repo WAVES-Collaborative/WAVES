@@ -49,7 +49,7 @@ rmc.col.time,c(1),params_rawdata
 rmc.unit.acc,g,params_rawdata
 rmc.unit.temp,C,params_rawdata
 rmc.unit.time,POSIX,params_rawdata
-rmc.format.time,%Y-%m-%d %H:%M:%OS,params_rawdata
+rmc.format.time,"c(""%Y-%m-%d %H:%M:%OS"")",params_rawdata
 rmc.bitrate,c(),params_rawdata
 rmc.dynamic_range,c(),params_rawdata
 rmc.unsignedbit,TRUE,params_rawdata
@@ -58,8 +58,8 @@ rmc.desiredtz,c(),params_rawdata
 rmc.configtz,c(),params_rawdata
 rmc.sf,c(100),params_rawdata
 rmc.headername.sf,c(),params_rawdata
-rmc.headername.sn,"c(""Device Unique Serial Code"")",params_rawdata
-rmc.headername.recordingid,"c(""""Subject Code"")",params_rawdata
+rmc.headername.sn,Device Unique Serial Code,params_rawdata
+rmc.headername.recordingid,Subject Code,params_rawdata
 rmc.header.structure,c(),params_rawdata
 rmc.check4timegaps,FALSE,params_rawdata
 rmc.noise,13,params_rawdata

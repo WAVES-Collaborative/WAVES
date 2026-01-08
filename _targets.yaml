@@ -1,0 +1,6 @@
+config:
+  script: _targets_config.R
+  store: _targets_config
+main:
+  script: _targets.R
+  store: _targets

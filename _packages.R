@@ -1,0 +1,28 @@
+pkgs <- c(
+  # "adept",
+  # "adeptdata",
+  "arrow",
+  "crew",
+  "data.table",
+  "dplyr",
+  "GGIR",
+  "knitr",
+  "lubridate",
+  "nnet",
+  "qs2",
+  "randomForest",
+  "reticulate",
+  "stringi",
+  "tarchetypes",
+  "targets",
+  "tidyr",
+  "tools",
+  # sydney --
+  "C50",
+  "caret",
+  "HMM",
+  "kernlab",
+  "rattle",
+  "signal",
+  "tzdb"
+)
