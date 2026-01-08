@@ -728,6 +728,74 @@ config_miniconda <- function(...) {
   )
 
 }
+#' Determine format of raw files
+#'
+#' @param vct_raw
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+config_raw_type <- function(vct_raw) {
+
+  vct_type <- vector(
+    mode = "character",
+    length = length(vct_raw)
+  )
+
+  for (i in seq_along(vct_raw)) {
+
+    # Determine if input is "happily read by GGIR or if user is providing a
+    # GENEActiv csv file w/ header or a no header csv.
+    # https://github.com/wadpac/GGIR/issues/518
+    I <- suppressWarnings(tryCatch(
+      GGIR::g.inspectfile(
+        datafile = vct_raw[i],
+        params_rawdata =
+          GGIR::extract_params(params2check = "rawdata")[["params_rawdata"]]
+      ),
+      error = \(e) e
+    ))
+
+    if (class(I)[1] == "simpleError") {
+
+      chk_geneactiv_csv <-
+        I$message == "The GENEActiv csv reading functionality is deprecated in GGIR from version 2.6-4 onwards. Please, use either the GENEActiv bin files or try to read the csv files with GGIR::read.myacc.csv"
+
+      if (chk_geneactiv_csv) {
+        vct_type[i] <- "GENEACTIV - CSV w/ HEADER"
+      } else {
+        vct_type[i] <- "UNKNOWN"
+      }
+
+    } else {
+
+      # If GGIR determines its an ad-hoc csv, assume that it will be
+      # GENEActiv csv file without header
+      chk_adhoc_csv <-
+        I$header[1, 1] == "file does not have header" &&
+        I$sf == 0
+
+      if (chk_adhoc_csv) {
+        vct_type[i] <- "GENEACTIV - CSV w/o HEADER"
+      } else {
+        vct_type[i] <-
+          paste0(I$monn, " - ", I$dformn) |>
+          toupper()
+      }
+    }
+  }
+
+  # Rename "GENEACTIVE" to "GENEACTIV".
+  vct_type <- sub(
+    x = vct_type,
+    pattern = "GENEACTIVE",
+    replacement = "GENEACTIV"
+  )
+
+  return(vct_type)
+
+}
 config_pipeline <- function(vct_raw,
                             vct_basic,
                             vct_cal,
