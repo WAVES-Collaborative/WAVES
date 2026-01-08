@@ -777,7 +777,7 @@ config_raw_type <- function(vct_raw) {
         I$sf == 0
 
       if (chk_adhoc_csv) {
-        vct_type[i] <- "GENEACTIV - CSV w/o HEADER"
+        vct_type[i] <- "ADHOC"
       } else {
         vct_type[i] <-
           paste0(I$monn, " - ", I$dformn) |>

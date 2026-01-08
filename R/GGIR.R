@@ -15,53 +15,30 @@ wrapper_GGIR <- function(vct_raw,
 
   if (is.null(vct_raw)) return(NULL)
 
-  all_type <- unique(vct_raw_type)
+  chk_csv_type <- vct_raw_type %in% c(
+    "GENEACTIV - CSV w/ HEADER",
+    "ADHOC",
+    "UKNOWN"
+  )
 
-  if (length(all_type) > 1) {
-
-    len_type <- length(all_type)
+  if (chk_csv_type) {
     cli::cli_abort(c(
-      "More than one type of raw data is provided.",
-      "i" = "{len_type} types are data were provided.",
-      "i" = "Please provide data from one monitor brand, in one format."
+      "Raw GENEActiv and adhoc csv's are currently not supported.",
+      "i" = "Please use raw exported data such as {.value '.bin' '.gt3x' or '.cwa'} data.",
+      "i" = "If non-csv data is not available, please reach out to WAVES data team for possible solutions."
     ))
-
   }
 
-  if (all_type == "GENEACTIV - CSV w/ HEADER") {
-    GGIR::GGIR(
-      mode       = c(1, 2, 3, 4),
-      datadir    = vct_raw,
-      outputdir  = "data/GGIR",
-      studyname  = "WAVES",
-      # fo         = 1,
-      # f1         = 2,
-      do.report  = c(),
-      configfile = "data/GGIR/config_WAVES_GENEActivHeaderCSV.csv"
-    )
-  } else if (all_type == "GENEACTIV - CSV w/o HEADER") {
-    GGIR::GGIR(
-      mode       = c(1, 2, 3, 4),
-      datadir    = vct_raw,
-      outputdir  = "data/GGIR",
-      studyname  = "WAVES",
-      # fo         = 1,
-      # f1         = 2,
-      do.report  = c(),
-      configfile = "data/GGIR/config_WAVES_GENEActivNoHeaderCSV.csv"
-    )
-  } else {
-    GGIR::GGIR(
-      mode       = c(1, 2, 3, 4),
-      datadir    = vct_raw,
-      outputdir  = "data/GGIR",
-      studyname  = "WAVES",
-      # fo         = 1,
-      # f1         = 2,
-      do.report  = c(),
-      configfile = "data/GGIR/config_WAVES.csv"
-    )
-  }
+  GGIR::GGIR(
+    mode       = c(1, 2, 3, 4),
+    datadir    = vct_raw,
+    outputdir  = "data/GGIR",
+    studyname  = "WAVES",
+    # fo         = 1,
+    # f1         = 2,
+    do.report  = c(),
+    configfile = "data/GGIR/config_WAVES.csv"
+  )
 
   list.files(
     file.path("data", "GGIR", "output_WAVES", "meta", "basic"),
@@ -92,46 +69,15 @@ wrapper_GGIR_config <- function(vct_raw,
      fpa_raw <- vct_raw[i]
      le_type <- vct_raw_type[i]
 
-     if (le_type == "GENEACTIV - CSV w/ HEADER") {
-       # GGIR::GGIR(
-       #   mode = 1:4,
-       #   datadir = fpa_raw,
-       #   outputdir  = "data/0_CONFIG/GGIR",
-       #   studyname  = "config",
-       #   do.report  = c(),
-       #   rmc.firstrow.acc = 101,
-       #   rmc.firstrow.header = 1,
-       #   rmc.header.length = 58,
-       #   rmc.col.acc = 2:4,
-       #   rmc.col.temp = 7,
-       #   rmc.col.time = 1,
-       #   rmc.unit.acc = "g",
-       #   rmc.unit.temp = "C",
-       #   rmc.unit.time = "POSIX",
-       #   rmc.format.time = "%Y-%m-%d %H:%M:%OS",
-       #   rmc.sf = 100, # my_sf
-       #   # rmc.headername.sf = "Measurement Frequency", # doesn't get frequency correctly
-       #   rmc.headername.sn = "Device Unique Serial Code",
-       #   rmc.headername.recordingid = "Subject Code",
-       #   configtz = "Canada/Saskatchewan" # my_tz
-       # )
-       GGIR::GGIR(
-         mode       = c(1, 2, 3, 4),
-         datadir    = fpa_raw,
-         outputdir  = "data/0_CONFIG/GGIR",
-         studyname  = "config",
-         do.report  = c(),
-         configfile = "data/GGIR/config_WAVES_GENEActivHeaderCSV.csv"
-       )
-     } else if (le_type == "GENEACTIV - CSV w/o HEADER") {
-       GGIR::GGIR(
-         mode       = c(1, 2, 3, 4),
-         datadir    = fpa_raw,
-         outputdir  = "data/0_CONFIG/GGIR",
-         studyname  = "config",
-         do.report  = c(),
-         configfile = "data/GGIR/config_WAVES_GENEActivNoHeaderCSV.csv"
-       )
+     chk_csv_type <- c(
+       "GENEACTIV - CSV w/ HEADER",
+       "ADHOC",
+       "UKNOWN"
+     )
+
+     if (le_type %in% chk_csv_type) {
+       # These are skipped for now
+       next()
      } else {
        GGIR::GGIR(
          mode       = c(1, 2, 3, 4),
@@ -145,7 +91,7 @@ wrapper_GGIR_config <- function(vct_raw,
    }
 
   list.files(
-    file.path("data", "0_CONFIG", "GGIR", "output_WAVES", "meta", "basic"),
+    file.path("data", "0_CONFIG", "GGIR", "output_config", "meta", "basic"),
     pattern =
       basename(vct_raw) |>
       paste0(collapse = "|"),
