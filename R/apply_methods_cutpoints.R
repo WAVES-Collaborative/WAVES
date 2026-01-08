@@ -1,3 +1,104 @@
+#' @title Apply cutpoints.
+#'
+#' @description
+#' Applies 13 cutpoints. Most follow the GGIR article on cutpoints
+#' titled \href(https://wadpac.github.io/GGIR/articles/CutPoints.html){Published cut-points and how to use them in GGIR}.
+#'
+#' @section How each cutpoint was extracted/implemented:
+#'
+#' All cutpoints are for the non-dominant wrist. Brand specific cutpoints were used when possible, with the
+#' GENEActiv cutpoint used if the supplied data comes from a non-specific brand (i.e. user supplies Axivity
+#' data, the Hildebrand GENEActiv cutpoint will be used).
+#'
+#' Euclidean Norm Minus One (ENMO) methods:
+#'
+#' * bakrania.enmo.simple: Table 5 contains wrist cutpoints for GT3X+ and GENEactiv
+#' monitors, where the cutpoint for the "washing pots" activity was used to
+#' separate sedentary and light intensity.
+#'
+#' * bakrania.enmo.average: Table 5, averages the cutpoints for washing pots
+#' and dusting, as done in \href(https://doi.org/10.1123/jmpb.2024-0051){Matthews et al., 2025}
+#'
+#' * hildebrand: Sedentary threshold cutpoint from Table 3 of Hildebrand et al., 2017,
+#' moderate intensity threshold cutpoint from Table 4 of Hildebrand et al., 2014.
+#'
+#' * mielke: Table 2
+#'
+#' * white.enmo.lin: Table S1, in using derived regression model 1, which estimates
+#' PAEE in J/min/kg from ENMO, we solved for ENMO when substituting PAEE to
+#' 35.6125 J/min/kg (0.5 marginal METs due to PA, 1.5 gross METs) and 142.45 J/min/kg
+#' (2 marginal METs due to PA, 3 gross METs) to get sedentary threshold and light
+#' threshold cutpoints.
+#'
+#' $$PAEE = 5.01 + 1.000(ENMO)$$
+#'
+#' $$35.6125 = 5.01 + 1.000(ENMO)$$
+#'
+#' $$142.45 = 5.01 + 1.000(ENMO)$$
+#'
+#' * white.enmo.pol: Table S2, uses the same procedure for model 1
+#'
+#' $$PAEE = −10.58 + 1.1176(ENMO) + 2.9418(\sq{ENMO}) − 0.00059277(ENMO^2)$$
+#'
+#' $$35.6125 = -10.58 + 1.1176(ENMO) + 2.9418(\sq{ENMO}) − 0.00059277(ENMO^2)$$
+#'
+#' $$142.45 = -10.58 + 1.1176(ENMO) + 2.9418(\sq{ENMO}) − 0.00059277(ENMO^2)$$
+#'
+#' ENMOa methods:
+#'
+#' * esliger: GGIR scaled
+#'
+#' * fraysee: TODO
+#'
+#' High-Pass Filtered Vector Magnitude (HPFVM) methods:
+#'
+#' * white.hpfvm.lin: TODO
+#'
+#' * white.hpfvm.pol: TODO
+#'
+#' MAD cutpoints:
+#'
+#' * bakrania.mad.simple: Table 7 contains MAD wrist cutpoints for GT3X+ and GENEActiv
+#' monitors, where the cutpoint for the "washing pots" activity was used to
+#' separate sedentary and light intensity.
+#'
+#' * bakrania.mad.average: Table 7, averages the cutpoints for washing pots
+#' and dusting, similar to the ENMO method described in \href(https://doi.org/10.1123/jmpb.2024-0051){Matthews et al., 2025}
+#'
+#' @section References:
+#'
+#' ENMO methods:
+#'
+#' * \href(https://doi.org/10.1371/journal.pone.0164045){Bakrania et al., 2016}
+#'
+#' * \href(https://doi.org/10.1249/mss.0000000000000289){Hildebrand et al., 2014 (mvpa cutpoint)}
+#'
+#' * \href(https://doi.org/10.1111/sms.12795){Hildebrand et al., 2017 (sedentary cutpoint)}
+#'
+#' * \href(https://doi.org/10.1111/sms.14416){Mielke et al., 2023}
+#'
+#' * \href(https://doi.org){}
+#'
+#' * \href(https://doi.org){}
+#'
+#' * \href(https://doi.org){}
+#'
+#' * \href(https://doi.org){}
+#'
+#' * \href(https://doi.org){}
+#'
+#' * \href(https://doi.org){}
+#'
+#' * \href(https://doi.org){}
+#'
+#' @param fpa_basic
+#' @param dir_write
+#' @param my_tz
+#'
+#' @returns
+#' @export
+#'
+#' @examples
 apply_methods_cutpoints <- function(fpa_basic,
                                     dir_write,
                                     my_tz) {
@@ -14,7 +115,7 @@ apply_methods_cutpoints <- function(fpa_basic,
         pattern = "meta_",
         replacement = "")
   brand <- case_when(
-    !I$monn %in% c("actigraph", "geneactive") ~ "other",
+    I$monn != c("actigraph") ~ "other",
     .default = I$monn
   )
   df_cutpoint <-
@@ -35,12 +136,11 @@ apply_methods_cutpoints <- function(fpa_basic,
           breaks = c(-Inf, 25.8, Inf),
           labels = c("sedentary", "light")
         )},
-        "geneactive" = {cut(
+        "other" = {cut(
           ENMO,
           breaks = c(-Inf, 30.7, Inf),
           labels = c("sedentary", "light")
-        )},
-        "other" = stop("FUDGE. Not ActiGraph or GENEactiv")
+        )}
       ),
       intensity_bakrania.enmo.average = switch(
         brand,
@@ -49,12 +149,11 @@ apply_methods_cutpoints <- function(fpa_basic,
           breaks = c(-Inf, 26.85, Inf),
           labels = c("sedentary", "light")
         )},
-        "geneactive" = {cut(
+        "other" = {cut(
           ENMO,
           breaks = c(-Inf, 32.55, Inf),
           labels = c("sedentary", "light")
-        )},
-        "other" = stop("FUDGE. Not ActiGraph or GENEactiv")
+        )}
       ),
       intensity_hildebrand = switch(
         brand,
@@ -65,14 +164,13 @@ apply_methods_cutpoints <- function(fpa_basic,
           labels = c("sedentary", "light", # "moderate", "vigorous",
                      "mvpa")
         )},
-        "geneactive" = {cut(
+        "other" = {cut(
           ENMO,
           breaks = c(-Inf, 45.8, 93.2, # 418.3,
                      Inf),
           labels = c("sedentary", "light", # "moderate", "vigorous",
                      "mvpa")
-        )},
-        "other" = stop("FUDGE. Not ActiGraph or GENEactiv")
+        )}
       ),
       intensity_mielke = switch(
         brand,
@@ -83,21 +181,13 @@ apply_methods_cutpoints <- function(fpa_basic,
           labels = c("sedentary", "light", # "moderate", "vigorous",
                      "mvpa")
         )},
-        "geneactive" = {cut(
+        "other" = {cut(
           ENMO,
           breaks = c(-Inf, 36.0, 92.0, # 283.0,
                      Inf),
           labels = c("sedentary", "light", # "moderate", "vigorous",
                      "mvpa")
-        )},
-        "other" = stop("FUDGE. Not ActiGraph or GENEactiv")
-      ),
-      intensity_mielke = cut(
-        ENMO,
-        breaks = c(-Inf, 25.0, 78.0, # 249.0,
-                   Inf),
-        labels = c("sedentary", "light", # "moderate", "vigorous",
-                   "mvpa")
+        )}
       ),
       intensity_white.enmo.lin = cut(
         ENMO,
@@ -149,12 +239,11 @@ apply_methods_cutpoints <- function(fpa_basic,
           breaks = c(-Inf, 33.4, Inf),
           labels = c("sedentary", "light")
         )},
-        "geneactive" = {cut(
+        "other" = {cut(
           MAD,
           breaks = c(-Inf, 39.6, Inf),
           labels = c("sedentary", "light")
-        )},
-        "other" = stop("FUDGE. Not ActiGraph or GENEactiv")
+        )}
       ),
       intensity_bakrania.mad.average = switch(
         brand,
@@ -163,12 +252,11 @@ apply_methods_cutpoints <- function(fpa_basic,
           breaks = c(-Inf, 34.65, Inf),
           labels = c("sedentary", "light")
         )},
-        "geneactive" = {cut(
+        "other" = {cut(
           MAD,
           breaks = c(-Inf, 42.4, Inf),
           labels = c("sedentary", "light")
-        )},
-        "other" = stop("FUDGE. Not ActiGraph or GENEactiv")
+        )}
       )
     ) |>
     reframe(
