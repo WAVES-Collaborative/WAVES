@@ -39,18 +39,6 @@
       "Source": "Repository",
       "Repository": "CRAN"
     },
-    "adept": {
-      "Package": "adept",
-      "Version": "1.2",
-      "Source": "Repository",
-      "Repository": "CRAN"
-    },
-    "adeptdata": {
-      "Package": "adeptdata",
-      "Version": "1.1",
-      "Source": "Repository",
-      "Repository": "CRAN"
-    },
     "arrow": {
       "Package": "arrow",
       "Version": "22.0.0",

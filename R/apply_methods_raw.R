@@ -180,17 +180,6 @@ apply_methods_raw <- function(fpa_read,
   # Montoye
   load(file.path(dir_models, "montoye2018.RData"))
 
-  # ADEPT
-  # Use all templates available, just don't have `segmentWalking` tell
-  # us which templates match the best with data to lower computation time
-  # (compute.template.idx = FALSE)
-  lst_template <-
-    do.call(rbind,
-            adeptdata::stride_template$left_wrist) |>
-    apply(MARGIN = 1,
-          FUN    = identity,
-          simplify = FALSE)
-
   # OAK
   use_condaenv("WHO_WAVES_oak")
   forest <- import("forest")
@@ -320,114 +309,6 @@ apply_methods_raw <- function(fpa_read,
           type    = "response"
         )
       )
-    gc()
-
-    ### Steps: ADEPT ----
-    # Adapted from Lily Koff
-    # https://github.com/lilykoff/step_algorithms/blob/505a0b81971b662927fb4cbe4b442e6277bbb0b7/code/R/utils.R#L8
-
-    message("ADEPT...", appendLF = FALSE)
-
-    # TODO: ADEPT takes forever on 24 hour data. Shortened the loop to 6 hours,
-    # maybe do it even less? Drawbacks to this? Any other faster method? My
-    # computer is a potato so idk...
-    if (round(length(ind_chunk) / I$sf / 3600, digits = 2) > 6) {
-
-      chunk_is_last_adept <- FALSE
-      chunk_begin_adept   <- chunk_begin
-      chunk_length_adept  <- I$sf * 60 * 60 * 6
-      chunk_end_adept     <- chunk_begin_adept + chunk_length_adept - 1
-      chunk_n_adept       <- 1
-      adept_start_dttm    <- chunk_start_dttm
-
-      while (!chunk_is_last_adept) {
-        if (chunk_end_adept >= chunk_end) {
-          chunk_end_adept <- chunk_end
-          chunk_is_last_adept <- TRUE
-        }
-        ind_chunk_adept <-
-          chunk_begin_adept:chunk_end_adept
-        le_start <- Sys.time()
-        df_adept <-
-          adept::segmentWalking(
-            xyz                     = mtx_data[ind_chunk_adept, c("x", "y", "z")],
-            xyz.fs                  = I$sf,
-            template                = lst_template,
-            sim_MIN                 = 0.6, # Default 0.85
-            dur_MIN                 = 0.8,
-            dur_MAX                 = 1.4,
-            ptp_r_MIN               = 0.5, # Default 0.2
-            ptp_r_MAX               = 2,
-            vmc_r_MIN               = 0.05,
-            vmc_r_MAX               = 0.5,
-            mean_abs_diff_med_p_MAX = 0.7, # Default 0.5
-            mean_abs_diff_med_t_MAX = 0.2,
-            mean_abs_diff_dur_MAX   = 0.3, # Default 0.2
-            compute.template.idx    = FALSE,
-            run.parallel            = FALSE,
-            run.parallel.cores      = 1
-          ) |>
-          dplyr::filter(is_walking_i == 1) |>
-          mutate(
-            datetime = floor_date(
-              adept_start_dttm + (tau_i / I$sf),
-              unit = "seconds"
-            ),
-            steps = 2 / (T_i / I$sf),
-          ) |>
-          summarise(
-            steps = sum(steps),
-            .by = datetime
-          )
-        le_stop <- Sys.time() - le_start
-        cat(le_stop, "\n")
-        ind_adept <- which(
-          df_all$datetime %in% df_adept$datetime
-        )
-        df_all$steps_adept[ind_adept] <-
-          df_adept$steps
-        chunk_begin_adept <- chunk_begin_adept + chunk_length_adept
-        chunk_end_adept   <- chunk_begin_adept + chunk_length_adept - 1
-        chunk_n_adept     <- chunk_n_adept + 1
-        adept_start_dttm  <- adept_start_dttm + floor(chunk_begin_adept / I$sf)
-      }
-    } else {
-      df_adept <-
-        adept::segmentWalking(
-          xyz                     = mtx_data[ind_chunk, c("x", "y", "z")],
-          xyz.fs                  = I$sf,
-          template                = lst_template,
-          sim_MIN                 = 0.6, # Default 0.85
-          dur_MIN                 = 0.8,
-          dur_MAX                 = 1.4,
-          ptp_r_MIN               = 0.5, # Default 0.2
-          ptp_r_MAX               = 2,
-          vmc_r_MIN               = 0.05,
-          vmc_r_MAX               = 0.5,
-          mean_abs_diff_med_p_MAX = 0.7, # Default 0.5
-          mean_abs_diff_med_t_MAX = 0.2,
-          mean_abs_diff_dur_MAX   = 0.3, # Default 0.2
-          compute.template.idx    = FALSE,
-          run.parallel            = FALSE,
-          run.parallel.cores      = 1
-        ) |>
-        dplyr::filter(is_walking_i == 1) |>
-        mutate(
-          datetime = floor_date(
-            chunk_start_dttm + (tau_i / I$sf),
-            unit = "seconds"
-          ),
-          steps = 2 / (T_i / I$sf),
-        ) |>
-        summarise(
-          steps = sum(steps),
-          .by = datetime
-        )
-      ind_adept <-
-        which(df_all$datetime %in% df_adept$datetime)
-      df_all$steps_adept[ind_adept] <-
-        df_adept$steps
-    }
     gc()
 
     ### Steps: SDT ----
@@ -651,18 +532,6 @@ apply_methods_raw <- function(fpa_read,
     bsu_neural_network,
     bsu_decision_tree,
     bsu_support_vector_machine,
-    #
-    lst_template,
-    chunk_is_last_adept,
-    chunk_begin_adept,
-    chunk_length_adept,
-    chunk_end_adept,
-    chunk_n_adept,
-    adept_start_dttm,
-    adept_start_sec,
-    ind_chunk_adept,
-    df_adept,
-    ind_adept,
     #
     chunk_is_last_oak,
     chunk_begin_oak,

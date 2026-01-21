@@ -249,12 +249,11 @@ potentially available validation data.
 | White 2016<sup>12</sup> HPFVM linear | ✔️ | ✔️ | ❌ |
 | White 2016<sup>12</sup> HPFVM polynomial | ✔️ | ✔️ | ❌ |
 | Yuan 2024<sup>13</sup> (actinet) | ✔️ | ✔️ | ❌ |
-| ADEPT<sup>14</sup> | ❌ | ❌ | ✔️ |
-| Oak<sup>15</sup> | ❌ | ❌ | ✔️ |
-| Small 2024<sup>16</sup> (stepcount v3.17.1<sup>17</sup>) | ❌ | ❌ | ✔️ |
-| Step Detection Threshold<sup>18</sup> (SDT) | ❌ | ❌ | ✔️ |
-| Verisense (Original)<sup>19</sup> | ❌ | ❌ | ✔️ |
-| Verisense (Revised)<sup>20</sup> | ❌ | ❌ | ✔️ |
+| Oak<sup>14</sup> | ❌ | ❌ | ✔️ |
+| Small 2024<sup>15</sup> (stepcount v3.17.1<sup>16</sup>) | ❌ | ❌ | ✔️ |
+| Step Detection Threshold<sup>17</sup> (SDT) | ❌ | ❌ | ✔️ |
+| Verisense (Original)<sup>18</sup> | ❌ | ❌ | ✔️ |
+| Verisense (Revised)<sup>19</sup> | ❌ | ❌ | ✔️ |
 
 ## TODO
 
@@ -409,20 +408,9 @@ Medicine* 2024; 7: 91.</span>
 
 </div>
 
-<div id="ref-karas2021" class="csl-entry">
-
-<span class="csl-left-margin">14.
-</span><span class="csl-right-inline">Karas M, Stra Czkiewicz M, Fadel
-W, et al. [Adaptive empirical pattern transformation (ADEPT) with
-application to walking stride
-segmentation](https://doi.org/10.1093/biostatistics/kxz033).
-*Biostatistics (Oxford, England)* 2021; 22: 331–347.</span>
-
-</div>
-
 <div id="ref-straczkiewicz2023" class="csl-entry">
 
-<span class="csl-left-margin">15.
+<span class="csl-left-margin">14.
 </span><span class="csl-right-inline">Straczkiewicz M, Huang EJ, Onnela
 J-P. [A “one-size-fits-most” walking recognition method for smartphones,
 smartwatches, and wearable
@@ -433,7 +421,7 @@ Digital Medicine* 2023; 6: 29.</span>
 
 <div id="ref-small2024" class="csl-entry">
 
-<span class="csl-left-margin">16.
+<span class="csl-left-margin">15.
 </span><span class="csl-right-inline">Small SR, Chan S, Walmsley R, et
 al. [Self-supervised machine learning to characterize step counts from
 wrist-worn accelerometers in the UK
@@ -444,7 +432,7 @@ Science in Sports & Exercise* 2024; 56: 1945.</span>
 
 <div id="ref-chan2026" class="csl-entry">
 
-<span class="csl-left-margin">17.
+<span class="csl-left-margin">16.
 </span><span class="csl-right-inline">Chan S, Small SR, Acquah A, et al.
 *Improved step counting via foundation models for wrist-worn
 accelerometers*. Zenodo. Epub ahead of print 15 January 2026. DOI:
@@ -454,7 +442,7 @@ accelerometers*. Zenodo. Epub ahead of print 15 January 2026. DOI:
 
 <div id="ref-ducharme2021" class="csl-entry">
 
-<span class="csl-left-margin">18.
+<span class="csl-left-margin">17.
 </span><span class="csl-right-inline">Ducharme SW, Lim J, Busa MA, et
 al. A Transparent Method for Step Detection Using an Acceleration
 Threshold. Epub ahead of print 25 October 2021. DOI:
@@ -464,7 +452,7 @@ Threshold. Epub ahead of print 25 October 2021. DOI:
 
 <div id="ref-gu2017" class="csl-entry">
 
-<span class="csl-left-margin">19.
+<span class="csl-left-margin">18.
 </span><span class="csl-right-inline">Gu F, Khoshelham K, Shang J, et
 al. [Robust and accurate smartphone-based step counting for indoor
 localization](https://doi.org/10.1109/JSEN.2017.2685999). *IEEE Sensors
@@ -474,7 +462,7 @@ Journal* 2017; 17: 3453–3460.</span>
 
 <div id="ref-maylor2022" class="csl-entry">
 
-<span class="csl-left-margin">20.
+<span class="csl-left-margin">19.
 </span><span class="csl-right-inline">Maylor BD, Edwardson CL, Dempsey
 PC, et al. Stepping towards More Intuitive Physical Activity Metrics
 with Wrist-Worn Accelerometry: Validity of an Open-Source Step-Count

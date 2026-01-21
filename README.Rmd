@@ -165,7 +165,7 @@ The proposed flow diagram outlines the process for how the validation data and d
 ## Methods Implemented
 
 | Method | MVPA | SED | Steps |
-|----|----|----|----|
+|------------------|------------------|------------------|------------------|
 | Bakrania 2016[@bakrania2016] | ❌ | ✔️ | ❌ |
 | Ellis 2016[@ellis2016] Extended | ✔️️ | ✔️ | ❌ |
 | Esliger 2011[@esliger2011] | ✔️ | ✔️ | ❌ |
@@ -180,7 +180,6 @@ The proposed flow diagram outlines the process for how the validation data and d
 | White 2016[@white2016] HPFVM linear | ✔️ | ✔️ | ❌ |
 | White 2016[@white2016] HPFVM polynomial | ✔️ | ✔️ | ❌ |
 | Yuan 2024[@yuan2024] (actinet) | ✔️ | ✔️ | ❌ |
-| ADEPT[@karas2021] | ❌ | ❌ | ✔️ |
 | Oak[@straczkiewicz2023] | ❌ | ❌ | ✔️ |
 | Small 2024[@small2024] (stepcount v3.17.1[@chan2026]) | ❌ | ❌ | ✔️ |
 | Step Detection Threshold[@ducharme2021] (SDT) | ❌ | ❌ | ✔️ |
