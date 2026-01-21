@@ -40,5 +40,3 @@ list.files(
 kable(config_miniconda())
 
 ```
-
-## Test Files
