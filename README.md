@@ -8,6 +8,16 @@ Evaluation Study (WAVES). This repository contains all the code needed
 to run multiple wrist algorithms against your raw data.
 
 ## Setup
+## Proposed Flow Diagram 
+
+The proposed flow diagram outlines the process for how the validation data and data pipeline will work with the WAVES team and groups who have potentially available validation data. 
+
+![Flow Diagram](WAVES Diagram.png)
+
+
+__Full description of the flow diagram coming soon__
+
+## General Pipeline
 
 1.  Install R
 
