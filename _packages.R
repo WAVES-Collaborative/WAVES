@@ -6,6 +6,7 @@ pkgs <- c(
   "data.table",
   "dplyr",
   "GGIR",
+  "gt",
   "knitr",
   "lubridate",
   "nnet",
