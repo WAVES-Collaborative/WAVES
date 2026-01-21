@@ -7,17 +7,18 @@ Thank you for your collaboration in the Wrist Algorithm Verification and
 Evaluation Study (WAVES). This repository contains all the code needed
 to run multiple wrist algorithms against your raw data.
 
-## Setup
-## Proposed Flow Diagram 
+## Proposed Flow Diagram
 
-The proposed flow diagram outlines the process for how the validation data and data pipeline will work with the WAVES team and groups who have potentially available validation data. 
+The proposed flow diagram outlines the process for how the validation
+data and data pipeline will work with the WAVES team and groups who have
+potentially available validation data.
 
-![Flow Diagram](WAVES Diagram.png)
+<figure>
+<img src="media/WAVES%20Diagram.png" alt="Flow Diagram" />
+<figcaption aria-hidden="true">Flow Diagram</figcaption>
+</figure>
 
-
-__Full description of the flow diagram coming soon__
-
-## General Pipeline
+**Full description of the flow diagram coming soon** \## Setup
 
 1.  Install R
 

@@ -18,7 +18,13 @@ knitr::opts_chunk$set(
 
 Thank you for your collaboration in the Wrist Algorithm Verification and Evaluation Study (WAVES). This repository contains all the code needed to run multiple wrist algorithms against your raw data.
 
-## Setup
+## Proposed Flow Diagram
+
+The proposed flow diagram outlines the process for how the validation data and data pipeline will work with the WAVES team and groups who have potentially available validation data.
+
+![Flow Diagram](media/WAVES%20Diagram.png)
+
+**Full description of the flow diagram coming soon** \## Setup
 
 1.  Install R
 
@@ -65,7 +71,7 @@ Thank you for your collaboration in the Wrist Algorithm Verification and Evaluat
 
 6.  In Console, run `tar_make().`The "configuration" pipeline is now running, which will print messages out in the Console like the below image.
 
-    ![](media/Screenshot 2026-01-17 173935.png)
+    ![](media/Screenshot%202026-01-17%20173935.png)
 
     The "configuration" pipeline is:
 
@@ -79,11 +85,11 @@ Thank you for your collaboration in the Wrist Algorithm Verification and Evaluat
 
 7.  Once the pipeline is complete the console should say "ended pipeline" with how long it took.
 
-    ![](media/Screenshot 2026-01-20 234701.png)
+    ![](media/Screenshot%202026-01-20%20234701.png)
 
     Or it may error like so:
 
-    ![](media/Screenshot 2026-01-20 000733.png)
+    ![](media/Screenshot%202026-01-20%20000733.png)
 
     At least `config_miniconda` should be completed, allowing you to move on to step 8.
 
@@ -151,7 +157,7 @@ Thank you for your collaboration in the Wrist Algorithm Verification and Evaluat
 
     -   Stop the pipeline by clicking the "STOP" button that appears in the top right corner of the Console pane.
 
-    ![](media/Screenshot 2026-01-17 132513.png)
+    ![](media/Screenshot%202026-01-17%20132513.png)
 
     -   Change the `n_workers` object to 1, which will remove parallel processing.
 
