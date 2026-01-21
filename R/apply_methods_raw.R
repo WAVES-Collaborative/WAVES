@@ -163,6 +163,9 @@ apply_methods_raw <- function(fpa_read,
     )
   }
 
+  rec_start_dttm <-
+    floor_date(rec_start_dttm, unit = "seconds")
+
   # In seconds from 1970-01-01.
   rec_start_sec <-
     as.numeric(rec_start_dttm)
