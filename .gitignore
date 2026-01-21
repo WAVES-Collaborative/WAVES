@@ -1,9 +1,16 @@
 _targets/
 _targets_config/
 _testing/
+data/0_CONFIG/actinet
+data/0_CONFIG/MERGED/WAVES_ALL_CONFIG.parquet
+data/0_CONFIG/OUTPUT-CUTPOINT_PARQUET
+data/0_CONFIG/OUTPUT-RAW_PARQUET
 data/0_CONFIG/RAW/WAVES_10004_RAW.gt3x
 data/0_CONFIG/RAW/WAVES_10005_RAW.cwa
+data/0_CONFIG/RAW-CALIBRATED_QS2
 data/0_CONFIG/GGIR/output_config
+data/0_CONFIG/stepcount
+data/0_CONFIG/walmsley
 data/2_INTERIM
 data/3_MERGED
 data/actinet
@@ -18,3 +25,5 @@ reports/
 .Ruserdata
 
 /.quarto/
+
+**/*.quarto_ipynb
