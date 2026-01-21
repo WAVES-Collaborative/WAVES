@@ -1,0 +1,60 @@
+---
+title: "Pipeline Summary"
+format: 
+  html: 
+    embed-resources: true
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+#| label: setup
+#| echo: false
+
+tar_load(vct_raw)
+tar_load(vct_basic)
+tar_load(lst_out.cut)
+tar_load(vct_cal)
+tar_load(lst_out.raw)
+tar_load(vct_ox_step)
+tar_load(vct_ox_wlms)
+tar_load(vct_ox_acti)
+tar_load(fpa_merged)
+
+len_raw <- length(vct_raw)
+df_out <- config_pipeline(
+  vct_raw,
+  vct_basic,
+  vct_cal,
+  lst_out.raw,
+  lst_out.cut,
+  vct_ox_step,
+  vct_ox_wlms,
+  vct_ox_acti,
+  fpa_merged
+)
+lgl_all <- 
+  df_out |> 
+  mutate(
+    all = all(
+      GGIR, calibration, `raw methods`, cutpoints, stepcount, walmsley, actinet, merged
+    )
+  ) |> 
+  pull(all)
+  
+```
+
+# Input
+
+Out of `r len_raw` raw files, `r sum(lgl_all)` successfully went through the pipeline.
+
+# By Major Steps
+
+Below is a table listing if each major step was successful for a file (TRUE) or unsuccessful (FALSE)
+
+```{r}
+#| label: tbl-major
+#| echo: false
+kable(df_out) 
+```

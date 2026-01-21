@@ -1,5 +1,6 @@
 ---
 output: github_document
+bibliography: references.bib
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -15,152 +16,176 @@ knitr::opts_chunk$set(
 
 # WAVES
 
-Julian says helpme, my potato is a computer.
+Thank you for your collaboration in the Wrist Algorithm Verification and Evaluation Study (WAVES). This repository contains all the code needed to run multiple wrist algorithms against your raw data.
 
-## General Pipeline
+## Setup
 
-For the WAVES project, two "studies" are conceptualized to address the primary purpose of the project.
+1.  Install R
 
-Study #1 is evaluating multiple wrist-worn methods against direct observation with participants wearing wrist-worn accelerometers within "visits" that have a duration less than a waking day. Study #2 is evaluating the same wrist-worn methods against a criterion method, but now within the "field" where participants are asked to wear the wrist-worn accelerometers for their waking day.
+    1.  From [this link](https://cran.r-project.org/mirrors.html), click on the mirror from the location closest to you.
 
-The data wrangling/processing pipeline is mostly be the same for both studies, with more parts of GGIR used for Study #2. The pipeline uses the `targets` R package to run custom functions in parallel, as well as helps keep track that all functions downstream from each other work and are updated. The parallel processing is for when we share the repository to study sites, the "making sure everything works downstream" is for WAVES team members during testing the pipeline.
+    2.  On the following page, download and install R for your operating system. So far, only Windows and macOS have been tested.
 
-1.  Run GGIR on raw accelerometer data
+    3.  The code has been tested on v4.4.1 and v4.5.2. We recommend the latest v4.5.2. but earlier versions down to 4.4.0 should work. Just note you will get warning messages that the packages were developed for 4.5.2.
 
-    a.  Tested only on RAW CSV exported from ActiLife. Files will ideally be files that are "clean". That is, these files:
+2.  Install RStudio
 
-        i.  All have the same file naming scheme/format
+    1.  From [this link](https://posit.co/download/rstudio-desktop/), click on the "DOWNLOAD RSTUDIO DESKTOP FOR WINDOWS/MACOS"
+    2.  A version from 2023 onwards should be okay.
 
-        ii. Are named to have the correct participant ID
+3.  Install RTools
 
-        iii. Are named to have the correct wear location or at least guaranteed all files in provided directories come from the same wear location.
+    1.  From [this link](https://cran.r-project.org/bin/windows/Rtools/), download the RTools version specific to the R version being used (i.e. Rtools 4.4 for R v4.4.1, RTools 4.5 for R v4.5.2)
 
-        iv. Have followed all the initialization procedures provided from the data collection site.
+4.  Download WAVES repository.
 
-    b.  Utilize "data/GGIR/config_WAVES_visit.csv" to have GGIR autocalibrate raw acceleration and produce metrics such as ENMO, ENMOa, and others needed for cutpoints.
+    1.  The location of the WAVES repository can be downloaded anywhere on your system, but it is generally recommended to keep it on the same drive of the raw accelerometer data.
 
-2.  Read in raw accelerometer data separate from GGIR
+## Instructions
 
-    a.  Re-calibrate data using GGIR auto-calibration output.
+1.  Open WAVES.RProj
 
-    b.  Save visit data into parquet file format under "data/2_INTERIM/OUTPUT-RAW_PARQUET"
+    1.  This will automatically open the RStudio IDE.
 
-3.  Apply methods to metric and visit data
+2.  In Console, run `renv::restore()`
 
-    a.  Cutpoints to metric data from GGIR
+    1.  This command will download all the R software packages needed for the WAVES repository. It will take a while.
 
-    b.  Methods to raw parquet data
+3.  Open "\_targets_config.R"
 
-        i.  Montoye
-        ii. ADEPT
-        iii. SDT
-        iv. Verisense
-        v.  Trost
-        vi. Ellis
+    1.  Navigate to the "Files" tab within Rstudio (located either in the bottom left or top left pane of the RStudio window IF you haven't changed the pane layout in "Global Settings"). Click on "\_targets*\_*config.R"
 
-    c.  Python models to raw csv data (actinet , accelerometer, stepcount(?), forest/oak(?))
+    2.  Alternatively, open "\_targets*\_*config.R" with the system File Explorer. It should open the script within RStudio.
 
-    d.  Variable names will be:
+4.  Within "INPUT" section, change the following:
 
-        i.  intensity\_[METHOD] (i.e. intensity_montoye.rf)
+    1.  `n_workers`: The default is 3 workers, meaning 3 processes of the pipeline will run in parallel of each other. From testing, 3 workers has been the most memory and time efficient for systems operating with ≤ 16gb RAM or ≤ 4 cores. If your operating system has more RAM and cores available, feel free to increase the number of workers, with the max being one less than the number of cores available of your system (`parallel::detectCores() - 1`)
 
-        ii. steps\_[METHOD] (i.e. steps_adept)
+5.  Run all code within the "INPUT" section (Line 8 - Line 26) and save the script.
 
-    e.  Output saved as:
+6.  In Console, run `tar_make().`The "configuration" pipeline is now running, which will print messages out in the Console like the below image.
 
-        i.  data/2_INTERIM/OUTPUT-CUTPOINT_PARQUET
+    ![](media/Screenshot 2026-01-17 173935.png)
 
-        ii. data/2_INTERIM/OUTPUT-MODEL_PARQUET
+    The "configuration" pipeline is:
 
-        iii. ??data/oxwearables/actinet??; ??data/oxwearables/accelerometer??, ??data/oxwearables/stepcount??, ??data/forest??
+    1.  Downloading and installing non-R software
+
+    2.  Running the code against "configuration" data included within the WAVES repository to ensure code is running properly
+
+    3.  This will take awhile! On a potato computer, it took 15-24 hours!
+
+    4.  If the repository is being ran on a local computer, it is almost mandatory that no other work be done while the pipeline is running.
+
+7.  Once the pipeline is complete the console should say "ended pipeline" with how long it took.
+
+    ![](media/Screenshot 2026-01-20 234701.png)
+
+    Or it may error like so:
+
+    ![](media/Screenshot 2026-01-20 000733.png)
+
+    At least `config_miniconda` should be completed, allowing you to move on to step 8.
+
+8.  A "summary_miniconda.html" will have been created under the "reports" folder of the main WAVES repository. Within the html file:
+
+    1.  Check Miniconda configuration is good.
+
+        1.  All environments should say "Successfuly created"
+
+        2.  All modules should say "Modules successfully installed."
+
+9.  If the config pipeline errored, please share a screenshot of the messages in the console (like the previous screenshot in this README, but also show the error message) to the WAVES data team.
+
+10. If the pipeline successfully completed, a "summary_pipeline_config.html" file will have been created under the "reports" folder of the main WAVES repository. Open the file and ensure:
+
+    1.  WAVES_10002 and WAVES_10003 do not go through the pipeline at all.
+
+    2.  WAVES_10003 and WAVES_10004 completely go through the pipeline.
+
+    3.  WAVES_10006 goes through everything except for stepcount, walmsley and actinet.
+
+    4.  All summary metrics are highlighted green
+
+11. If all conditions for step 10 are met, then the WAVES code is working properly on your computer! Woo.
+
+12. Open the "\_targets.R" script
+
+13. Change vct_raw_fpa to your path of raw files.
+
+    1.  Suggest having it lead to directory of files, but then put "[1]" at the end to make sure pipeline works with one file. (image below)
+
+    TODO IMAGE (use UWM computer for this part)
+
+14. Change study_timezone, sample_frequency.
+
+15. Change workers if necessary.
+
+    1.  See Step 4.
+
+16. Run code within "INPUT" section and save the "\_targets.R" script.
+
+17. In Console, run "tar_make()". For one file that is a whole day, it can take anywhere between 15-30 minutes on a potato computer. For one file that is a whole week, it may take up to 24 hours.
+
+18. Once the pipeline has completed, a .html file should have been created under the "reports" folder called "summary_pipeline_main.html". Open the file and double-check file went through entire pipeline successfully under the "By Major Steps" section.
+
+19. If pipeline works successfully, close the "summary_pipeline_main.html" file and run pipeline on all files available by removing the the "[1]" at the end of the `file.path` function.
+
+    1.  Make sure to rerun the code within "INPUT" section and save the "\_targets.R" script.
+
+    2.  This WILL take multiple days if the repository is not being ran on a high performance cluster.
+
+    3.  If the repository is being ran on a local computer, it is almost mandatory that no other work be done while the pipeline is running.
+
+        1.  If the pipeline is interrupted due to an unexpected restart, the progress should be saved for major steps within the pipeline. Re-follow steps 12-13 the pipeline will pick up from the last major step.
+
+20. Open "summary_pipeline_main.html" once again and check to see what files have made it through. If all files have made it through, or at least the file's you would've expected to be successfully processed, share the "WAVES_MERGED_SITE.parquet" with WAVES data team, where "SITE" is renamed with the study acronym or the 3-4 letter abbreviation given to you by the WAVES study team.
+
+## Notes
+
+-   Even if a pipeline finishes successfully, you may in the console "There were XX warnings (use warnings() to see them)". This is normal if working on an R version that is not 4.5.2., as the messages will be warnings that the packages are meant to work on the latest R version. As long as the R version being used is R 4.4 or beyond, everything should still work. We have not tested the WAVES repository on R versions below 4.4.
+
+-   If working on a high performance cluster...TODO (work with Hayden)
+
+-   If the pipeline appears "stuck" after 24hrs, as in it looks like there has been no change in the processing time or the console messages have been the same for quite awhile, its most likely that your computer does not have enough computing resources to do parallel processing. In that case:
+
+    -   Stop the pipeline by clicking the "STOP" button that appears in the top right corner of the Console pane.
+
+    ![](media/Screenshot 2026-01-17 132513.png)
+
+    -   Change the `n_workers` object to 1, which will remove parallel processing.
 
 ## Methods Implemented
 
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| Processing                                                                                            | Method                                                                                                                                            | Output                           | In Pipeline?  |
-+=======================================================================================================+===================================================================================================================================================+==================================+===============+
-| Custom + actimetric                                                                                   | Ellis 2016                                                                                                                                        | Posture/Movement -\> Intensity   | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| Custom + actimetric                                                                                   | Trost Extended                                                                                                                                    | Posture/Movement -\> Intensity   | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| Custom + actimetric (??)                                                                              | SydneyGroup Model (??)                                                                                                                            | ??                               | ❌            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| Custom (Adapt Lily Koff's code / `adept` R package)                                                   | ADEPT (Karas 2021)                                                                                                                                | Steps                            | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| Custom (Adapt Lily Koffs's code / muschelli's `walking` R package                                     | Oak (Straczkiewicz 2023)                                                                                                                          | Steps                            | ❌            |
-|                                                                                                       |                                                                                                                                                   |                                  |               |
-| OR                                                                                                    |                                                                                                                                                   |                                  |               |
-|                                                                                                       |                                                                                                                                                   |                                  |               |
-| Python `forest`                                                                                       |                                                                                                                                                   |                                  |               |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| Custom (Adapt Lily Koff's code / muschelli's `walking` R package                                      | Step Detection Threshold (SDT, Ducharme 2021)                                                                                                     | Steps                            | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| Muschelli's `walking` R package                                                                       | Verisense                                                                                                                                         | Steps                            | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| Custom (Adapt Lily Koff's code / `stepcount` R package that is a wrapper around OxWearables stepcount | stepcount 3.16.2 (Chan 2023)                                                                                                                      | Steps                            | ❌            |
-|                                                                                                       |                                                                                                                                                   |                                  |               |
-| OR                                                                                                    |                                                                                                                                                   |                                  |               |
-|                                                                                                       |                                                                                                                                                   |                                  |               |
-| Python `stepcount`                                                                                    |                                                                                                                                                   |                                  |               |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| GGIR                                                                                                  | Bakrania 2016                                                                                                                                     | Intensity (Sed only)             | (In Progress) |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| GGIR                                                                                                  | Esliger 2011                                                                                                                                      | Intensity                        | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| GGIR                                                                                                  | Fraysse 2020                                                                                                                                      | Intensity                        | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| GGIR                                                                                                  | Hildebrand 2014/2016 AG wrist                                                                                                                     | Intensity                        | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| GGIR                                                                                                  | Mielke 2023 AG wrist                                                                                                                              | Intensity                        | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| GGIR                                                                                                  | White 2016 ENMO linear                                                                                                                            | Intensity                        | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| GGIR                                                                                                  | White 2016 ENMO polynomial                                                                                                                        | Intensity                        | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| GGIR                                                                                                  | White 2016 HPFVM linear                                                                                                                           | Intensity                        | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| GGIR                                                                                                  | White 2016 HPFVM polynomial                                                                                                                       | Intensity                        | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| GGIR + custom                                                                                         | Montoye 2018 (get metrics from `myfun` that will also get Verisense steps)                                                                        | Intensity                        | ✔️            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| Python `actinet`                                                                                      | OxWearables SSL (Yuan et al, 2024) OxWearables/ssl-wearables: Self-supervised learning for wearables using the UK-Biobank (\>700,000 person-days) | Posture (Extrapolate Intensity?) | ❌            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
-| Python `accelerometer`                                                                                | OxWearables Bio Bank Accelerometer Analysis                                                                                                       | Intensity                        | ❌            |
-+-------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------+---------------+
+| Method | MVPA | SED | Steps |
+|----|----|----|----|
+| Bakrania 2016[@bakrania2016] | ❌ | ✔️ | ❌ |
+| Ellis 2016[@ellis2016] Extended | ✔️️ | ✔️ | ❌ |
+| Esliger 2011[@esliger2011] | ✔️ | ✔️ | ❌ |
+| Fraysse 2020[@fraysse2021] | ✔️ | ✔️ | ❌ |
+| Hildebrand 2014[@hildebrand2014]/2017[@hildebrand2017] | ✔️ | ✔️ | ❌ |
+| Mielke 2023[@mielke2023] | ✔️ | ✔️ | ❌ |
+| Montoye 2018[@montoye2018] | ✔️ | ✔️ | ❌ |
+| Trost 2017[@pavey2017] Extended | ✔️ | ✔️ | ❌ |
+| Walmsley 2022[@walmsley2022] (accelerometer v7.3.0[@doherty2025]) | ✔️ | ✔️ | ❌ |
+| White 2016[@white2016] ENMO linear | ✔️ | ✔️ | ❌ |
+| White 2016[@white2016] ENMO polynomial | ✔️ | ✔️ | ❌ |
+| White 2016[@white2016] HPFVM linear | ✔️ | ✔️ | ❌ |
+| White 2016[@white2016] HPFVM polynomial | ✔️ | ✔️ | ❌ |
+| Yuan 2024[@yuan2024] (actinet) | ✔️ | ✔️ | ❌ |
+| ADEPT[@karas2021] | ❌ | ❌ | ✔️ |
+| Oak[@straczkiewicz2023] | ❌ | ❌ | ✔️ |
+| Small 2024[@small2024] (stepcount v3.17.1[@chan2026]) | ❌ | ❌ | ✔️ |
+| Step Detection Threshold[@ducharme2021] (SDT) | ❌ | ❌ | ✔️ |
+| Verisense (Original)[@gu2017] | ❌ | ❌ | ✔️ |
+| Verisense (Revised)[@maylor2022] | ❌ | ❌ | ✔️ |
 
 ## TODO
 
--   Implement Python methods
+-   Test WAVES_10006 CSV file against OxWearable methods.
 
-    -   I added a "src" directory to save any python scripts, but this can easily be changed
+    -   Stepcount
+    -   Walmsley
+    -   Actinet
 
--   Have a function to convert criterion data into a parquet for sending to JM?
-
-    -   My idea is to have site users provide a file path to the csv that holds the DO/activPAL/WearableCamera/whatever criterion measures for ALL visit/field data where the function just simply converts it to parquet file format to send to JM, along with "WAVES_OUTPUT-[VISIT/FIELD].parquet" and Python output
-
--   Control/checks if field and visit data have same filenames?
-
-    -   The whole reason why there is visit and field distinctions is due to the FLAC UWM dataset (Strath) has both DO "visit" data and 7-day "field" data where participants where also asked to wear activpal. Visit and 7day data are named distinctly from each other, and will not overlap. If another site that contributes to WAVES also have visit and field data, the filenames should also be different...hopefully.
-
--   Create "user-facing" readme with the following:
-
-1.  Install R
-2.  Install RStudio
-3.  Install RTools
-4.  Download WAVES repository.
-5.  Open WAVES.RProj
-6.  In Console, run renv::restore()
-7.  In console, type `tar_make()` and make sure pipeline works against test data (TODO).
-8.  Put in directory paths to raw accelerometer data within "INPUT" section.
-9.  Change study_sampling_frequency and my_tz as needed.
-10. Select all lines within "INPUT" section, then Ctrl+Enter.
-11. In console, type `tar_make()` and press Enter.
-12. Share `WAVES_OUTPUT` file(s) with WAVES working group, criterion data, and demographic data
-
--   Work on making a WAVES website using pkgdown? Doesn't have to be fancy but I can see it being really helpful than a readme, or making a private youtube video?
-
--   Create "technical-facing" readme
-
--   Have site provide a key for breaking down ID?
-
-    -   The ID for now is the filename of the raw accelerometer data. FLAC UWM data follows a naming scheme of "[STUDY]\_[MONITOR]\_[LOCATION]\_[SUBJECT]\_[VISIT]RAW" where I think it would be nice to identify all data from a site with at least [STUDY] and [SUBJECT]. Maybe ask for a key to get this from ID/filenames? Or just ask in an email?
+## References for Methods

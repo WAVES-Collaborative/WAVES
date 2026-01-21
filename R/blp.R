@@ -1,4 +1,3 @@
-# fpa_raw = vct_raw_poly[19]
 secbysec_blp_poly <- function(fpa_raw) {
 
   key_behavior <- c(
@@ -383,8 +382,6 @@ secbysec_blp_poly <- function(fpa_raw) {
   )
 
 }
-# fpa_raw_act = vct_raw_wisc[13]
-# fpa_raw_pos = vct_raw_wisc[14]
 secbysec_blp_wisc <- function(fpa_raw_act,
                               fpa_raw_pos) {
 
@@ -677,8 +674,6 @@ secbysec_blp_wisc <- function(fpa_raw_act,
   )
 
 }
-# vct_behavior = df$behavior_calpoly
-# vct_activity = df$activity_calpoly
 collapse_behavior_calpoly <- function(vct_behavior,
                                       vct_activity) {
 
@@ -732,9 +727,6 @@ collapse_behavior_calpoly <- function(vct_behavior,
     paste0(vct_equal, ... = _)
 
 }
-# vct_behavior     = df$behavior_uwm
-# vct_activity     = df$activity_uwm
-# vct_environment  = df$environment_uwm
 collapse_behavior_uwm <- function(vct_behavior,
                                   vct_activity,
                                   vct_environment) {
@@ -1043,9 +1035,6 @@ collapse_behavior_uwm <- function(vct_behavior,
   #   )
 
 }
-# vct_behavior     = df_section$behavior_uwm
-# vct_activity     = df_section$activity_uwm
-# vct_environment  = df_section$environment_uwm
 # This version includes rolling.
 collapse_behavior_uwm2 <- function(vct_behavior,
                                    vct_activity,
@@ -1480,8 +1469,6 @@ collapse_behavior_uwm2 <- function(vct_behavior,
     pull(collapse4)
 
 }
-# vct_behavior = df$behavior_calpoly
-# vct_activity = df$activity_calpoly
 get_equal.behavior_calpoly <- function(vct_behavior,
                                        vct_activity) {
 
@@ -1548,12 +1535,6 @@ get_equal.behavior_calpoly <- function(vct_behavior,
     ))
 
 }
-# vct_behavior     = df_section$behavior_uwm
-# vct_activity     = df_section$activity_uwm
-# vct_environment  = df_section$environment_uwm
-# vct_behavior     = df$behavior_uwm
-# vct_activity     = df$activity_uwm
-# vct_environment  = df$environment_uwm
 get_equal.behavior_uwm <- function(vct_behavior,
                                    vct_activity,
                                    vct_environment) {
@@ -2196,7 +2177,6 @@ get_broad.behavior = function(vct_equal.behavior) {
     ))
 
 }
-# vct_posture = df_section$posture_calpoly
 get_equal.posture_calpoly <- function(vct_posture) {
 
   case_match(

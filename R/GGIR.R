@@ -1,98 +1,101 @@
-# vct_raw_csv = tar_read(vct_gt3x.raw_csv_field)
-# sf          = tar_read(sf)
-wrapper_GGIR <- function(vct_raw_csv) {
+#' @title Run GGIR in main pipeline.
+#' @description Runs GGIR parts 1, 3 and 4 on provided raw data. Requires that
+#'  all of vct_raw are the same "raw type". If not, the function will error and
+#'  return NULL
+#' @param vct_raw Character vector of filepaths to raw data.
+#' @param vct_raw_type Character vector containing brand and data format name of
+#'  raw data.
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+wrapper_GGIR <- function(vct_raw,
+                         vct_raw_type) {
 
-  if (is.null(vct_raw_csv)) return(NULL)
+  if (is.null(vct_raw)) return(NULL)
 
-  # Determine average file size. If >= 1GB, its most likely field data.
-  dbl_fsize <-
-    file.size(vct_raw_csv) |>
-    mean() / 2^30
+  chk_csv_type <- vct_raw_type %in% c(
+    "GENEACTIV - CSV w/ HEADER",
+    "ADHOC",
+    "UKNOWN"
+  )
 
-  if (dbl_fsize >= 1) {
-    le_mode <-
-      1:5
-    le_studyname <-
-      "WAVES-FIELD"
-  } else {
-    le_mode <-
-      1
-    le_studyname <-
-      "WAVES-VISIT"
+  if (chk_csv_type) {
+    cli::cli_abort(c(
+      "Raw GENEActiv and adhoc csv's are currently not supported.",
+      "i" = "Please use raw exported data such as {.value '.bin' '.gt3x' or '.cwa'} data.",
+      "i" = "If non-csv data is not available, please reach out to WAVES data team for possible solutions."
+    ))
   }
 
   GGIR::GGIR(
-    mode       = le_mode,
-    datadir    = vct_raw_csv,
+    mode       = c(1, 2, 3, 4),
+    datadir    = vct_raw,
     outputdir  = "data/GGIR",
-    studyname  = le_studyname,
+    studyname  = "WAVES",
     # fo         = 1,
     # f1         = 2,
     do.report  = c(),
     configfile = "data/GGIR/config_WAVES.csv"
   )
 
-  le_output <-
-    paste0("output_", le_studyname)
   list.files(
-    file.path("data", "GGIR", le_output, "meta", "basic"),
-    pattern = "RData$",
+    file.path("data", "GGIR", "output_WAVES", "meta", "basic"),
+    pattern =
+      basename(vct_raw) |>
+      paste0(collapse = "|"),
     full.names = TRUE
   )
-}
-# df = data.table::fread(
-#   vct_gt3x.raw.csv_visit[5],
-#   sep = ",",
-#   header = TRUE,
-#   skip = 10,
-#   # select = c("Accelerometer X", "Accelerometer Y", "Accelerometer Z"),
-#   drop = "Timestamp",
-#   col.names = c("x", "y", "z")
-# )
-# parameters = list(
-#   sf     = 100,
-#   window = 30
-# )
-calc_ggir_metrics_montoye2018 <- function(df,
-                                          parameters = list(
-                                            sf     = 100, # sampling frequency
-                                            window = 30 # in seconds
-                                          )) {
 
-  df <-
-    as.data.frame(df)
-  names(df) <-
-    names(df) |>
-    toupper()
-  n_window <- ceiling(
-    nrow(df) / (parameters$sf * parameters$window)
+}
+
+#' @title Run GGIR in config pipeline.
+#' @description Runs GGIR parts 1, 3 and 4 on provided config data.
+#' @param vct_raw Character vector of filepaths to config data.
+#' @param vct_raw_type Character vector containing brand and data format name of
+#'  config data.
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+wrapper_GGIR_config <- function(vct_raw,
+                                vct_raw_type) {
+
+  if (is.null(vct_raw)) return(NULL)
+
+   for (i in seq_along(vct_raw)) {
+     fpa_raw <- vct_raw[i]
+     le_type <- vct_raw_type[i]
+
+     chk_csv_type <- c(
+       "GENEACTIV - CSV w/ HEADER",
+       "ADHOC",
+       "UKNOWN"
+     )
+
+     if (le_type %in% chk_csv_type) {
+       # These are skipped for now
+       next()
+     } else {
+       GGIR::GGIR(
+         mode       = c(1, 2, 3, 4),
+         datadir    = fpa_raw,
+         outputdir  = "data/0_CONFIG/GGIR",
+         studyname  = "config",
+         do.report  = c(),
+         configfile = "data/GGIR/config_WAVES.csv"
+       )
+     }
+   }
+
+  list.files(
+    file.path("data", "0_CONFIG", "GGIR", "output_config", "meta", "basic"),
+    pattern =
+      basename(vct_raw) |>
+      paste0(collapse = "|"),
+    full.names = TRUE
   )
-  df$window <- rep(
-    seq_len(n_window),
-    each       = parameters$sf * parameters$window,
-    length.out = nrow(df)
-  )
-  df_features <-
-    df |>
-    dplyr::summarise(
-      dplyr::across(
-        .cols = everything(),
-        .fns = list(
-          Mean   = mean,
-          StdDev = sd,
-          Min    = min,
-          Max    = max,
-          # For some reason all the percentile features need to start with "X".
-          `X10th` = ~quantile(.x, probs = 0.10),
-          `X25th` = ~quantile(.x, probs = 0.25),
-          `X50th` = ~quantile(.x, probs = 0.50),
-          `X75th` = ~quantile(.x, probs = 0.75),
-          `X90th` = ~quantile(.x, probs = 0.90)
-        ),
-        .names = "{.fn}{.col}"
-      ),
-      .by = window
-    )
-  return(df_features)
 
 }

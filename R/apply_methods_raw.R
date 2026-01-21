@@ -62,14 +62,6 @@ estimate_steps_sdtnew <- function(data,
     as.integer()
 
 }
-
-# fpa_read      = tar_read(vct_cal_visit)[1]
-# # fpa_read      = tar_read(vct_cal_field)[1]
-# # vct_fpa_basic = tar_read(vct_basic_field)
-# vct_fpa_basic = tar_read(vct_basic_visit)
-# dir_models = tar_read(dir_models)
-# dir_write = tar_read(dir_out.mdl)
-# my_tz    = tar_read(my_tz)
 apply_methods_raw <- function(fpa_read,
                               vct_fpa_basic,
                               dir_models,
@@ -85,6 +77,16 @@ apply_methods_raw <- function(fpa_read,
   fnm_sans_ext <-
     basename(fpa_read) |>
     tools::file_path_sans_ext()
+
+  # Check if file was already created from a previous run of the pipeline.
+  fpa_write <- file.path(
+    dir_write, paste0(fnm_sans_ext, ".parquet")
+  )
+
+  if (file.exists(fpa_write)) {return(
+    arrow::read_parquet(fpa_write)
+  )}
+
   grep(
     x       = vct_fpa_basic,
     pattern = tools::file_path_sans_ext(fnm_sans_ext),
@@ -112,7 +114,7 @@ apply_methods_raw <- function(fpa_read,
   # start of recording ----
   if (I$dformn == "gt3x") {
     rec_start_junk <-
-      data.frame((I$header[[1]][6]))
+      data.frame(I$header["Start Date", "value"])
     names(rec_start_junk)<-
       "start"
     rec_start_junk$start <-
@@ -161,6 +163,9 @@ apply_methods_raw <- function(fpa_read,
     )
   }
 
+  rec_start_dttm <-
+    floor_date(rec_start_dttm, unit = "seconds")
+
   # In seconds from 1970-01-01.
   rec_start_sec <-
     as.numeric(rec_start_dttm)
@@ -186,12 +191,18 @@ apply_methods_raw <- function(fpa_read,
           FUN    = identity,
           simplify = FALSE)
 
+  # OAK
+  use_condaenv("WHO_WAVES_oak")
+  forest <- import("forest")
+  np <- import("numpy")
+
   # variables used to read data in 24 hr increment
-  chunk_is_last <- FALSE
-  chunk_begin <- 1
-  chunk_end <- chunk_length <- I$sf * 60 * 60 * 24
-  chunk_n <- 1
+  chunk_is_last    <- FALSE
+  chunk_begin      <- 1
+  chunk_end        <- chunk_length <- I$sf * 60 * 60 * 24
+  chunk_n          <- 1
   chunk_start_dttm <- rec_start_dttm
+  chunk_start_sec  <- rec_start_sec
   df_all <- tibble(
     id = fnm_sans_ext,
     datetime = seq.POSIXt(
@@ -206,12 +217,15 @@ apply_methods_raw <- function(fpa_read,
     class_trost = NA_character_,
     class_ellis = NA_character_,
     steps_adept              = NA,
+    steps_oak                = NA,
     steps_sdt                = NA_integer_,
     steps_verisense.original = NA_integer_,
     steps_verisense.revised  = NA_integer_
   )
 
   while(!chunk_is_last) {
+
+    message("chunk", chunk_n)
 
     if (chunk_end >= nrow_data) {
       # if chunk is less than 24 hrs, set to end of data and make this
@@ -238,6 +252,7 @@ apply_methods_raw <- function(fpa_read,
       chunk_begin:chunk_end
 
     ### Intensity: Montoye 2018 ----
+    message("Montoye...", appendLF = FALSE)
     df_montoye <-
       as.data.frame(mtx_data[ind_chunk, ])
     names(df_montoye) <-
@@ -311,31 +326,31 @@ apply_methods_raw <- function(fpa_read,
     # Adapted from Lily Koff
     # https://github.com/lilykoff/step_algorithms/blob/505a0b81971b662927fb4cbe4b442e6277bbb0b7/code/R/utils.R#L8
 
+    message("ADEPT...", appendLF = FALSE)
+
     # TODO: ADEPT takes forever on 24 hour data. Shortened the loop to 6 hours,
     # maybe do it even less? Drawbacks to this? Any other faster method? My
     # computer is a potato so idk...
     if (round(length(ind_chunk) / I$sf / 3600, digits = 2) > 6) {
 
-      adept_is_last <- FALSE
-      adept_begin <- chunk_begin
-      adept_length <- I$sf * 60 * 60 * 6
-      adept_end <- adept_begin + adept_length - 1
-      adept_n <- 1
-      adept_start_dttm <- chunk_start_dttm
+      chunk_is_last_adept <- FALSE
+      chunk_begin_adept   <- chunk_begin
+      chunk_length_adept  <- I$sf * 60 * 60 * 6
+      chunk_end_adept     <- chunk_begin_adept + chunk_length_adept - 1
+      chunk_n_adept       <- 1
+      adept_start_dttm    <- chunk_start_dttm
 
-      while (!adept_is_last) {
-        if (adept_end >= chunk_end) {
-          # if chunk is less than 24 hrs, set to end of data and make this
-          # the last loop.
-          adept_end <- chunk_end
-          adept_is_last <- TRUE
+      while (!chunk_is_last_adept) {
+        if (chunk_end_adept >= chunk_end) {
+          chunk_end_adept <- chunk_end
+          chunk_is_last_adept <- TRUE
         }
-        adept_chunk <-
-          adept_begin:adept_end
+        ind_chunk_adept <-
+          chunk_begin_adept:chunk_end_adept
         le_start <- Sys.time()
         df_adept <-
           adept::segmentWalking(
-            xyz                     = mtx_data[adept_chunk, c("x", "y", "z")],
+            xyz                     = mtx_data[ind_chunk_adept, c("x", "y", "z")],
             xyz.fs                  = I$sf,
             template                = lst_template,
             sim_MIN                 = 0.6, # Default 0.85
@@ -371,11 +386,10 @@ apply_methods_raw <- function(fpa_read,
         )
         df_all$steps_adept[ind_adept] <-
           df_adept$steps
-        adept_begin <- adept_begin + adept_length
-        adept_end <- adept_begin + adept_length - 1
-        adept_n <- adept_n + 1
-        adept_start_dttm <- adept_start_dttm + floor(adept_begin / I$sf)
-
+        chunk_begin_adept <- chunk_begin_adept + chunk_length_adept
+        chunk_end_adept   <- chunk_begin_adept + chunk_length_adept - 1
+        chunk_n_adept     <- chunk_n_adept + 1
+        adept_start_dttm  <- adept_start_dttm + floor(chunk_begin_adept / I$sf)
       }
     } else {
       df_adept <-
@@ -417,12 +431,13 @@ apply_methods_raw <- function(fpa_read,
     gc()
 
     ### Steps: SDT ----
-    ind_sdt_verisense <- seq(
+    message("SDT...", appendLF = FALSE)
+    ind_steps <- seq(
       from = ceiling(chunk_begin / I$sf),
       to   = ceiling(chunk_end / I$sf),
       by   = 1
     )
-    df_all$steps_sdt[ind_sdt_verisense] <-
+    df_all$steps_sdt[ind_steps] <-
       as.data.frame(mtx_data[ind_chunk, ]) |>
       mutate(
         datetime =
@@ -441,12 +456,13 @@ apply_methods_raw <- function(fpa_read,
     ### Steps: Verisense ----
     # The Versense method only utilizes vector magnitude of data. Output from
     # `wrist_steps` function is the same as OG verisense.
+    message("Verisense...", appendLF = FALSE)
     vm <- sqrt(
       mtx_data[ind_chunk, "x"]^2 +
         mtx_data[ind_chunk, "y"]^2 +
         mtx_data[ind_chunk, "z"]^2
     )
-    df_all$steps_verisense.original[ind_sdt_verisense] <-
+    df_all$steps_verisense.original[ind_steps] <-
       walking::verisense_count_steps(
         data        = vm,
         sample_rate = I$sf
@@ -465,18 +481,156 @@ apply_methods_raw <- function(fpa_read,
 
     # For some reason, at the end of data, revised will have one second less
     # compared to original.
-    if (length(le_steps) < length(ind_sdt_verisense)) {
-      ind_sdt_verisense <-
-        ind_sdt_verisense[-length(ind_sdt_verisense)]
+    if (length(le_steps) < length(ind_steps)) {
+      ind_veri <- ind_steps[-length(ind_steps)]
+    } else {
+      ind_veri <- ind_steps
     }
 
-    df_all$steps_verisense.revised[ind_sdt_verisense] <- le_steps
+    df_all$steps_verisense.revised[ind_veri] <- le_steps
+
+    ### Steps: oak ----
+    # Like ADEPT, split into max 6 hours to try and prevent overloading memory.
+
+    # time (t_bout) has to be in double format AND contain fractional seconds.
+    # The below won't work if your vector just repeats the time value throughout
+    # the sampling frequency.
+    # Correct: 1512410340.00 1512410340.01 1512410340.02 1512410340.03 1512410340.04
+    # Incorrect: 1512410340 1512410340 1512410340 1512410340 1512410340
+    message("Oak...")
+
+    if (round(length(ind_chunk) / I$sf / 3600, digits = 2) > 6) {
+
+      chunk_is_last_oak <- FALSE
+      chunk_begin_oak   <- chunk_begin
+      chunk_length_oak  <- I$sf * 60 * 60 * 6
+      chunk_end_oak     <- chunk_begin_oak + chunk_length_oak - 1
+      chunk_n_oak       <- 1
+      oak_start_dttm    <- chunk_start_dttm
+      oak_start_sec     <- chunk_start_sec
+
+      while (!chunk_is_last_oak) {
+        if (chunk_end_oak >= chunk_end) {
+          chunk_end_oak <- chunk_end
+          chunk_is_last_oak <- TRUE
+        }
+        ind_chunk_oak <-
+          chunk_begin_oak:chunk_end_oak
+        ind_steps_oak <- seq(
+          from = ceiling(chunk_begin_oak / I$sf),
+          to   = ceiling(chunk_end_oak / I$sf),
+          by   = 1
+        )
+
+        chk_decimal <-
+          last(ind_chunk_oak) / I$sf !=
+          round(last(ind_chunk_oak) / I$sf, digits = 0)
+
+        if (chunk_is_last_oak & chk_decimal) {
+
+          # Oak doesn't like it when the last bit isn't easily divisible by the
+          # sample frequency. Don't read in last bit of Hz then.
+          ind_chunk_oak <- seq(
+            from = chunk_begin_oak,
+            to   = round(last(ind_chunk_oak) / I$sf, digits = 0) * I$sf
+          )
+          df_all$steps_oak[last(ind_steps_oak)] <- 0
+          ind_steps_oak <- ind_steps_oak[-length(ind_steps_oak)]
+
+        }
+
+        vm_bout <- forest$oak$base$preprocess_bout(
+          t_bout = np$array(
+            seq(
+              from = oak_start_sec,
+              by = 1 / I$sf,
+              length.out = length(ind_chunk_oak)
+            ),
+            dtype = "float64"
+          ),
+          x_bout = np$array(mtx_data[ind_chunk_oak, "x"], dtype = "float64"),
+          y_bout = np$array(mtx_data[ind_chunk_oak, "y"], dtype = "float64"),
+          z_bout = np$array(mtx_data[ind_chunk_oak, "z"], dtype = "float64"),
+          fs     = as.integer(I$sf)
+        )
+
+        # defaults except for fs
+        # https://github.com/onnela-lab/forest/blob/develop/docs/source/oak.md#default-tuning-parameters-for-walking-recognition-and-step-counting
+        df_all$steps_oak[ind_steps_oak] <- forest$oak$base$find_walking(
+          vm_bout = vm_bout[[2]],
+          fs = as.integer(I$sf),
+          min_amp = 0.3,
+          step_freq = c(1.4, 2.3),
+          alpha = 0.6,
+          beta = 2.5,
+          min_t = 3L,
+          delta = 20L
+        )
+
+        chunk_begin_oak <- chunk_begin_oak + chunk_length_oak
+        chunk_end_oak   <- chunk_begin_oak + chunk_length_oak - 1
+        chunk_n_oak     <- chunk_n_oak + 1
+        oak_start_dttm  <- oak_start_dttm + floor(chunk_begin_oak / I$sf)
+        oak_start_sec   <- as.numeric(oak_start_dttm)
+      }
+    } else {
+
+      chk_decimal <-
+        last(ind_chunk) / I$sf !=
+        round(last(ind_chunk) / I$sf, digits = 0)
+
+      if (chk_decimal) {
+
+        # Oak doesn't like it when the last bit isn't easily divisible by the
+        # sample frequency. Don't read in last bit of Hz then.
+        ind_chunk_oak <- seq(
+          from = chunk_begin,
+          to   = round(last(ind_chunk) / I$sf, digits = 0) * I$sf
+        )
+        df_all$steps_oak[last(ind_steps)] <- 0
+        ind_steps_oak <- ind_steps[-length(ind_steps)]
+
+      } else {
+        ind_chunk_oak <- ind_chunk
+        ind_steps_oak <- ind_steps
+      }
+
+      vm_bout <- forest$oak$base$preprocess_bout(
+        t_bout = np$array(
+          seq(
+            from = chunk_start_sec,
+            by = 1 / I$sf,
+            length.out = length(ind_chunk_oak)
+          ),
+          dtype = "float64"
+        ),
+        x_bout = np$array(mtx_data[ind_chunk_oak, "x"], dtype = "float64"),
+        y_bout = np$array(mtx_data[ind_chunk_oak, "y"], dtype = "float64"),
+        z_bout = np$array(mtx_data[ind_chunk_oak, "z"], dtype = "float64"),
+        fs     = as.integer(I$sf)
+      )
+
+      # defaults except for fs
+      # https://github.com/onnela-lab/forest/blob/develop/docs/source/oak.md#default-tuning-parameters-for-walking-recognition-and-step-counting
+      df_all$steps_oak[ind_steps_oak] <- forest$oak$base$find_walking(
+        vm_bout = vm_bout[[2]],
+        fs = as.integer(I$sf),
+        min_amp = 0.3,
+        step_freq = c(1.4, 2.3),
+        alpha = 0.6,
+        beta = 2.5,
+        min_t = 3L,
+        delta = 20L
+      )
+    }
+    gc()
 
     ### To restart loop ----
-    chunk_begin <- chunk_begin + chunk_length
-    chunk_end <- chunk_begin + chunk_length - 1
-    chunk_n <- chunk_n + 1
+    chunk_begin      <- chunk_begin + chunk_length
+    chunk_end        <- chunk_begin + chunk_length - 1
+    chunk_n          <- chunk_n + 1
     chunk_start_dttm <- chunk_start_dttm + (chunk_length / I$sf)
+    chunk_start_sec  <- as.numeric(chunk_start_dttm)
 
   }
 
@@ -499,18 +653,28 @@ apply_methods_raw <- function(fpa_read,
     bsu_support_vector_machine,
     #
     lst_template,
-    adept_is_last,
-    adept_begin,
-    adept_length,
-    adept_end,
-    adept_n,
+    chunk_is_last_adept,
+    chunk_begin_adept,
+    chunk_length_adept,
+    chunk_end_adept,
+    chunk_n_adept,
     adept_start_dttm,
     adept_start_sec,
-    adept_chunk,
+    ind_chunk_adept,
     df_adept,
     ind_adept,
     #
-    ind_sdt_verisense,
+    chunk_is_last_oak,
+    chunk_begin_oak,
+    chunk_length_oak,
+    chunk_end_oak,
+    chunk_n_oak,
+    adept_start_dttm,
+    adept_start_sec,
+    ind_chunk_oak,
+    ind_steps_oak,
+    #
+    ind_steps,
     vm,
     le_steps
   ) |>
@@ -571,10 +735,15 @@ apply_methods_raw <- function(fpa_read,
   # Shouldn't be any NA for other variables.
   # anyNA(df_all)
 
-  fpa_write <- file.path(
-    dir_write, paste0(fnm_sans_ext, ".parquet")
-  )
-  arrow::write_parquet(df_all, sink = fpa_write)
+  # For some reason, arrow doesn't like the POSIXCT format for datetime. Save
+  # as numeric and check back later to see when they fix this.
+  df_all |>
+    mutate(datetime = as.numeric(datetime)) |>
+    arrow::write_parquet(sink = fpa_write)
+  # df_all$datetime[1] |>
+  #   as.numeric() |>
+  #   as.POSIXct(tz = my_tz)
+
   return(df_all)
 
 }

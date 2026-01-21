@@ -1,10 +1,5 @@
-## fpa_read  = tar_read(vct_raw_visit)[1]
-# fpa_read = tar_read(vct_raw_field)[1]
-## vct_fpa_basic = tar_read(vct_basic_fpa)
-# vct_fpa_basic = tar_read(vct_basic_fpa_field)
-# dir_cal = tar_read(dir_cal)
-# my_tz = tar_read(my_tz)
 read_acc_raw <- function(fpa_read,
+                         le_type,
                          vct_fpa_basic,
                          dir_cal,
                          my_tz) {
@@ -18,8 +13,27 @@ read_acc_raw <- function(fpa_read,
     fpa_read |>
     basename() |>
     tools::file_path_sans_ext()
-  fnm_ext <-
-    tools::file_ext(fpa_read)
+
+  chk_gen <- le_type %in% c(
+    "GENEACTIV - CSV w/ HEADER",
+    "ADHOC",
+    "UKNOWN"
+  )
+
+  if (chk_gen) {
+    # Geneactiv and adhoc csv reading not implemented for now.
+    return(NULL)
+  }
+
+  # Check if file was already created from a previous run of the pipeline.
+  fpa_write <- file.path(
+    dir_cal,
+    paste0(fnm_sans_ext, ".qs2")
+  )
+
+  if (file.exists(fpa_write)) {return(
+      fpa_write
+  )}
 
   ## GGIR Basic ----
   grep(
@@ -139,7 +153,11 @@ read_acc_raw <- function(fpa_read,
   # C$scale
 
   ## While loop ----
-  if (C$cal.error.end < C$cal.error.start) {
+  chk_cal <-
+    C$cal.error.end < C$cal.error.start
+  if (is.null(C$cal.error.end)) chk_cal <- FALSE
+
+  if (chk_cal) {
     # variables used to read data in 24 hr increment
     chunk_is_last <-
       FALSE
@@ -205,10 +223,6 @@ read_acc_raw <- function(fpa_read,
   }
 
   # Write ----
-  fpa_write <- file.path(
-    dir_cal,
-    paste0(fnm_sans_ext, ".qs2")
-  )
   qs2::qd_save(
     mtx_data,
     file = fpa_write
