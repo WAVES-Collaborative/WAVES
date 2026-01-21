@@ -9,15 +9,19 @@ library(targets)
 library(tarchetypes)
 library(crew)
 Sys.setenv(TAR_PROJECT = "config")
-study_timezone <- Sys.timezone()
+
+study_timezone     <- Sys.timezone()
 sampling_frequency <- 100
+n_workers          <- 3 # parallel::detectCores() - 1
+
 vct_raw_fpa <- file.path(
   "data", "0_CONFIG", "RAW",
   c(
     "WAVES_10002_RAW.csv.gz",
     "WAVES_10003_RAW.csv.gz",
     "WAVES_10004_RAW.gt3x",
-    "WAVES_10005_RAW.cwa"
+    "WAVES_10005_RAW.cwa",
+    "WAVES_10006_RAW.csv.gz"
   )
 )
 
@@ -87,12 +91,20 @@ options(datatable.print.class = TRUE)
 options(datatable.print.keys = TRUE)
 
 # Set target options:
-tar_option_set(
-  packages   = pkgs,
-  format     = "qs",
-  controller = crew_controller_local(workers = parallel::detectCores() - 1)
-  # trust_timestamps = TRUE
-)
+if (n_workers == 1) {
+  tar_option_set(
+    packages   = pkgs,
+    format     = "qs",
+    # trust_timestamps = TRUE
+  )
+} else {
+  tar_option_set(
+    packages   = pkgs,
+    format     = "qs",
+    controller = crew_controller_local(workers = n_workers)
+    # trust_timestamps = TRUE
+  )
+}
 
 # Run the R scripts in the R/ folder with your custom functions:
 list.files(
@@ -135,6 +147,11 @@ list.files(
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 tar_plan(
+  tar_render(
+    name = config_miniconda,
+    path = "quarto/config_miniconda.qmd",
+    output_file = file.path(getwd(), fdr_reports, "summary_miniconda.html")
+  ),
   my_tz = study_timezone,
   my_sf = sampling_frequency,
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -181,86 +198,94 @@ tar_plan(
     ),
     pattern   = map(vct_basic),
     iteration = "list"
+  ),
+  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  ##                           PROCESS - OXWEARABLES                        ----
+  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  vct_ox_input = prepare_ox_input(
+    vct_raw,
+    vct_raw_type,
+    vct_basic
+  ),
+  tar_target(
+    name    = vct_ox_step,
+    command = apply_ox_stepcount(
+      vct_ox_input = vct_ox_input,
+      fdr_write = file.path(getwd(), dir_stepcount),
+      fdr_log = dir_logs
+    ),
+    format = "file"
+  ),
+  tar_target(
+    name    = vct_ox_wlms,
+    command = apply_ox_walmsley(
+      vct_ox_input = vct_ox_input,
+      fdr_write = file.path(getwd(), dir_walmsley),
+      fdr_log = dir_logs,
+      my_tz = my_tz
+    ),
+    format = "file"
+  ),
+  tar_target(
+    name    = vct_ox_acti,
+    command = apply_ox_actinet(
+      vct_ox_input = vct_ox_input,
+      fdr_write = file.path(getwd(), dir_actinet),
+      fdr_log = dir_logs
+    ),
+    format = "file"
+  ),
+  lst_ox = merge_ox(
+    vct_ox_step,
+    vct_ox_wlms,
+    vct_ox_acti,
+    my_tz
+  ),
+  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  ##                             PROCESS - CUSTOM                           ----
+  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  tar_qs(
+    name      = vct_cal,
+    command   = read_acc_raw(
+      fpa_read      = vct_raw,
+      le_type       = vct_raw_type,
+      vct_fpa_basic = vct_basic,
+      dir_cal       = dir_cal,
+      my_tz         = my_tz
+    ),
+    pattern   = map(vct_raw, vct_raw_type),
+    iteration = "vector"
+  ),
+  tar_qs(
+    name      = lst_out.raw,
+    command   = apply_methods_raw(
+      fpa_read      = vct_cal,
+      vct_fpa_basic = vct_basic,
+      dir_models    = dir_models,
+      dir_write     = dir_out.raw,
+      my_tz         = my_tz
+    ),
+    pattern   = map(vct_cal),
+    iteration = "list",
+    error = "null"
+  ),
+  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  ##                                   MERGE                                ----
+  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  tar_target(
+    name    = fpa_merged,
+    command = merge_output_config(
+      lst_out.raw = lst_out.raw,
+      lst_out.cut = lst_out.cut,
+      lst_ox      = lst_ox,
+      dir_merged  = dir_merged,
+      my_tz       = my_tz
+    ),
+    format = "file"
+  ),
+  tar_render(
+    name = pipeline_summary,
+    path = "quarto/pipeline_config.qmd",
+    output_file = file.path(getwd(), fdr_reports, "summary_pipeline_config.html")
   )
-  # ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  # ##                           PROCESS - OXWEARABLES                        ----
-  # ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  # tar_target(
-  #   name    = vct_ox_step,
-  #   command = apply_ox_stepcount(
-  #     vct_raw = vct_raw,
-  #     fdr_write = file.path(getwd(), dir_stepcount),
-  #     fdr_log = dir_logs
-  #   ),
-  #   format = "file"
-  # ),
-  # tar_target(
-  #   name    = vct_ox_wlms,
-  #   command = apply_ox_walmsley(
-  #     vct_raw = vct_raw,
-  #     fdr_write = file.path(getwd(), dir_walmsley),
-  #     fdr_log = dir_logs,
-  #     my_tz = my_tz
-  #   ),
-  #   format = "file"
-  # ),
-  # tar_target(
-  #   name    = vct_ox_acti,
-  #   command = apply_ox_actinet(
-  #     vct_raw = vct_raw,
-  #     fdr_write = file.path(getwd(), dir_actinet),
-  #     fdr_log = dir_logs
-  #   ),
-  #   format = "file"
-  # ),
-  # lst_ox = merge_ox(
-  #   vct_ox_step,
-  #   vct_ox_wlms,
-  #   vct_ox_acti,
-  #   my_tz
-  # ),
-  # ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  # ##                             PROCESS - CUSTOM                           ----
-  # ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  # tar_qs(
-  #   name      = vct_cal,
-  #   command   = read_acc_raw(
-  #     fpa_read      = vct_raw,
-  #     vct_fpa_basic = vct_basic,
-  #     dir_cal       = dir_cal,
-  #     my_tz         = my_tz
-  #   ),
-  #   pattern   = map(vct_raw),
-  #   iteration = "vector"
-  # ),
-  # tar_qs(
-  #   name      = lst_out.raw,
-  #   command   = apply_methods_raw(
-  #     fpa_read      = vct_cal,
-  #     vct_fpa_basic = vct_basic,
-  #     dir_models    = dir_models,
-  #     dir_write     = dir_out.raw,
-  #     my_tz         = my_tz
-  #   ),
-  #   pattern   = map(vct_cal),
-  #   iteration = "list"
-  # ),
-  # ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  # ##                                   MERGE                                ----
-  # ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  # tar_target(
-  #   name    = fpa_merged,
-  #   command = merge_output(
-  #     lst_out.raw = lst_out.raw,
-  #     lst_out.cut = lst_out.cut,
-  #     lst_ox      = lst_ox,
-  #     dir_merged  = dir_merged
-  #   ),
-  #   format = "file"
-  # ),
-  # tar_render(
-  #   name = pipeline_summary,
-  #   path = "quarto/pipeline.qmd",
-  #   output_file = file.path(getwd(), fdr_reports, "summary_pipeline.html")
-  # )
 )
