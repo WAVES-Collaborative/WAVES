@@ -1,12 +1,113 @@
-apply_ox_stepcount <- function(vct_raw,
+prepare_ox_input <- function(vct_raw,
+                             vct_raw_type,
+                             vct_basic) {
+
+  vct_ox_input <- vector(
+    mode = "character",
+    length = length(vct_raw)
+  )
+
+  for (i in seq_along(vct_raw)) {
+
+    fpa_raw <- vct_raw[i]
+    le_type <- vct_raw_type[i]
+    chk_gen <- le_type %in% c(
+      "GENEACTIV - CSV w/ HEADER",
+      "ADHOC",
+      "UKNOWN"
+    )
+    chk_gt3x <- le_type == "ACTIGRAPH - CSV"
+    chk_axiv <- le_type == "AXIVITY - CSV"
+
+    if (chk_gen) {
+      next()
+    } else if (chk_gt3x) {
+
+      # TODO
+      next()
+
+      # # Determine if timestamp column exists. If it does, supply it as a column
+      # # in --csv-txyz. If not, then need to supply --start BUT unsure how to
+      # # specify absent timestamp column.
+      # chk_time_col <- "Timestamp" %in% (
+      #   fread(fpa_raw,
+      #         nrows = 2,
+      #         skip = 10,
+      #         header = TRUE) |>
+      #     colnames()
+      # )
+      #
+      # if (chk_time_col) {
+      #   vct_ox_input[i] <- paste0(
+      #     '"', fpa_raw, '"',
+      #     ' --csv-txyz "Timestamp,Accelerometer X,Accelerometer Y,Accelerometer Z"',
+      #     ' --csv-start-row 11'
+      #   )
+      #
+      # }
+      #
+      # grep(
+      #   x       = vct_basic,
+      #   pattern = basename(fpa_raw),
+      #   value   = TRUE
+      # ) |>
+      #   load()
+      # M
+
+    } else if (chk_axiv) {
+      # TODO
+      next()
+    } else {
+      vct_ox_input[i] <- paste0('"', fpa_raw, '"')
+    }
+
+  }
+
+  return(
+    vct_ox_input[!stri_isempty(vct_ox_input)]
+  )
+
+}
+apply_ox_stepcount <- function(vct_ox_input,
                                fdr_write,
-                               fdr_log) {
+                               fdr_log,
+                               log_prefix = "") {
 
   chk_windows <- grepl(
     x = Sys.getenv("OS"),
     pattern = "windows",
     ignore.case = TRUE
   )
+
+  # Check if files were already created from a previous run of the pipeline.
+  vct_fnm_write <-
+    vct_ox_input |>
+    gsub(x = _,
+         pattern = '"',
+         replacement = "") |>
+    basename() |>
+    file_path_sans_ext()
+  vct_fpa_write <-
+    vct_fnm_write |>
+    paste0(... = _, "-StepTimes.csv.gz",
+           collapse = "|") |>
+    list.files(path = fdr_write,
+               pattern = _,
+               full.names = TRUE,
+               recursive = TRUE)
+  chk_write <- length(vct_fpa_write) > 0
+  chk_length <- length(vct_fpa_write) == length(vct_ox_input)
+
+  if (chk_write & chk_length) {
+    return(vct_fpa_write)
+  } else if (chk_write) {
+    vct_ox_input <- grep(
+      x = vct_ox_input,
+      pattern = paste0(vct_fnm_write, collapse = "|"),
+      value = TRUE,
+      invert = TRUE
+    )
+  }
 
   if (chk_windows) {
     # Run activate.bat which is what is activated when "Anaconda Prompt" runs.
@@ -15,7 +116,7 @@ apply_ox_stepcount <- function(vct_raw,
       args = paste0(
         "activate WHO_WAVES_stepcount & ",
         paste0(
-          'stepcount "', vct_raw, '" -o "', fdr_write, '"',
+          'stepcount ', vct_ox_input, ' -o "', fdr_write, '"',
           collapse = " & "
         ) |>
           # file paths to windows style.
@@ -24,8 +125,8 @@ apply_ox_stepcount <- function(vct_raw,
                replacement = "\\\\"),
         collapse = ""
       ),
-      stdout = file.path(fdr_log, "stepcount_out.txt"),
-      stderr = file.path(fdr_log, "stepcount_err.txt")
+      stdout = file.path(fdr_log, paste0(log_prefix, "stepcount_out.txt")),
+      stderr = file.path(fdr_log, paste0(log_prefix, "stepcount_err.txt"))
     )
   } else {
     # The `system2` command uses a shell within MacOS and Linux.
@@ -37,13 +138,13 @@ apply_ox_stepcount <- function(vct_raw,
         paste0('"', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
         "conda activate WHO_WAVES_stepcount",
         paste0(
-          'stepcount "', vct_raw, '" -o "', fdr_write, '"',
+          'stepcount ', vct_ox_input, ' -o "', fdr_write, '"',
           collapse = " ; "
         ),
         sep = " ; "
       ),
-      stdout = file.path(fdr_log, "stepcount_out.txt"),
-      stderr = file.path(fdr_log, "stepcount_err.txt")
+      stdout = file.path(fdr_log, paste0(log_prefix, "stepcount_out.txt")),
+      stderr = file.path(fdr_log, paste0(log_prefix, "stepcount_err.txt"))
     )
   }
 
@@ -55,9 +156,10 @@ apply_ox_stepcount <- function(vct_raw,
   )
 
 }
-apply_ox_walmsley <- function(vct_raw,
+apply_ox_walmsley <- function(vct_ox_input,
                               fdr_write,
                               fdr_log,
+                              log_prefix = "",
                               my_tz) {
 
   chk_windows <- grepl(
@@ -65,6 +167,36 @@ apply_ox_walmsley <- function(vct_raw,
     pattern = "windows",
     ignore.case = TRUE
   )
+
+  # Check if files were already created from a previous run of the pipeline.
+  vct_fnm_write <-
+    vct_ox_input |>
+    gsub(x = _,
+         pattern = '"',
+         replacement = "") |>
+    basename() |>
+    file_path_sans_ext()
+  vct_fpa_write <-
+    vct_fnm_write |>
+    paste0(... = _, "-timeSeries.csv.gz",
+           collapse = "|") |>
+    list.files(path = fdr_write,
+               pattern = _,
+               full.names = TRUE,
+               recursive = TRUE)
+  chk_write <- length(vct_fpa_write) > 0
+  chk_length <- length(vct_fpa_write) == length(vct_ox_input)
+
+  if (chk_write & chk_length) {
+    return(vct_fpa_write)
+  } else if (chk_write) {
+    vct_ox_input <- grep(
+      x = vct_ox_input,
+      pattern = paste0(vct_fnm_write, collapse = "|"),
+      value = TRUE,
+      invert = TRUE
+    )
+  }
 
   if (chk_windows) {
 
@@ -74,7 +206,7 @@ apply_ox_walmsley <- function(vct_raw,
       args = paste0(
         "activate WHO_WAVES_accelerometer & ",
         paste0(
-          'accProcess "', vct_raw, '" -o "', fdr_write, '"',
+          'accProcess ', vct_ox_input, ' -o "', fdr_write, '"',
           " --timeZone ", my_tz,
           collapse = " & "
         ) |>
@@ -88,8 +220,8 @@ apply_ox_walmsley <- function(vct_raw,
                replacement = my_tz),
         collapse = ""
       ),
-      stdout = file.path(fdr_log, "walmsley_out.txt"),
-      stderr = file.path(fdr_log, "walmsley_err.txt")
+      stdout = file.path(fdr_log, paste0(log_prefix, "walmsley_out.txt")),
+      stderr = file.path(fdr_log, paste0(log_prefix, "walmsley_err.txt"))
     )
 
   } else {
@@ -102,14 +234,14 @@ apply_ox_walmsley <- function(vct_raw,
         paste0('"', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
         "conda activate WHO_WAVES_accelerometer",
         paste0(
-          'accProcess "', vct_raw, '" -o "', fdr_write, '"',
+          'accProcess ', vct_ox_input, ' -o "', fdr_write, '"',
           " --timeZone ", my_tz,
           collapse = " ; "
         ),
         sep = " ; "
       ),
-      stdout = file.path(fdr_log, "walmsley_out.txt"),
-      stderr = file.path(fdr_log, "walmsley_err.txt")
+      stdout = file.path(fdr_log, paste0(log_prefix, "walmsley_out.txt")),
+      stderr = file.path(fdr_log, paste0(log_prefix, "walmsley_err.txt"))
     )
   }
 
@@ -120,15 +252,46 @@ apply_ox_walmsley <- function(vct_raw,
   )
 
 }
-apply_ox_actinet <- function(vct_raw,
+apply_ox_actinet <- function(vct_ox_input,
                              fdr_write,
-                             fdr_log) {
+                             fdr_log,
+                             log_prefix = "") {
 
   chk_windows <- grepl(
     x = Sys.getenv("OS"),
     pattern = "windows",
     ignore.case = TRUE
   )
+
+  # Check if files were already created from a previous run of the pipeline.
+  vct_fnm_write <-
+    vct_ox_input |>
+    gsub(x = _,
+         pattern = '"',
+         replacement = "") |>
+    basename() |>
+    file_path_sans_ext()
+  vct_fpa_write <-
+    vct_fnm_write |>
+    paste0(... = _, "-timeSeries.csv.gz",
+           collapse = "|") |>
+    list.files(path = fdr_write,
+               pattern = _,
+               full.names = TRUE,
+               recursive = TRUE)
+  chk_write <- length(vct_fpa_write) > 0
+  chk_length <- length(vct_fpa_write) == length(vct_ox_input)
+
+  if (chk_write & chk_length) {
+    return(vct_fpa_write)
+  } else if (chk_write) {
+    vct_ox_input <- grep(
+      x = vct_ox_input,
+      pattern = paste0(vct_fnm_write, collapse = "|"),
+      value = TRUE,
+      invert = TRUE
+    )
+  }
 
   if (chk_windows) {
 
@@ -138,7 +301,7 @@ apply_ox_actinet <- function(vct_raw,
       args = paste0(
         "activate WHO_WAVES_actinet & ",
         paste0(
-          'actinet "', vct_raw, '" -o "', fdr_write, '"',
+          'actinet ', vct_ox_input, ' -o "', fdr_write, '"',
           collapse = " & "
         ) |>
           # file paths to windows style.
@@ -147,8 +310,8 @@ apply_ox_actinet <- function(vct_raw,
                replacement = "\\\\"),
         collapse = ""
       ),
-      stdout = file.path(fdr_log, "actinet_out.txt"),
-      stderr = file.path(fdr_log, "actinet_err.txt")
+      stdout = file.path(fdr_log, paste0(log_prefix, "actinet_out.txt")),
+      stderr = file.path(fdr_log, paste0(log_prefix, "actinet_err.txt"))
     )
 
   } else {
@@ -161,13 +324,13 @@ apply_ox_actinet <- function(vct_raw,
         paste0('"', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
         "conda activate WHO_WAVES_actinet",
         paste0(
-          'actinet "', vct_raw, '" -o "', fdr_write, '"',
+          'actinet ', vct_ox_input, ' -o "', fdr_write, '"',
           collapse = " ; "
         ),
         sep = " ; "
       ),
-      stdout = file.path(fdr_log, "actinet_out.txt"),
-      stderr = file.path(fdr_log, "actinet_err.txt")
+      stdout = file.path(fdr_log, paste0(log_prefix, "actinet_out.txt")),
+      stderr = file.path(fdr_log, paste0(log_prefix, "actinet_err.txt"))
     )
   }
 

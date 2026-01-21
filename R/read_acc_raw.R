@@ -1,4 +1,5 @@
 read_acc_raw <- function(fpa_read,
+                         le_type,
                          vct_fpa_basic,
                          dir_cal,
                          my_tz) {
@@ -12,8 +13,27 @@ read_acc_raw <- function(fpa_read,
     fpa_read |>
     basename() |>
     tools::file_path_sans_ext()
-  fnm_ext <-
-    tools::file_ext(fpa_read)
+
+  chk_gen <- le_type %in% c(
+    "GENEACTIV - CSV w/ HEADER",
+    "ADHOC",
+    "UKNOWN"
+  )
+
+  if (chk_gen) {
+    # Geneactiv and adhoc csv reading not implemented for now.
+    return(NULL)
+  }
+
+  # Check if file was already created from a previous run of the pipeline.
+  fpa_write <- file.path(
+    dir_cal,
+    paste0(fnm_sans_ext, ".qs2")
+  )
+
+  if (file.exists(fpa_write)) {return(
+      fpa_write
+  )}
 
   ## GGIR Basic ----
   grep(
@@ -203,10 +223,6 @@ read_acc_raw <- function(fpa_read,
   }
 
   # Write ----
-  fpa_write <- file.path(
-    dir_cal,
-    paste0(fnm_sans_ext, ".qs2")
-  )
   qs2::qd_save(
     mtx_data,
     file = fpa_write

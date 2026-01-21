@@ -77,6 +77,16 @@ apply_methods_raw <- function(fpa_read,
   fnm_sans_ext <-
     basename(fpa_read) |>
     tools::file_path_sans_ext()
+
+  # Check if file was already created from a previous run of the pipeline.
+  fpa_write <- file.path(
+    dir_write, paste0(fnm_sans_ext, ".parquet")
+  )
+
+  if (file.exists(fpa_write)) {return(
+    arrow::read_parquet(fpa_write)
+  )}
+
   grep(
     x       = vct_fpa_basic,
     pattern = tools::file_path_sans_ext(fnm_sans_ext),
@@ -601,10 +611,15 @@ apply_methods_raw <- function(fpa_read,
   # Shouldn't be any NA for other variables.
   # anyNA(df_all)
 
-  fpa_write <- file.path(
-    dir_write, paste0(fnm_sans_ext, ".parquet")
-  )
-  arrow::write_parquet(df_all, sink = fpa_write)
+  # For some reason, arrow doesn't like the POSIXCT format for datetime. Save
+  # as numeric and check back later to see when they fix this.
+  df_all |>
+    mutate(datetime = as.numeric(datetime)) |>
+    arrow::write_parquet(sink = fpa_write)
+  # df_all$datetime[1] |>
+  #   as.numeric() |>
+  #   as.POSIXct(tz = my_tz)
+
   return(df_all)
 
 }

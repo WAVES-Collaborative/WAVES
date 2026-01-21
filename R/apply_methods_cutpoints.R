@@ -118,6 +118,14 @@ apply_methods_cutpoints <- function(fpa_basic,
     I$monn != c("actigraph") ~ "other",
     .default = I$monn
   )
+
+  # Check if file was already created from a previous run of the pipeline.
+  fpa_write <- file.path(dir_write, paste0(fnm_sans_ext, ".parquet"))
+
+  if (file.exists(fpa_write)) {return(
+      arrow::read_parquet(fpa_write)
+  )}
+
   df_cutpoint <-
     M$metashort |>
     mutate(
@@ -273,7 +281,6 @@ apply_methods_cutpoints <- function(fpa_basic,
     )
 
   # Return ----
-  fpa_write <- file.path(dir_write, paste0(fnm_sans_ext, ".parquet"))
   arrow::write_parquet(df_cutpoint, sink = fpa_write)
   return(df_cutpoint)
 
