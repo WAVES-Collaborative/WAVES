@@ -108,10 +108,10 @@ config_miniconda <- function(...) {
     "imbalanced-learn_0.8.1",
     "joblib_1.1.1",
     "kiwisolver_1.4.7",
-    "libexpat_2.7.1",
+    "libexpat_2.7.3",
     "libffi_3.5.2",
     "liblzma_5.8.1",
-    "libsqlite_3.51.0",
+    "libsqlite_3.51.1",
     "libzlib_1.3.1",
     "matplotlib_3.5.3",
     "numpy_1.21.6",
@@ -124,11 +124,15 @@ config_miniconda <- function(...) {
     "pip_25.2",
     "pyparsing_3.2.5",
     "python_3.9.23",
+    "python-dateutil_2.9.0.post0",
+    "pytz_2025.2",
     "scikit-learn_1.0.2",
     "scipy_1.7.3",
     "setuptools_80.9.0",
+    "six_1.17.0",
     "statsmodels_0.13.5",
     "symlink-exe-runtime_1.0",
+    "threadpoolctl_3.6.0",
     "tk_8.6.13",
     "tqdm_4.65.2",
     "tzdata_2025b",
@@ -153,10 +157,10 @@ config_miniconda <- function(...) {
     "imbalanced-learn_0.9.1",
     "joblib_1.2.0",
     "kiwisolver_1.4.7",
-    "libexpat_2.7.1",
+    "libexpat_2.7.3",
     "libffi_3.5.2",
     "liblzma_5.8.1",
-    "libsqlite_3.51.0",
+    "libsqlite_3.51.1",
     "libzlib_1.3.1",
     "matplotlib_3.5.3",
     "numpy_1.24.4",
@@ -169,12 +173,16 @@ config_miniconda <- function(...) {
     "pip_25.2",
     "pyparsing_3.2.5",
     "python_3.9.23",
+    "python-dateutil_2.9.0.post0",
+    "pytz_2025.2",
     "requests_2.32.5",
     "scikit-learn_1.1.1",
     "scipy_1.10.1",
     "setuptools_80.9.0",
-    "statsmodels_0.14.5",
+    "six_1.17.0",
+    "statsmodels_0.14.6",
     "symlink-exe-runtime_1.0",
+    "threadpoolctl_3.6.0",
     "tk_8.6.13",
     "torch_1.13.1",
     "torchvision_0.14.1",
@@ -183,7 +191,7 @@ config_miniconda <- function(...) {
     "typing-extensions_4.15.0",
     "tzdata_2025.2",
     "ucrt_10.0.26100.0",
-    "urllib3_2.5.0",
+    "urllib3_2.6.1",
     "vc_14.3",
     "vc14_runtime_14.44.35208",
     "vcomp14_14.44.35208",
@@ -201,7 +209,7 @@ config_miniconda <- function(...) {
     "decorator_5.2.1",
     "h3_4.3.0",
     "h3-py_4.3.0",
-    "holidays_0.85",
+    "holidays_0.86",
     "idna_3.11",
     "joblib_1.5.2",
     "lazy-loader_0.4",
@@ -214,12 +222,12 @@ config_miniconda <- function(...) {
     "liblapack_3.11.0",
     "liblzma_5.8.1",
     "librosa_0.11.0",
-    "libsqlite_3.51.0",
+    "libsqlite_3.51.1",
     "libwinpthread_12.0.0.r4.gg4f2fc60ca",
     "libxml2_2.15.1",
     "libxml2-16_2.15.1",
     "libzlib_1.3.1",
-    "llvm-openmp_21.1.6",
+    "llvm-openmp_21.1.7",
     "llvmlite_0.45.1",
     "mkl_2025.3.0",
     "msgpack_1.1.2",
@@ -230,7 +238,7 @@ config_miniconda <- function(...) {
     "packaging_25.0",
     "pandas_2.3.3",
     "pip_25.3",
-    "platformdirs_4.5.0",
+    "platformdirs_4.5.1",
     "pooch_1.8.2",
     "pycparser_2.22",
     "pyproj_3.7.2",
@@ -256,7 +264,7 @@ config_miniconda <- function(...) {
     "typing-extensions_4.15.0",
     "tzdata_2025.2",
     "ucrt_10.0.26100.0",
-    "urllib3_2.5.0",
+    "urllib3_2.6.1",
     "vc_14.3",
     "vc14_runtime_14.44.35208",
     "vcomp14_14.44.35208",
@@ -288,6 +296,9 @@ config_miniconda <- function(...) {
         py_list_packages("WHO_WAVES_stepcount") |>
         unite(col = "pkg", package, version) |>
         pull(pkg)
+      # vct_installed |>
+      #   paste0('"', ... = _, '",\n') |>
+      #   cat(sep = "")
       chk_package <- all(
         vct_pkg_step %in% vct_installed
       )
@@ -378,6 +389,9 @@ config_miniconda <- function(...) {
         py_list_packages("WHO_WAVES_accelerometer") |>
         unite(col = "pkg", package, version) |>
         pull(pkg)
+      # vct_installed |>
+      #   paste0('"', ... = _, '",\n') |>
+      #   cat(sep = "")
       chk_package <- all(
         vct_pkg_acc %in% vct_installed
       )
@@ -468,6 +482,9 @@ config_miniconda <- function(...) {
         py_list_packages("WHO_WAVES_actinet") |>
         unite(col = "pkg", package, version) |>
         pull(pkg)
+      # vct_installed |>
+      #   paste0('"', ... = _, '",\n') |>
+      #   cat(sep = "")
       chk_package <- all(
         vct_pkg_acti %in% vct_installed
       )
@@ -682,6 +699,9 @@ config_miniconda <- function(...) {
         py_list_packages("WHO_WAVES_oak") |>
         unite(col = "pkg", package, version) |>
         pull(pkg)
+      # vct_installed |>
+      #   paste0('"', ... = _, '",\n') |>
+      #   cat(sep = "")
       chk_package <- all(
         vct_pkg_oak %in% vct_installed
       )
@@ -795,54 +815,4 @@ config_raw_type <- function(vct_raw) {
 
   return(vct_type)
 
-}
-config_pipeline <- function(vct_raw,
-                            vct_basic,
-                            vct_cal,
-                            lst_out.raw,
-                            lst_out.cut,
-                            vct_ox_step,
-                            vct_ox_wlms,
-                            vct_ox_acti,
-                            fpa_merged) {
-  tibble(
-    file =
-      basename(vct_raw) |>
-      file_path_sans_ext(),
-    GGIR = grepl(
-      x = vct_basic,
-      pattern = paste0(file, collapse = "|")
-    ),
-    calibration = grepl(
-      x = vct_cal,
-      pattern = paste0(file, collapse = "|")
-    ),
-    `raw methods` = grepl(
-      x = sapply(lst_out.raw, \(.x) .x$id[1]),
-      pattern = paste0(file, collapse = "|")
-    ),
-    `cutpoints` = grepl(
-      x = sapply(lst_out.cut, \(.x) .x$id[1]),
-      pattern = paste0(file, collapse = "|")
-    ),
-    stepcount = grepl(
-      x = vct_ox_step,
-      pattern = paste0(file, collapse = "|")
-    ),
-    walmsley = grepl(
-      x = vct_ox_wlms,
-      pattern = paste0(file, collapse = "|")
-    ),
-    actinet = grepl(
-      x = vct_ox_acti,
-      pattern = paste0(file, collapse = "|")
-    ),
-    merged = grepl(
-      x =
-        read_parquet(fpa_merged, col_select = "id") |>
-        unique() |>
-        unlist(),
-      pattern = paste0(file, collapse = "|")
-    )
-  )
 }
