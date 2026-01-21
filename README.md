@@ -235,26 +235,26 @@ potentially available validation data.
 
 | Method | MVPA | SED | Steps |
 |----|----|----|----|
-| Bakrania 2016(Bakrania et al. 2016) | ❌ | ✔️ | ❌ |
-| Ellis 2016(Ellis et al. 2016) Extended | ✔️️ | ✔️ | ❌ |
-| Esliger 2011(Esliger et al. 2011) | ✔️ | ✔️ | ❌ |
-| Fraysse 2020(Fraysse et al. 2021) | ✔️ | ✔️ | ❌ |
-| Hildebrand 2014(Hildebrand et al. 2014)/2017(Hildebrand et al. 2017) | ✔️ | ✔️ | ❌ |
-| Mielke 2023(Mielke et al. 2023) | ✔️ | ✔️ | ❌ |
-| Montoye 2018(Montoye et al. 2018) | ✔️ | ✔️ | ❌ |
-| Trost 2017(Pavey et al. 2017) Extended | ✔️ | ✔️ | ❌ |
-| Walmsley 2022(Walmsley et al. 2022) (accelerometer v7.3.0(Doherty et al. 2025)) | ✔️ | ✔️ | ❌ |
-| White 2016(White et al. 2016) ENMO linear | ✔️ | ✔️ | ❌ |
-| White 2016(White et al. 2016) ENMO polynomial | ✔️ | ✔️ | ❌ |
-| White 2016(White et al. 2016) HPFVM linear | ✔️ | ✔️ | ❌ |
-| White 2016(White et al. 2016) HPFVM polynomial | ✔️ | ✔️ | ❌ |
-| Yuan 2024(Yuan et al. 2024) (actinet) | ✔️ | ✔️ | ❌ |
-| ADEPT(Karas et al. 2021) | ❌ | ❌ | ✔️ |
-| Oak(Straczkiewicz, Huang, and Onnela 2023) | ❌ | ❌ | ✔️ |
-| Small 2024(Small et al. 2024) (stepcount v3.17.1(Chan et al. 2026)) | ❌ | ❌ | ✔️ |
-| Step Detection Threshold(Ducharme et al. 2021) (SDT) | ❌ | ❌ | ✔️ |
-| Verisense (Original)(Gu et al. 2017) | ❌ | ❌ | ✔️ |
-| Verisense (Revised)(Maylor et al. 2022) | ❌ | ❌ | ✔️ |
+| Bakrania 2016<sup>1</sup> | ❌ | ✔️ | ❌ |
+| Ellis 2016<sup>2</sup> Extended | ✔️️ | ✔️ | ❌ |
+| Esliger 2011<sup>3</sup> | ✔️ | ✔️ | ❌ |
+| Fraysse 2020<sup>4</sup> | ✔️ | ✔️ | ❌ |
+| Hildebrand 2014<sup>5</sup>/2017<sup>6</sup> | ✔️ | ✔️ | ❌ |
+| Mielke 2023<sup>7</sup> | ✔️ | ✔️ | ❌ |
+| Montoye 2018<sup>8</sup> | ✔️ | ✔️ | ❌ |
+| Trost 2017<sup>9</sup> Extended | ✔️ | ✔️ | ❌ |
+| Walmsley 2022<sup>10</sup> (accelerometer v7.3.0<sup>11</sup>) | ✔️ | ✔️ | ❌ |
+| White 2016<sup>12</sup> ENMO linear | ✔️ | ✔️ | ❌ |
+| White 2016<sup>12</sup> ENMO polynomial | ✔️ | ✔️ | ❌ |
+| White 2016<sup>12</sup> HPFVM linear | ✔️ | ✔️ | ❌ |
+| White 2016<sup>12</sup> HPFVM polynomial | ✔️ | ✔️ | ❌ |
+| Yuan 2024<sup>13</sup> (actinet) | ✔️ | ✔️ | ❌ |
+| ADEPT<sup>14</sup> | ❌ | ❌ | ✔️ |
+| Oak<sup>15</sup> | ❌ | ❌ | ✔️ |
+| Small 2024<sup>16</sup> (stepcount v3.17.1<sup>17</sup>) | ❌ | ❌ | ✔️ |
+| Step Detection Threshold<sup>18</sup> (SDT) | ❌ | ❌ | ✔️ |
+| Verisense (Original)<sup>19</sup> | ❌ | ❌ | ✔️ |
+| Verisense (Revised)<sup>20</sup> | ❌ | ❌ | ✔️ |
 
 ## TODO
 
@@ -266,201 +266,220 @@ potentially available validation data.
 
 ## References for Methods
 
-<div id="refs" class="references csl-bib-body hanging-indent"
-entry-spacing="0">
+<div id="refs" class="references csl-bib-body">
 
 <div id="ref-bakrania2016" class="csl-entry">
 
-Bakrania, Kishan, Thomas Yates, Alex V. Rowlands, Dale W. Esliger, Sarah
-Bunnewell, James Sanders, Melanie Davies, Kamlesh Khunti, and Charlotte
-L. Edwardson. 2016. “Intensity Thresholds on Raw Acceleration Data:
-Euclidean Norm Minus One (ENMO) and Mean Amplitude Deviation (MAD)
-Approaches.” *PLOS ONE* 11 (10): e0164045.
-<https://doi.org/10.1371/journal.pone.0164045>.
-
-</div>
-
-<div id="ref-chan2026" class="csl-entry">
-
-Chan, Shing, Scott R Small, Aidan Acquah, Gert Mertes, and Aiden
-Doherty. 2026. *Improved Step Counting via Foundation Models for
-Wrist-Worn Accelerometers*. Zenodo.
-<https://doi.org/10.5281/zenodo.18255030>.
-
-</div>
-
-<div id="ref-doherty2025" class="csl-entry">
-
-Doherty, Aiden, Shing Chan, Hang Yuan, and Rosemary Walmsley. 2025.
-*Accelerometer: A Python Toolkit for Extracting Physical Activity and
-Behavior Metrics from Wearable Sensor Data*. Zenodo.
-<https://doi.org/10.5281/zenodo.15874476>.
-
-</div>
-
-<div id="ref-ducharme2021" class="csl-entry">
-
-Ducharme, Scott W., Jongil Lim, Michael A. Busa, Elroy J. Aguiar,
-Christopher C. Moore, John M. Schuna, Tiago V. Barreira, John
-Staudenmayer, Stuart R. Chipkin, and Catrine Tudor-Locke. 2021. “A
-Transparent Method for Step Detection Using an Acceleration Threshold,”
-October. <https://doi.org/10.1123/jmpb.2021-0011>.
+<span class="csl-left-margin">1.
+</span><span class="csl-right-inline">Bakrania K, Yates T, Rowlands AV,
+et al. [Intensity Thresholds on Raw Acceleration Data: Euclidean Norm
+Minus One (ENMO) and Mean Amplitude Deviation (MAD)
+Approaches](https://doi.org/10.1371/journal.pone.0164045). *PLOS ONE*
+2016; 11: e0164045.</span>
 
 </div>
 
 <div id="ref-ellis2016" class="csl-entry">
 
-Ellis, Katherine, Jacqueline Kerr, Suneeta Godbole, John Staudenmayer,
-and Gert Lanckriet. 2016. “Hip and Wrist Accelerometer Algorithms for
-Free-Living Behavior Classification.” *Medicine & Science in Sports &
-Exercise* 48 (5): 933–40.
-<https://doi.org/10.1249/MSS.0000000000000840>.
+<span class="csl-left-margin">2.
+</span><span class="csl-right-inline">Ellis K, Kerr J, Godbole S, et al.
+[Hip and wrist accelerometer algorithms for free-living behavior
+classification](https://doi.org/10.1249/MSS.0000000000000840). *Medicine
+& Science in Sports & Exercise* 2016; 48: 933–940.</span>
 
 </div>
 
 <div id="ref-esliger2011" class="csl-entry">
 
-Esliger, Dale W., Ann V. Rowlands, Tina L. Hurst, Michael Catt, Peter
-Murray, and Roger G. Eston. 2011. “Validation of the GENEA
-Accelerometer.” *Medicine & Science in Sports & Exercise* 43 (6): 1085.
-<https://doi.org/10.1249/MSS.0b013e31820513be>.
+<span class="csl-left-margin">3.
+</span><span class="csl-right-inline">Esliger DW, Rowlands AV, Hurst TL,
+et al. [Validation of the GENEA
+accelerometer](https://doi.org/10.1249/MSS.0b013e31820513be). *Medicine
+& Science in Sports & Exercise* 2011; 43: 1085.</span>
 
 </div>
 
 <div id="ref-fraysse2021" class="csl-entry">
 
-Fraysse, François, Dannielle Post, Roger Eston, Daiki Kasai, Alex V.
-Rowlands, and Gaynor Parfitt. 2021. “Physical Activity Intensity
-Cut-Points for Wrist-Worn GENEActiv in Older Adults.” *Frontiers in
-Sports and Active Living* 2 (January).
-<https://doi.org/10.3389/fspor.2020.579278>.
-
-</div>
-
-<div id="ref-gu2017" class="csl-entry">
-
-Gu, Fuqiang, Kourosh Khoshelham, Jianga Shang, Fangwen Yu, and Zhuo Wei.
-2017. “Robust and Accurate Smartphone-Based Step Counting for Indoor
-Localization.” *IEEE Sensors Journal* 17 (11): 3453–60.
-<https://doi.org/10.1109/JSEN.2017.2685999>.
-
-</div>
-
-<div id="ref-hildebrand2017" class="csl-entry">
-
-Hildebrand, Maria, Bjørge H. Hansen, Vincent T. van Hees, and Ulf
-Ekelund. 2017. “Evaluation of Raw Acceleration Sedentary Thresholds in
-Children and Adults.” *Scandinavian Journal of Medicine & Science in
-Sports* 27 (12): 1814–23. <https://doi.org/10.1111/sms.12795>.
+<span class="csl-left-margin">4.
+</span><span class="csl-right-inline">Fraysse F, Post D, Eston R, et al.
+Physical activity intensity cut-points for wrist-worn GENEActiv in older
+adults. *Frontiers in Sports and Active Living*; 2. Epub ahead of print
+15 January 2021. DOI:
+[10.3389/fspor.2020.579278](https://doi.org/10.3389/fspor.2020.579278).</span>
 
 </div>
 
 <div id="ref-hildebrand2014" class="csl-entry">
 
-Hildebrand, Maria, Vincent T. Van Hees, Bjorge Hermann Hansen, and Ulf
-Ekelund. 2014. “Age Group Comparability of Raw Accelerometer Output from
-Wrist- and Hip-Worn Monitors.” *Medicine & Science in Sports & Exercise*
-46 (9): 1816. <https://doi.org/10.1249/MSS.0000000000000289>.
+<span class="csl-left-margin">5.
+</span><span class="csl-right-inline">Hildebrand M, Van Hees VT, Hansen
+BH, et al. [Age group comparability of raw accelerometer output from
+wrist- and hip-worn
+monitors](https://doi.org/10.1249/MSS.0000000000000289). *Medicine &
+Science in Sports & Exercise* 2014; 46: 1816.</span>
 
 </div>
 
-<div id="ref-karas2021" class="csl-entry">
+<div id="ref-hildebrand2017" class="csl-entry">
 
-Karas, Marta, Marcin Stra Czkiewicz, William Fadel, Jaroslaw Harezlak,
-Ciprian M. Crainiceanu, and Jacek K. Urbanek. 2021. “Adaptive empirical
-pattern transformation (ADEPT) with application to walking stride
-segmentation.” *Biostatistics (Oxford, England)* 22 (2): 331–47.
-<https://doi.org/10.1093/biostatistics/kxz033>.
-
-</div>
-
-<div id="ref-maylor2022" class="csl-entry">
-
-Maylor, Benjamin D., Charlotte L. Edwardson, Paddy C. Dempsey, Matthew
-R. Patterson, Tatiana Plekhanova, Tom Yates, and Alex V. Rowlands. 2022.
-“Stepping Towards More Intuitive Physical Activity Metrics with
-Wrist-Worn Accelerometry: Validity of an Open-Source Step-Count
-Algorithm.” *Sensors* 22 (24). <https://doi.org/10.3390/s22249984>.
+<span class="csl-left-margin">6.
+</span><span class="csl-right-inline">Hildebrand M, Hansen BH, Hees VT
+van, et al. [Evaluation of raw acceleration sedentary thresholds in
+children and adults](https://doi.org/10.1111/sms.12795). *Scandinavian
+Journal of Medicine & Science in Sports* 2017; 27: 1814–1823.</span>
 
 </div>
 
 <div id="ref-mielke2023" class="csl-entry">
 
-Mielke, Gregore Iven, Márcio de Almeida Mendes, Ulf Ekelund, Alex V.
-Rowlands, Felipe Fossati Reichert, and Inacio Crochemore-Silva. 2023.
-“Absolute Intensity Thresholds for Tri-Axial Wrist and Waist
-Accelerometer-Measured Movement Behaviors in Adults.” *Scandinavian
-Journal of Medicine & Science in Sports* 33 (9): 1752–64.
-<https://doi.org/10.1111/sms.14416>.
+<span class="csl-left-margin">7.
+</span><span class="csl-right-inline">Mielke GI, Almeida Mendes M de,
+Ekelund U, et al. [Absolute intensity thresholds for tri-axial wrist and
+waist accelerometer-measured movement behaviors in
+adults](https://doi.org/10.1111/sms.14416). *Scandinavian Journal of
+Medicine & Science in Sports* 2023; 33: 1752–1764.</span>
 
 </div>
 
 <div id="ref-montoye2018" class="csl-entry">
 
-Montoye, Alexander H. K., Bradford S. Westgate, Morgan R. Fonley, and
-Karin A. Pfeiffer. 2018. “Cross-validation and out-of-sample testing of
-physical activity intensity predictions with a wrist-worn
-accelerometer.” *Journal of Applied Physiology (Bethesda, Md.: 1985)*
-124 (5): 1284–93. <https://doi.org/10.1152/japplphysiol.00760.2017>.
+<span class="csl-left-margin">8.
+</span><span class="csl-right-inline">Montoye AHK, Westgate BS, Fonley
+MR, et al. [Cross-validation and out-of-sample testing of physical
+activity intensity predictions with a wrist-worn
+accelerometer](https://doi.org/10.1152/japplphysiol.00760.2017).
+*Journal of Applied Physiology (Bethesda, Md: 1985)* 2018; 124:
+1284–1293.</span>
 
 </div>
 
 <div id="ref-pavey2017" class="csl-entry">
 
-Pavey, Toby G., Nicholas D. Gilson, Sjaan R. Gomersall, Bronwyn Clark,
-and Stewart G. Trost. 2017. “Field evaluation of a random forest
-activity classifier for wrist-worn accelerometer data.” *Journal of
-Science and Medicine in Sport* 20 (1): 75–80.
-<https://doi.org/10.1016/j.jsams.2016.06.003>.
-
-</div>
-
-<div id="ref-small2024" class="csl-entry">
-
-Small, Scott R., Shing Chan, Rosemary Walmsley, Lennart Von Fritsch,
-Aidan Acquah, Gert Mertes, Benjamin G. Feakins, et al. 2024.
-“Self-Supervised Machine Learning to Characterize Step Counts from
-Wrist-Worn Accelerometers in the UK Biobank.” *Medicine & Science in
-Sports & Exercise* 56 (10): 1945.
-<https://doi.org/10.1249/MSS.0000000000003478>.
-
-</div>
-
-<div id="ref-straczkiewicz2023" class="csl-entry">
-
-Straczkiewicz, Marcin, Emily J. Huang, and Jukka-Pekka Onnela. 2023. “A
-“One-Size-Fits-Most” Walking Recognition Method for Smartphones,
-Smartwatches, and Wearable Accelerometers.” *Npj Digital Medicine* 6
-(1): 29. <https://doi.org/10.1038/s41746-022-00745-z>.
+<span class="csl-left-margin">9.
+</span><span class="csl-right-inline">Pavey TG, Gilson ND, Gomersall SR,
+et al. [Field evaluation of a random forest activity classifier for
+wrist-worn accelerometer
+data](https://doi.org/10.1016/j.jsams.2016.06.003). *Journal of Science
+and Medicine in Sport* 2017; 20: 75–80.</span>
 
 </div>
 
 <div id="ref-walmsley2022" class="csl-entry">
 
-Walmsley, Rosemary, Shing Chan, Karl Smith-Byrne, Rema Ramakrishnan,
-Mark Woodward, Kazem Rahimi, Terence Dwyer, Derrick Bennett, and Aiden
-Doherty. 2022. “Reallocation of Time Between Device-Measured Movement
-Behaviours and Risk of Incident Cardiovascular Disease,” September.
-<https://doi.org/10.1136/bjsports-2021-104050>.
+<span class="csl-left-margin">10.
+</span><span class="csl-right-inline">Walmsley R, Chan S, Smith-Byrne K,
+et al. Reallocation of time between device-measured movement behaviours
+and risk of incident cardiovascular disease. Epub ahead of print 1
+September 2022. DOI:
+[10.1136/bjsports-2021-104050](https://doi.org/10.1136/bjsports-2021-104050).</span>
+
+</div>
+
+<div id="ref-doherty2025" class="csl-entry">
+
+<span class="csl-left-margin">11.
+</span><span class="csl-right-inline">Doherty A, Chan S, Yuan H, et al.
+*Accelerometer: A python toolkit for extracting physical activity and
+behavior metrics from wearable sensor data*. Zenodo. Epub ahead of print
+13 July 2025. DOI:
+[10.5281/zenodo.15874476](https://doi.org/10.5281/zenodo.15874476).</span>
 
 </div>
 
 <div id="ref-white2016" class="csl-entry">
 
-White, Tom, Kate Westgate, Nicholas J. Wareham, and Soren Brage. 2016.
-“Estimation of Physical Activity Energy Expenditure During Free-Living
-from Wrist Accelerometry in UK Adults.” *PLOS ONE* 11 (12): e0167472.
-<https://doi.org/10.1371/journal.pone.0167472>.
+<span class="csl-left-margin">12.
+</span><span class="csl-right-inline">White T, Westgate K, Wareham NJ,
+et al. [Estimation of Physical Activity Energy Expenditure during
+Free-Living from Wrist Accelerometry in UK
+Adults](https://doi.org/10.1371/journal.pone.0167472). *PLOS ONE* 2016;
+11: e0167472.</span>
 
 </div>
 
 <div id="ref-yuan2024" class="csl-entry">
 
-Yuan, Hang, Shing Chan, Andrew P. Creagh, Catherine Tong, Aidan Acquah,
-David A. Clifton, and Aiden Doherty. 2024. “Self-Supervised Learning for
-Human Activity Recognition Using 700,000 Person-Days of Wearable Data.”
-*Npj Digital Medicine* 7 (1): 91.
-<https://doi.org/10.1038/s41746-024-01062-3>.
+<span class="csl-left-margin">13.
+</span><span class="csl-right-inline">Yuan H, Chan S, Creagh AP, et al.
+[Self-supervised learning for human activity recognition using 700,000
+person-days of wearable
+data](https://doi.org/10.1038/s41746-024-01062-3). *npj Digital
+Medicine* 2024; 7: 91.</span>
+
+</div>
+
+<div id="ref-karas2021" class="csl-entry">
+
+<span class="csl-left-margin">14.
+</span><span class="csl-right-inline">Karas M, Stra Czkiewicz M, Fadel
+W, et al. [Adaptive empirical pattern transformation (ADEPT) with
+application to walking stride
+segmentation](https://doi.org/10.1093/biostatistics/kxz033).
+*Biostatistics (Oxford, England)* 2021; 22: 331–347.</span>
+
+</div>
+
+<div id="ref-straczkiewicz2023" class="csl-entry">
+
+<span class="csl-left-margin">15.
+</span><span class="csl-right-inline">Straczkiewicz M, Huang EJ, Onnela
+J-P. [A “one-size-fits-most” walking recognition method for smartphones,
+smartwatches, and wearable
+accelerometers](https://doi.org/10.1038/s41746-022-00745-z). *npj
+Digital Medicine* 2023; 6: 29.</span>
+
+</div>
+
+<div id="ref-small2024" class="csl-entry">
+
+<span class="csl-left-margin">16.
+</span><span class="csl-right-inline">Small SR, Chan S, Walmsley R, et
+al. [Self-supervised machine learning to characterize step counts from
+wrist-worn accelerometers in the UK
+biobank](https://doi.org/10.1249/MSS.0000000000003478). *Medicine &
+Science in Sports & Exercise* 2024; 56: 1945.</span>
+
+</div>
+
+<div id="ref-chan2026" class="csl-entry">
+
+<span class="csl-left-margin">17.
+</span><span class="csl-right-inline">Chan S, Small SR, Acquah A, et al.
+*Improved step counting via foundation models for wrist-worn
+accelerometers*. Zenodo. Epub ahead of print 15 January 2026. DOI:
+[10.5281/zenodo.18255030](https://doi.org/10.5281/zenodo.18255030).</span>
+
+</div>
+
+<div id="ref-ducharme2021" class="csl-entry">
+
+<span class="csl-left-margin">18.
+</span><span class="csl-right-inline">Ducharme SW, Lim J, Busa MA, et
+al. A Transparent Method for Step Detection Using an Acceleration
+Threshold. Epub ahead of print 25 October 2021. DOI:
+[10.1123/jmpb.2021-0011](https://doi.org/10.1123/jmpb.2021-0011).</span>
+
+</div>
+
+<div id="ref-gu2017" class="csl-entry">
+
+<span class="csl-left-margin">19.
+</span><span class="csl-right-inline">Gu F, Khoshelham K, Shang J, et
+al. [Robust and accurate smartphone-based step counting for indoor
+localization](https://doi.org/10.1109/JSEN.2017.2685999). *IEEE Sensors
+Journal* 2017; 17: 3453–3460.</span>
+
+</div>
+
+<div id="ref-maylor2022" class="csl-entry">
+
+<span class="csl-left-margin">20.
+</span><span class="csl-right-inline">Maylor BD, Edwardson CL, Dempsey
+PC, et al. Stepping towards More Intuitive Physical Activity Metrics
+with Wrist-Worn Accelerometry: Validity of an Open-Source Step-Count
+Algorithm. *Sensors*; 22. Epub ahead of print 18 December 2022. DOI:
+[10.3390/s22249984](https://doi.org/10.3390/s22249984).</span>
 
 </div>
 
