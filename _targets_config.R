@@ -37,6 +37,23 @@ source("_packages.R")
 # Interactive use
 # for (package in pkgs) library(package, character.only = TRUE)
 
+# Decompress config files.
+chk_10004 <- !file.exists(vct_raw_fpa[3])
+chk_10005 <- !file.exists(vct_raw_fpa[4])
+
+if (chk_10004) {R.utils::decompressFile(
+  filename = "data/0_CONFIG/RAW/WAVES_10004_RAW.gt3x.xz",
+  ext = "xz",
+  FUN = base::xzfile,
+  remove = FALSE
+)}
+if (chk_10005) {R.utils::decompressFile(
+  filename = "data/0_CONFIG/RAW/WAVES_10004_RAW.cwa.xz",
+  ext = "xz",
+  FUN = base::xzfile,
+  remove = FALSE
+)}
+
 # Define directories
 fdr_logs <- file.path(
   "logs"
