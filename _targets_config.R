@@ -48,7 +48,7 @@ if (chk_10004) {R.utils::decompressFile(
   remove = FALSE
 )}
 if (chk_10005) {R.utils::decompressFile(
-  filename = "data/0_CONFIG/RAW/WAVES_10004_RAW.cwa.xz",
+  filename = "data/0_CONFIG/RAW/WAVES_10005_RAW.cwa.xz",
   ext = "xz",
   FUN = base::xzfile,
   remove = FALSE
