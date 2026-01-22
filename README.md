@@ -207,6 +207,21 @@ potentially available validation data.
 
 ## Notes
 
+- After running `renv::restore()` and starting a new R session, you may
+  see the following in the console during startup:
+
+  ![](media/Screenshot%202026-01-22%20153810.png)
+
+  Additionally, if you run `renv::status()`, the following will appear:
+
+  ![](media/Screenshot%202026-01-22%20154057.png)
+
+  This is **normal and expected**. As long as the packages are
+  installed, everything is good to go. For some reason, `renv` will
+  always think the packages are not being used within the repository,
+  which is most likely due to how the WAVES repository is dependent on
+  the `targets` pipeline.
+
 - Even if a pipeline finishes successfully, you may in the console
   “There were XX warnings (use warnings() to see them)”. This is normal
   if working on an R version that is not 4.5.2., as the messages will be
@@ -244,10 +259,7 @@ potentially available validation data.
 | Montoye 2018<sup>8</sup> | ✔️ | ✔️ | ❌ |
 | Trost 2017<sup>9</sup> Extended | ✔️ | ✔️ | ❌ |
 | Walmsley 2022<sup>10</sup> (accelerometer v7.3.0<sup>11</sup>) | ✔️ | ✔️ | ❌ |
-| White 2016<sup>12</sup> ENMO linear | ✔️ | ✔️ | ❌ |
-| White 2016<sup>12</sup> ENMO polynomial | ✔️ | ✔️ | ❌ |
-| White 2016<sup>12</sup> HPFVM linear | ✔️ | ✔️ | ❌ |
-| White 2016<sup>12</sup> HPFVM polynomial | ✔️ | ✔️ | ❌ |
+| White 2016<sup>12</sup> ENMO and HPFVM | ✔️ | ✔️ | ❌ |
 | Yuan 2024<sup>13</sup> (actinet) | ✔️ | ✔️ | ❌ |
 | Oak<sup>14</sup> | ❌ | ❌ | ✔️ |
 | Small 2024<sup>15</sup> (stepcount v3.17.1<sup>16</sup>) | ❌ | ❌ | ✔️ |

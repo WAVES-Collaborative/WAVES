@@ -150,6 +150,16 @@ The proposed flow diagram outlines the process for how the validation data and d
 
 ## Notes
 
+-   After running `renv::restore()` and starting a new R session, you may see the following in the console during startup:
+
+    ![](media/Screenshot 2026-01-22 153810.png)
+
+    Additionally, if you run `renv::status()`, the following will appear:
+
+    ![](media/Screenshot 2026-01-22 154057.png)
+
+    This is **normal and expected**. As long as the packages are installed, everything is good to go. For some reason, `renv` will always think the packages are not being used within the repository, which is most likely due to how the WAVES repository is dependent on the `targets` pipeline.
+
 -   Even if a pipeline finishes successfully, you may in the console "There were XX warnings (use warnings() to see them)". This is normal if working on an R version that is not 4.5.2., as the messages will be warnings that the packages are meant to work on the latest R version. As long as the R version being used is R 4.4 or beyond, everything should still work. We have not tested the WAVES repository on R versions below 4.4.
 
 -   If working on a high performance cluster...TODO (work with Hayden)
@@ -175,10 +185,7 @@ The proposed flow diagram outlines the process for how the validation data and d
 | Montoye 2018[@montoye2018] | ✔️ | ✔️ | ❌ |
 | Trost 2017[@pavey2017] Extended | ✔️ | ✔️ | ❌ |
 | Walmsley 2022[@walmsley2022] (accelerometer v7.3.0[@doherty2025]) | ✔️ | ✔️ | ❌ |
-| White 2016[@white2016] ENMO linear | ✔️ | ✔️ | ❌ |
-| White 2016[@white2016] ENMO polynomial | ✔️ | ✔️ | ❌ |
-| White 2016[@white2016] HPFVM linear | ✔️ | ✔️ | ❌ |
-| White 2016[@white2016] HPFVM polynomial | ✔️ | ✔️ | ❌ |
+| White 2016[@white2016] ENMO and HPFVM | ✔️ | ✔️ | ❌ |
 | Yuan 2024[@yuan2024] (actinet) | ✔️ | ✔️ | ❌ |
 | Oak[@straczkiewicz2023] | ❌ | ❌ | ✔️ |
 | Small 2024[@small2024] (stepcount v3.17.1[@chan2026]) | ❌ | ❌ | ✔️ |
