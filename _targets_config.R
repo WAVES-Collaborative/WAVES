@@ -58,6 +58,9 @@ if (chk_10005) {R.utils::decompressFile(
 fdr_logs <- file.path(
   "logs"
 )
+fdr_ggir <- file.path(
+  "data", "0_CONFIG", "GGIR"
+)
 fdr_calibrated <- file.path(
   "data", "0_CONFIG", "RAW-CALIBRATED_QS2"
 )
@@ -85,6 +88,7 @@ fdr_reports <- file.path(
 # fdr_merged_
 fs::dir_create(c(
   fdr_logs,
+  fdr_ggir,
   fdr_calibrated,
   fdr_output.cutpoint,
   fdr_output.raw,
