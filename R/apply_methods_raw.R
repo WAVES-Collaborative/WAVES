@@ -97,20 +97,6 @@ apply_methods_raw <- function(fpa_read,
   mtx_data <-
     qs2::qd_read(fpa_read)
 
-  # # Make an empty data frame for step approaches/models.
-  # df_steps <- tibble(
-  #   datetime = seq.POSIXt(
-  #     from = rec_start_dttm,
-  #     to   = rec_start_dttm + (nrow(mtx_data) / I$sf),
-  #     by   = 1
-  #     # length.out = n_window
-  #   ),
-  #   # steps_adept     = NA,
-  #   steps_sdt       = NA,
-  #   steps_verisense = NA,
-  #   steps_oak       = NA
-  # )
-
   # start of recording ----
   if (I$dformn == "gt3x") {
     rec_start_junk <-
@@ -180,8 +166,8 @@ apply_methods_raw <- function(fpa_read,
   # Montoye
   load(file.path(dir_models, "montoye2018.RData"))
 
-  # OAK
-  use_condaenv("WHO_WAVES_oak")
+  # Oak 1.0
+  use_condaenv("WHO_WAVES_oak_1.0")
   forest <- import("forest")
   np <- import("numpy")
 
@@ -205,8 +191,7 @@ apply_methods_raw <- function(fpa_read,
     intensity_montoye.svm = NA_character_,
     class_trost = NA_character_,
     class_ellis = NA_character_,
-    steps_adept              = NA,
-    steps_oak                = NA,
+    steps_oak.1.0            = NA,
     steps_sdt                = NA_integer_,
     steps_verisense.original = NA_integer_,
     steps_verisense.revised  = NA_integer_
@@ -371,7 +356,7 @@ apply_methods_raw <- function(fpa_read,
     df_all$steps_verisense.revised[ind_veri] <- le_steps
 
     ### Steps: oak ----
-    # Like ADEPT, split into max 6 hours to try and prevent overloading memory.
+    # Split into max 6 hours to try and prevent overloading memory.
 
     # time (t_bout) has to be in double format AND contain fractional seconds.
     # The below won't work if your vector just repeats the time value throughout
@@ -382,6 +367,7 @@ apply_methods_raw <- function(fpa_read,
 
     if (round(length(ind_chunk) / I$sf / 3600, digits = 2) > 6) {
 
+      #### oak chunks ----
       chunk_is_last_oak <- FALSE
       chunk_begin_oak   <- chunk_begin
       chunk_length_oak  <- I$sf * 60 * 60 * 6
@@ -415,7 +401,7 @@ apply_methods_raw <- function(fpa_read,
             from = chunk_begin_oak,
             to   = round(last(ind_chunk_oak) / I$sf, digits = 0) * I$sf
           )
-          df_all$steps_oak[last(ind_steps_oak)] <- 0
+          df_all$steps_oak.1.0[last(ind_steps_oak)] <- 0
           ind_steps_oak <- ind_steps_oak[-length(ind_steps_oak)]
 
         }
@@ -437,7 +423,7 @@ apply_methods_raw <- function(fpa_read,
 
         # defaults except for fs
         # https://github.com/onnela-lab/forest/blob/develop/docs/source/oak.md#default-tuning-parameters-for-walking-recognition-and-step-counting
-        df_all$steps_oak[ind_steps_oak] <- forest$oak$base$find_walking(
+        df_all$steps_oak.1.0[ind_steps_oak] <- forest$oak$base$find_walking(
           vm_bout = vm_bout[[2]],
           fs = as.integer(I$sf),
           min_amp = 0.3,
@@ -456,6 +442,7 @@ apply_methods_raw <- function(fpa_read,
       }
     } else {
 
+      #### no chunks ----
       chk_decimal <-
         last(ind_chunk) / I$sf !=
         round(last(ind_chunk) / I$sf, digits = 0)
@@ -468,7 +455,7 @@ apply_methods_raw <- function(fpa_read,
           from = chunk_begin,
           to   = round(last(ind_chunk) / I$sf, digits = 0) * I$sf
         )
-        df_all$steps_oak[last(ind_steps)] <- 0
+        df_all$steps_oak.1.0[last(ind_steps)] <- 0
         ind_steps_oak <- ind_steps[-length(ind_steps)]
 
       } else {
@@ -493,7 +480,7 @@ apply_methods_raw <- function(fpa_read,
 
       # defaults except for fs
       # https://github.com/onnela-lab/forest/blob/develop/docs/source/oak.md#default-tuning-parameters-for-walking-recognition-and-step-counting
-      df_all$steps_oak[ind_steps_oak] <- forest$oak$base$find_walking(
+      df_all$steps_oak.1.0[ind_steps_oak] <- forest$oak$base$find_walking(
         vm_bout = vm_bout[[2]],
         fs = as.integer(I$sf),
         min_amp = 0.3,
@@ -544,7 +531,7 @@ apply_methods_raw <- function(fpa_read,
     ind_steps_oak,
     #
     ind_steps,
-    vm,
+    vm_bout,
     le_steps
   ) |>
     suppressWarnings()
@@ -598,8 +585,7 @@ apply_methods_raw <- function(fpa_read,
     fill(
       matches("intensity|class"),
       .direction = "down"
-    ) |>
-    mutate(steps_adept = replace_na(steps_adept, 0))
+    )
 
   # Shouldn't be any NA for other variables.
   # anyNA(df_all)
