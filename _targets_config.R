@@ -54,6 +54,24 @@ if (chk_10005) {R.utils::decompressFile(
   remove = FALSE
 )}
 
+# Make sure conda isn't being used by another process: TEST ON MAC
+chk_conda <-
+  reticulate::miniconda_path() |>
+  dirname() |>
+  file.path("Temp", "1") |>
+  list.files(pattern = "conda_tmp",
+             full.names = TRUE)
+
+if (length(chk_conda) != 0) {
+
+  stop(c(
+    "A process within a conda environment was interrupted or is currently ongoing.
+    Please only run the pipeline without any other processes running in the background
+    or delete the temp file if a conda environment process was interrupted.",
+    paste0('"', chk_conda, '"\n')
+  ))
+}
+
 # Define directories
 fdr_logs <- file.path(
   "logs"
@@ -66,6 +84,9 @@ fdr_output.cutpoint <- file.path(
 )
 fdr_output.raw <- file.path(
   "data", "0_CONFIG", "OUTPUT-RAW_PARQUET"
+)
+fdr_output.oak.pre <- file.path(
+  "data", "0_CONFIG", "OUTPUT-OAK-PRE_PARQUET"
 )
 fdr_stepcount <- file.path(
   "data", "0_CONFIG", "stepcount"
@@ -88,6 +109,7 @@ fs::dir_create(c(
   fdr_calibrated,
   fdr_output.cutpoint,
   fdr_output.raw,
+  fdr_output.oak.pre,
   fdr_stepcount,
   fdr_walmsley,
   fdr_actinet,
@@ -174,15 +196,16 @@ tar_plan(
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                             FILE DIRECTORIES                           ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  dir_models  = "models",
-  dir_logs    = fdr_logs,
-  dir_cal     = fdr_calibrated,
-  dir_out.cut = fdr_output.cutpoint,
-  dir_out.raw = fdr_output.raw,
-  dir_stepcount = fdr_stepcount,
-  dir_walmsley  = fdr_walmsley,
-  dir_actinet   = fdr_actinet,
-  dir_merged    = fdr_merged,
+  dir_models      = "models",
+  dir_logs        = fdr_logs,
+  dir_cal         = fdr_calibrated,
+  dir_out.cut     = fdr_output.cutpoint,
+  dir_out.raw     = fdr_output.raw,
+  dir_out.oak.pre = fdr_output.oak.pre,
+  dir_stepcount   = fdr_stepcount,
+  dir_walmsley    = fdr_walmsley,
+  dir_actinet     = fdr_actinet,
+  dir_merged      = fdr_merged,
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                                FILE PATHS                              ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -285,6 +308,20 @@ tar_plan(
     pattern   = map(vct_cal),
     iteration = "list",
     error = "null"
+  ),
+  tar_qs(
+    name      = lst_out.oak.pre,
+    command   = apply_oak.pre(
+      fpa_read      = vct_cal,
+      vct_fpa_basic = vct_basic,
+      dir_write     = dir_out.oak.pre,
+      my_tz         = my_tz,
+      df_miniconda
+    ),
+    pattern   = map(vct_cal),
+    iteration = "list",
+    error = "null",
+    deployment = "main" # in order to avoid error of loading two conda environments within the same R session
   ),
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                                   MERGE                                ----
