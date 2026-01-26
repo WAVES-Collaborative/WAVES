@@ -36,7 +36,10 @@ config_miniconda <- function(...) {
   chk_stepcount <- !condaenv_exists("WHO_WAVES_stepcount")
   chk_accelerometer <- !condaenv_exists("WHO_WAVES_accelerometer")
   chk_actinet <- !condaenv_exists("WHO_WAVES_actinet")
-  chk_oak <- !condaenv_exists("WHO_WAVES_oak")
+  chk_oak_1.0 <- !condaenv_exists("WHO_WAVES_oak_1.0")
+  chk_oak_pre <- !condaenv_exists("WHO_WAVES_oak_pre")
+
+  # packages in each environment ----
   vct_pkg_step <- c(
     "actipy_3.8.0",
     "bzip2_1.0.8",
@@ -269,6 +272,65 @@ config_miniconda <- function(...) {
     "vc14_runtime_14.44.35208",
     "vcomp14_14.44.35208",
     "wheel_0.45.1"
+  )
+  vct_pkg_oak_pre <- c(
+    "audioread_3.1.0",
+    "bzip2_1.0.8",
+    "ca-certificates_2026.1.4",
+    "certifi_2026.1.4",
+    "cffi_2.0.0",
+    "charset-normalizer_3.4.4",
+    "decorator_5.2.1",
+    "flatbuffers_25.12.19",
+    "forest-analysis_1.0.dev3",
+    "h3_4.4.1",
+    "holidays_0.89",
+    "idna_3.11",
+    "joblib_1.5.3",
+    "lazy-loader_0.4",
+    "libexpat_2.7.3",
+    "libffi_3.5.2",
+    "liblzma_5.8.2",
+    "librosa_0.11.0",
+    "libsqlite_3.51.2",
+    "libzlib_1.3.1",
+    "llvmlite_0.46.0",
+    "msgpack_1.1.2",
+    "numba_0.63.1",
+    "numpy_2.3.5",
+    "openrouteservice_2.3.3",
+    "openssl_3.6.0",
+    "packaging_26.0",
+    "pandas_3.0.0",
+    "pip_25.3",
+    "platformdirs_4.5.1",
+    "pooch_1.8.2",
+    "pycparser_3.0",
+    "pyproj_3.7.2",
+    "python_3.11.14",
+    "python-dateutil_2.9.0.post0",
+    "pytz_2025.2",
+    "ratelimit_2.2.1",
+    "requests_2.32.5",
+    "scikit-learn_1.8.0",
+    "scipy_1.17.0",
+    "setuptools_80.10.1",
+    "shapely_2.1.2",
+    "six_1.17.0",
+    "soundfile_0.13.1",
+    "soxr_1.0.0",
+    "ssqueezepy_0.6.6",
+    "threadpoolctl_3.6.0",
+    "timezonefinder_8.2.1",
+    "tk_8.6.13",
+    "typing-extensions_4.15.0",
+    "tzdata_2025.3",
+    "ucrt_10.0.26100.0",
+    "urllib3_2.6.3",
+    "vc_14.3",
+    "vc14_runtime_14.44.35208",
+    "vcomp14_14.44.35208",
+    "wheel_0.46.2"
   )
 
   # stepcount ----
@@ -550,20 +612,20 @@ config_miniconda <- function(...) {
     }
   }
 
-  # oak ----
-  if (chk_oak) {
+  # oak_1.0 ----
+  if (chk_oak_1.0) {
 
     # Install's of forest from  at least commit adada3f onwards don't work unless
     # timezonefinder module is installed beforehand. To lazy to open an issue
     # for it.
     conda_create(
-      envname = "WHO_WAVES_oak",
+      envname = "WHO_WAVES_oak_1.0",
       packages = "timezonefinder==8.1.0",
       forge = TRUE,
       python_version = 3.12,
       pip = TRUE
     )
-    chk_successful <- condaenv_exists("WHO_WAVES_oak")
+    chk_successful <- condaenv_exists("WHO_WAVES_oak_1.0")
 
     if (chk_successful) {
 
@@ -590,19 +652,19 @@ config_miniconda <- function(...) {
         system2(
           command = file.path(miniconda_path(), "Scripts", "activate.bat"),
           args = paste(
-            "activate WHO_WAVES_oak",
+            "activate WHO_WAVES_oak_1.0",
             "pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d",
             sep = " & "
           )
         )
       } else {
         # TODO CHECK
-        # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_oak ; pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d
+        # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_oak_1.0 ; pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d
         system2(
           command = "source",
           args = paste(
             paste0('"', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
-            "conda activate WHO_WAVES_oak",
+            "conda activate WHO_WAVES_oak_1.0",
             "pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d",
             sep = " ; "
           )
@@ -610,7 +672,7 @@ config_miniconda <- function(...) {
         # system2(
         #   command = paste0('source "', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
         #   args = paste(
-        #     "conda activate WHO_WAVES_oak",
+        #     "conda activate WHO_WAVES_oak_1.0",
         #     "pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d",
         #     sep = " ; "
         #   )
@@ -618,7 +680,7 @@ config_miniconda <- function(...) {
       }
 
       vct_installed <-
-        py_list_packages("WHO_WAVES_oak") |>
+        py_list_packages("WHO_WAVES_oak_1.0") |>
         unite(col = "pkg", package, version) |>
         pull(pkg)
       chk_package <- all(
@@ -646,7 +708,7 @@ config_miniconda <- function(...) {
 
     # Check packages are installed.
     vct_installed <-
-      py_list_packages("WHO_WAVES_oak") |>
+      py_list_packages("WHO_WAVES_oak_1.0") |>
       unite(col = "pkg", package, version) |>
       pull(pkg)
     chk_package <- all(
@@ -668,19 +730,19 @@ config_miniconda <- function(...) {
         system2(
           command = file.path(miniconda_path(), "Scripts", "activate.bat"),
           args = paste(
-            "activate WHO_WAVES_oak",
+            "activate WHO_WAVES_oak_1.0",
             "pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d",
             sep = " & "
           )
         )
       } else {
         # TODO CHECK
-        # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_oak ; pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d
+        # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_oak_1.0 ; pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d
         system2(
           command = "source",
           args = paste(
             paste0('"', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
-            "conda activate WHO_WAVES_oak",
+            "conda activate WHO_WAVES_oak_1.0",
             "pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d",
             sep = " ; "
           )
@@ -688,7 +750,7 @@ config_miniconda <- function(...) {
         # system2(
         #   command = paste0('source "', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
         #   args = paste(
-        #     "conda activate WHO_WAVES_oak",
+        #     "conda activate WHO_WAVES_oak_1.0",
         #     "pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d",
         #     sep = " ; "
         #   )
@@ -696,7 +758,7 @@ config_miniconda <- function(...) {
       }
 
       vct_installed <-
-        py_list_packages("WHO_WAVES_oak") |>
+        py_list_packages("WHO_WAVES_oak_1.0") |>
         unite(col = "pkg", package, version) |>
         pull(pkg)
       # vct_installed |>
@@ -719,6 +781,170 @@ config_miniconda <- function(...) {
     }
   }
 
+  # oak_pre-release ----
+  if (chk_oak_pre) {
+
+    # Install's of forest from  at least commit adada3f onwards don't work unless
+    # timezonefinder module is installed beforehand. To lazy to open an issue
+    # for it.
+    conda_create(
+      envname = "WHO_WAVES_oak_pre",
+      # packages = "timezonefinder==8.1.0",
+      forge = TRUE,
+      python_version = 3.11, # match version in walking R package
+      pip = TRUE
+    )
+    chk_successful <- condaenv_exists("WHO_WAVES_oak_pre")
+
+    if (chk_successful) {
+
+      msg_oak_pre_env <- "Successfuly created"
+
+      # The Forest module in the `Walking` R package from Muscheli is from
+      # Dec 13, 2024 https://github.com/onnela-lab/forest/commit/45fb41038bd46c25d9e6a4442aa74fa03b501317
+
+      chk_windows <- grepl(
+        x = Sys.getenv("OS"),
+        pattern = "windows",
+        ignore.case = TRUE
+      )
+
+      if (chk_windows) {
+        system2(
+          command = file.path(miniconda_path(), "Scripts", "activate.bat"),
+          args = paste(
+            "activate WHO_WAVES_oak_pre",
+            "pip install git+https://github.com/onnela-lab/forest@45fb41038bd46c25d9e6a4442aa74fa03b501317",
+            sep = " & "
+          )
+        )
+      } else {
+        # TODO CHECK
+        # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_oak_pre ; pip install git+https://github.com/onnela-lab/forest@45fb41038bd46c25d9e6a4442aa74fa03b501317
+        system2(
+          command = "source",
+          args = paste(
+            paste0('"', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
+            "conda activate WHO_WAVES_oak_pre",
+            "pip install git+https://github.com/onnela-lab/forest@45fb41038bd46c25d9e6a4442aa74fa03b501317",
+            sep = " ; "
+          )
+        )
+        # system2(
+        #   command = paste0('source "', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
+        #   args = paste(
+        #     "conda activate WHO_WAVES_oak_pre",
+        #     "pip install git+https://github.com/onnela-lab/forest@45fb41038bd46c25d9e6a4442aa74fa03b501317",
+        #     sep = " ; "
+        #   )
+        # )
+      }
+
+      vct_installed <-
+        py_list_packages("WHO_WAVES_oak_pre") |>
+        unite(col = "pkg", package, version) |>
+        pull(pkg)
+      # vct_installed |>
+      #   paste0('"', ... = _, '",\n') |>
+      #   cat(sep = "")
+      chk_package <- all(
+        vct_pkg_oak_pre %in% vct_installed
+      )
+
+      if (chk_package) {
+        msg_oak_pre_pkg <- "Modules successfully installed."
+      } else {
+        vct_fudge <- vct_installed[!vct_pkg_oak_pre %in% vct_installed]
+        msg_oak_pre_pkg <- paste0(
+          "Unsuccessful module installation. The following modules were not installed: ",
+          paste0('"', vct_fudge, '"',  collapse = " "), ". Share with WHO WAVES team."
+        )
+      }
+
+    } else {
+      msg_oak_pre_env <- "Not created. Share report with WHO_WAVES team."
+      msg_oak_pre_pkg <- "Environment not created, no packages installed."
+    }
+
+  } else {
+
+    msg_oak_pre_env <- "Already exists."
+
+    # Check packages are installed.
+    vct_installed <-
+      py_list_packages("WHO_WAVES_oak_pre") |>
+      unite(col = "pkg", package, version) |>
+      pull(pkg)
+    chk_package <- all(
+      vct_pkg_oak_pre %in% vct_installed
+    )
+
+    if (chk_package) {
+      msg_oak_pre_pkg <- "Modules already installed."
+    } else {
+
+      # Install modules and check one more time afterwards.
+      chk_windows <- grepl(
+        x = Sys.getenv("OS"),
+        pattern = "windows",
+        ignore.case = TRUE
+      )
+
+      if (chk_windows) {
+        system2(
+          command = file.path(miniconda_path(), "Scripts", "activate.bat"),
+          args = paste(
+            "activate WHO_WAVES_oak_pre",
+            "pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d",
+            sep = " & "
+          )
+        )
+      } else {
+        # TODO CHECK
+        # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_oak_pre ; pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d
+        system2(
+          command = "source",
+          args = paste(
+            paste0('"', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
+            "conda activate WHO_WAVES_oak_pre",
+            "pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d",
+            sep = " ; "
+          )
+        )
+        # system2(
+        #   command = paste0('source "', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
+        #   args = paste(
+        #     "conda activate WHO_WAVES_oak_pre",
+        #     "pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d",
+        #     sep = " ; "
+        #   )
+        # )
+      }
+
+      vct_installed <-
+        py_list_packages("WHO_WAVES_oak_pre") |>
+        unite(col = "pkg", package, version) |>
+        pull(pkg)
+      # vct_installed |>
+      #   paste0('"', ... = _, '",\n') |>
+      #   cat(sep = "")
+      chk_package <- all(
+        vct_pkg_oak_pre %in% vct_installed
+      )
+
+      if (chk_package) {
+        msg_oak_pre_pkg <- "Modules successfully installed."
+      } else {
+        vct_fudge <- vct_installed[!vct_pkg_oak_pre %in% vct_installed]
+        msg_oak_pre_pkg <- paste0(
+          "Unsuccessful module installation. The following modules were not installed: ",
+          paste0('"', vct_fudge, '"',  collapse = " "), ". Share with WHO WAVES team."
+        )
+
+      }
+    }
+  }
+
   # return ----
   data.frame(
     Item = c(
@@ -730,8 +956,10 @@ config_miniconda <- function(...) {
       "accelerometer modules",
       "actinet environment",
       "actinet modules",
-      "oak environment",
-      "oak modules"
+      "oak.1.0 environment",
+      "oak.1.0 modules",
+      "oak.pre environment",
+      "oak.pre modules"
     ),
     `Message/Value` = c(
       msg_conda,
@@ -743,7 +971,9 @@ config_miniconda <- function(...) {
       msg_acti_env,
       msg_acti_pkg,
       msg_oak_env,
-      msg_oak_pkg
+      msg_oak_pkg,
+      msg_oak_pre_env,
+      msg_oak_pre_pkg
     )
   )
 

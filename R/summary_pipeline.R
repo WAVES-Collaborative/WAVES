@@ -2,12 +2,14 @@ summary_config <- function(vct_raw,
                            vct_basic,
                            vct_cal,
                            lst_out.raw,
+                           lst_out.oak.pre,
                            lst_out.cut,
                            vct_ox_step,
                            vct_ox_wlms,
                            vct_ox_acti) {
 
   lst_out.raw[sapply(lst_out.raw, is.null)] <- NULL
+  lst_out.oak.pre[sapply(lst_out.oak.pre, is.null)] <- NULL
   lst_out.cut[sapply(lst_out.cut, is.null)] <- NULL
 
   df <- tibble(
@@ -30,6 +32,9 @@ summary_config <- function(vct_raw,
   vct_nm_raw <-
     sapply(lst_out.raw, \(.x) .x$id[1]) |>
     file_path_sans_ext()
+  vct_nm_oak.pre <-
+    sapply(lst_out.oak.pre, \(.x) .x$id[1]) |>
+    file_path_sans_ext()
   vct_nm_cut <-
     sapply(lst_out.cut, \(.x) .x$id[1]) |>
     file_path_sans_ext()
@@ -51,14 +56,15 @@ summary_config <- function(vct_raw,
 
   df |>
     mutate(
-    GGIR = file %in% vct_nm_ggir,
-    calibration = file_noext %in% vct_nm_cal,
+    GGIR          = file %in% vct_nm_ggir,
+    calibration   = file_noext %in% vct_nm_cal,
     `raw methods` = file_noext %in% vct_nm_raw,
-    `cutpoints` = file_noext %in% vct_nm_cut,
-    stepcount = file_noext %in% vct_nm_stp,
-    walmsley = file_noext %in% vct_nm_wlm,,
-    actinet = file_noext %in% vct_nm_act,,
-    file_noext = NULL
+    oak.pre       = file_noext %in% vct_nm_oak.pre,
+    `cutpoints`   = file_noext %in% vct_nm_cut,
+    stepcount     = file_noext %in% vct_nm_stp,
+    walmsley      = file_noext %in% vct_nm_wlm,,
+    actinet       = file_noext %in% vct_nm_act,,
+    file_noext    = NULL
   )
 }
 
@@ -77,6 +83,9 @@ metrics_config <- function(fpa_merged) {
       .cols = everything(),
       .fns = ~sum(.x == "sedentary", na.rm = TRUE) / 60
     ), .by = id)
+  df_sed <- df_sed[
+    , c(names(df_sed)[1], sort(names(df_sed[-1])))
+  ]
   df_mvpa <-
     df_pipe |>
     select(id, starts_with("intensity")) |>
@@ -87,6 +96,9 @@ metrics_config <- function(fpa_merged) {
       .cols = everything(),
       .fns = ~sum(.x == "mvpa", na.rm = TRUE) / 60
     ), .by = id)
+  df_mvpa <- df_mvpa[
+    , c(names(df_mvpa)[1], sort(names(df_mvpa[-1])))
+  ]
   df_step <-
     df_pipe |>
     select(id, starts_with("steps")) |>
@@ -96,6 +108,9 @@ metrics_config <- function(fpa_merged) {
       .cols = everything(),
       .fns = ~sum(.x, na.rm = TRUE)
     ), .by = id)
+  df_step <- df_step[
+    , c(names(df_step)[1], sort(names(df_step[-1])))
+  ]
 
   # agreement matrix ----
   ## sed ----
@@ -180,8 +195,10 @@ metrics_config <- function(fpa_merged) {
     df_pipe |>
     select(starts_with("steps")) |>
     rename_with(.cols = everything(),
-                .fn = ~sub(x = .x, pattern = "steps_", replacement = ""))
-  df_agr <- df_agr[complete.cases(df_agr)]
+                .fn = ~sub(x = .x, pattern = "steps_", replacement = "")) |>
+    as_tibble()
+  df_agr <- df_agr[complete.cases(df_agr), ]
+  df_agr <- df_agr[, sort(names(df_agr))]
   mtx_step <-
     cor(df_agr) |>
     round(digits = 2)

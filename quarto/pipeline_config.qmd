@@ -17,6 +17,7 @@ tar_load(vct_basic)
 tar_load(lst_out.cut)
 tar_load(vct_cal)
 tar_load(lst_out.raw)
+tar_load(lst_out.oak.pre)
 tar_load(vct_ox_step)
 tar_load(vct_ox_wlms)
 tar_load(vct_ox_acti)
@@ -28,6 +29,7 @@ df_out <- summary_config(
   vct_basic,
   vct_cal,
   lst_out.raw,
+  lst_out.oak.pre,
   lst_out.cut,
   vct_ox_step,
   vct_ox_wlms,
@@ -37,7 +39,7 @@ lgl_all <-
   df_out |> 
   mutate(
     all = all(
-      GGIR, calibration, `raw methods`, cutpoints, stepcount, walmsley, actinet
+      GGIR, calibration, `raw methods`, oak.pre, cutpoints, stepcount, walmsley, actinet
     )
   ) |> 
   pull(all)
