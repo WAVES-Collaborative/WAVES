@@ -66,7 +66,8 @@ apply_methods_raw <- function(fpa_read,
                               vct_fpa_basic,
                               dir_models,
                               dir_write,
-                              my_tz) {
+                              my_tz,
+                              ...) {
 
   if (is.null(fpa_read)) return(NULL)
 

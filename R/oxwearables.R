@@ -71,7 +71,8 @@ prepare_ox_input <- function(vct_raw,
 apply_ox_stepcount <- function(vct_ox_input,
                                fdr_write,
                                fdr_log,
-                               log_prefix = "") {
+                               log_prefix = "",
+                               ...) {
 
   chk_windows <- grepl(
     x = Sys.getenv("OS"),
@@ -160,7 +161,8 @@ apply_ox_walmsley <- function(vct_ox_input,
                               fdr_write,
                               fdr_log,
                               log_prefix = "",
-                              my_tz) {
+                              my_tz,
+                              ...) {
 
   chk_windows <- grepl(
     x = Sys.getenv("OS"),
@@ -255,7 +257,8 @@ apply_ox_walmsley <- function(vct_ox_input,
 apply_ox_actinet <- function(vct_ox_input,
                              fdr_write,
                              fdr_log,
-                             log_prefix = "") {
+                             log_prefix = "",
+                             ...) {
 
   chk_windows <- grepl(
     x = Sys.getenv("OS"),
