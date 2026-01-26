@@ -259,7 +259,8 @@ tar_plan(
     command = apply_ox_stepcount(
       vct_ox_input = vct_ox_input,
       fdr_write = file.path(getwd(), dir_stepcount),
-      fdr_log = dir_logs
+      fdr_log = dir_logs,
+      df_miniconda
     ),
     format = "file"
   ),
@@ -269,7 +270,8 @@ tar_plan(
       vct_ox_input = vct_ox_input,
       fdr_write = file.path(getwd(), dir_walmsley),
       fdr_log = dir_logs,
-      my_tz = my_tz
+      my_tz = my_tz,
+      df_miniconda
     ),
     format = "file"
   ),
@@ -278,7 +280,8 @@ tar_plan(
     command = apply_ox_actinet(
       vct_ox_input = vct_ox_input,
       fdr_write = file.path(getwd(), dir_actinet),
-      fdr_log = dir_logs
+      fdr_log = dir_logs,
+      df_miniconda
     ),
     format = "file"
   ),
@@ -310,7 +313,8 @@ tar_plan(
       vct_fpa_basic = vct_basic,
       dir_models    = dir_models,
       dir_write     = dir_out.raw,
-      my_tz         = my_tz
+      my_tz         = my_tz,
+      df_miniconda
     ),
     pattern   = map(vct_cal),
     iteration = "list",
