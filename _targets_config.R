@@ -186,8 +186,15 @@ list.files(
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 tar_plan(
+  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  ##                             MINICONDA SETUP                            ----
+  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  tar_parquet(
+    name    = df_miniconda,
+    command = config_miniconda()
+  ),
   tar_render(
-    name = config_miniconda,
+    name = minconda_summary,
     path = "quarto/config_miniconda.qmd",
     output_file = file.path(getwd(), fdr_reports, "summary_miniconda.html")
   ),
@@ -329,11 +336,12 @@ tar_plan(
   tar_target(
     name    = fpa_merged,
     command = merge_output_config(
-      lst_out.raw = lst_out.raw,
-      lst_out.cut = lst_out.cut,
-      lst_ox      = lst_ox,
-      dir_merged  = dir_merged,
-      my_tz       = my_tz
+      lst_out.raw     = lst_out.raw,
+      lst_out.oak.pre = lst_out.oak.pre,
+      lst_out.cut     = lst_out.cut,
+      lst_ox          = lst_ox,
+      dir_merged      = dir_merged,
+      my_tz           = my_tz
     ),
     format = "file"
   ),
