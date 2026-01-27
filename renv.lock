@@ -228,6 +228,15 @@
       "Version": "2.1.4",
       "Source": "Repository",
       "Repository": "CRAN"
+    },
+    "walking": {
+      "Package": "walking",
+      "Source": "GitHub",
+      "RemoteUsername": "muschellij2",
+      "RemoteRepo": "walking",
+      "RemoteRef": "main",
+      "RemoteSha": "86c13bb7c0fbf9afabe045fcdae493b273b10201",
+      "RemoteHost": "api.github.com"
     }
   }
 }
