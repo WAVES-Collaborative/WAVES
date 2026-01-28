@@ -62,6 +62,203 @@ estimate_steps_sdtnew <- function(data,
     as.integer()
 
 }
+# This script was originally copied from
+# https://github.com/ShimmerEngineering/Verisense-Toolbox/tree/master/Verisense_step_algorithm
+# where it included the following software license:
+
+# Copyright (c) 2020 Shimmer
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+#   The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+# by Matthew R Patterson, mpatterson@shimmersensing.com
+# Find peaks of RMS acceleration signal according to Gu et al, 2017 method
+# This method is based off finding peaks in the summed and squared acceleration signal
+# and then using multiple thresholds to determine if each peak is a step or an artefact.
+# An additional magnitude threshold was added to the algorithm to prevent false positives
+# in free living data.
+
+# Additionally incorporates code from John Muschelli's R package `walking`. Where:
+# - have thresholds be function arguments.
+# - `acc` object renamed to `vm`
+# - `length(vm)` is replaced with object `len_vm`.
+# - return early whenever the nrow/length of peak_info was <=2 or no steps were detected.
+# - use peak_info colnames whenever possible to for readability.
+estimate_steps_verisense <- function(
+    data,
+    sample_rate,
+    k = 3, # window size
+    period_min = 5,
+    period_max = 15,
+    similarity_threshold = -0.5,
+    continuity_window_size = 4,
+    continuity_threshold = 4,
+    variance_threshold = 0.001,
+    vm_threshold = 1.2,
+    global_vm_threshold = 0.025
+) {
+
+  if (is.vector(data) && is.numeric(data)) {
+    warning("Assuming data is a vector of VM!")
+    vm <- data
+  } else {
+    vm <- sqrt(
+      data[, "x"]^2 +
+        data[,"y"]^2 +
+        data[, "z"]^2
+    )
+  }
+
+  len_vm <- length(vm)
+
+  if (sd(vm) < global_vm_threshold) {
+    # acceleration too low, no steps
+    num_seconds <- round(len_vm / sample_rate)
+    steps_per_sec <- rep(0, num_seconds)
+    return(steps_per_sec)
+  }
+
+  half_k <- round(k / 2)
+  segments <- floor(len_vm / k)
+  peak_info <- matrix(NA, nrow = segments, ncol = 5)
+  colnames(peak_info) <- c(
+    "peak_location",
+    "vm_max",
+    "periodicity",
+    "similarity",
+    "continuity"
+  )
+
+  # for each segment find the peak location ----
+  for (i in seq_len(segments)) {
+    start_idx <- (i - 1) * k + 1
+    end_idx <- start_idx + (k - 1)
+    tmp_loc_a <- which.max(vm[start_idx:end_idx])
+    tmp_loc_b <- (i - 1) * k + tmp_loc_a
+
+    # only save if this is a peak value in range of -k/2:+K/2
+    start_idx_ctr <- max(tmp_loc_b - half_k, 1)
+    end_idx_ctr <- min(tmp_loc_b + half_k, len_vm)
+    check_loc <- which.max(vm[start_idx_ctr:end_idx_ctr])
+
+    if (check_loc == (half_k + 1)) {
+      peak_info[i, "peak_location"] <- tmp_loc_b
+      peak_info[i, "vm_max"] <- max(vm[start_idx:end_idx])
+    }
+  }
+
+  peak_info <- peak_info[!is.na(peak_info[, "peak_location"]), ] # get rid of na rows
+
+  # filter max vector magnitude based on vm_threshold ----
+  peak_info <- peak_info[peak_info[, "vm_max"] > vm_threshold, ]
+
+  # filter by periodicity ----
+  # there must be at least two steps
+  n_peaks <- nrow(peak_info)
+  no_steps <- TRUE
+
+  if (n_peaks > 2) {
+    # Calculate periodicity.
+    no_steps <- FALSE
+    peak_info[1:(n_peaks - 1), "periodicity"] <- diff(peak_info[, "peak_location"]) # calculate periodicity
+    peak_info <- peak_info[peak_info[, "periodicity"] > period_min, ] # filter peaks based on period_min
+    peak_info <- peak_info[peak_info[, "periodicity"] < period_max, ]   # filter peaks based on period_max
+  }
+
+  n_peaks <- nrow(peak_info)
+
+  if (n_peaks <= 2 || no_steps) {
+    # no steps found
+    num_seconds = round(len_vm / sample_rate)
+    steps_per_sec = rep(0, num_seconds)
+    return(steps_per_sec)
+  }
+
+  # Calculate similarity ----
+  peak_info[1:(n_peaks - 2), "similarity"] <- -abs(diff(peak_info[, "vm_max"], lag = 2))
+  peak_info <- peak_info[peak_info[, "similarity"] > similarity_threshold, , drop = FALSE]  # filter based on similarity_threshold
+  peak_info <- peak_info[!is.na(peak_info[, "peak_location"]), , drop = FALSE] # previous statement can result in an NA in col-1
+
+  # calculate continuity ----
+  peak_info[, "continuity"] <- 0
+
+  if (nrow(peak_info) > 5) {
+    end_for <- nrow(peak_info) - 1
+
+    for (i in continuity_threshold:end_for) {
+      # for each bw peak period calculate vm var
+      v_count <- 0 # count how many windows were over the variance threshold
+
+      for (x in seq_len(continuity_threshold)) {
+        ind_variance <-
+          peak_info[i - x + 1, "peak_location"]:peak_info[i - x + 2, "peak_location"]
+
+        if (var(vm[ind_variance]) > variance_threshold) v_count <- v_count + 1
+      }
+
+      if (v_count >= continuity_window_size) peak_info[i, "continuity"] <- 1 # set continuity to 1, otherwise, 0
+
+    }
+  }
+
+  # continuity test - only keep locations after this.
+  peak_location <- peak_info[peak_info[, "continuity"] == 1, "peak_location"]
+  peak_location <- peak_location[!is.na(peak_location)] # previous statement can result in an NA in col-1
+
+  if (length(peak_location) == 0) {
+    # no steps found
+    num_seconds = round(len_vm / sample_rate)
+    steps_per_sec = rep(0, num_seconds)
+    return(steps_per_sec)
+  }
+
+  # debug plot ----
+  # install.packages("plotly")
+  # df_vm <- data.frame(vm = vm, det_step = integer(len_vm))
+  # df_vm$det_step[peak_location] <- 1
+  # df_vm$idx <- as.numeric(row.names(df_vm))
+  # plt <-
+  #   ggplot(data=df_vm, aes(x = idx, y = vm)) +
+  #   geom_line() +
+  #   geom_point(
+  #     data = subset(df_vm, det_step == 1),
+  #     aes(x = idx, y = vm),
+  #     color = 'red',
+  #     size = 1,
+  #     alpha = 0.7
+  #   )
+  # plotly::ggplotly(plt)
+
+  # for GGIR, output the number of steps in 1 second chunks
+  start_idx_vec <- seq(
+    from = 1,
+    to = len_vm,
+    by = sample_rate
+  )
+  steps_per_sec <-
+    findInterval(peak_location, start_idx_vec) |>
+    factor(levels = seq_along(start_idx_vec)) |>
+    table() |>
+    as.integer()
+
+  return(steps_per_sec)
+
+}
 apply_methods_raw <- function(fpa_read,
                               vct_fpa_basic,
                               dir_models,
@@ -330,20 +527,27 @@ apply_methods_raw <- function(fpa_read,
         mtx_data[ind_chunk, "z"]^2
     )
     df_all$steps_verisense.original[ind_steps] <-
-      walking::verisense_count_steps(
-        data        = vm,
+      estimate_steps_verisense(
+        data = vm,
         sample_rate = I$sf
       ) |>
-      as.integer() |>
       # Since function warns "Assuming data is a vector of VM!" but its fo sho
       # a  vector of VM.
       suppressWarnings()
     le_steps <-
-      walking::verisense_count_steps_revised(
-        data        = vm,
-        sample_rate = I$sf
+      estimate_steps_verisense(
+        data = vm,
+        sample_rate = I$sf,
+        k                      = 4,
+        period_min             = 4,
+        period_max             = 20,
+        similarity_threshold   = -1,
+        continuity_window_size = 4,
+        continuity_threshold   = 4,
+        variance_threshold     = 0.01,
+        vm_threshold           = 1.25,
+        global_vm_threshold    = 0.025
       ) |>
-      as.integer() |>
       suppressWarnings()
 
     # For some reason, at the end of data, revised will have one second less
