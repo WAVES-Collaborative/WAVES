@@ -90,7 +90,7 @@ apply_ox_stepcount <- function(vct_ox_input,
     file_path_sans_ext()
   vct_fpa_write <-
     vct_fnm_write |>
-    paste0(... = _, "-StepTimes.csv.gz",
+    paste0(... = _, "-StepTimes\\.csv\\.gz",
            collapse = "|") |>
     list.files(path = fdr_write,
                pattern = _,
@@ -104,7 +104,11 @@ apply_ox_stepcount <- function(vct_ox_input,
   } else if (chk_write) {
     vct_ox_input <- grep(
       x = vct_ox_input,
-      pattern = paste0(vct_fnm_write, collapse = "|"),
+      pattern =
+        vct_fpa_write |>
+        dirname() |>
+        basename() |>
+        paste0(... = _, collapse = "|"),
       value = TRUE,
       invert = TRUE
     )
@@ -180,7 +184,7 @@ apply_ox_walmsley <- function(vct_ox_input,
     file_path_sans_ext()
   vct_fpa_write <-
     vct_fnm_write |>
-    paste0(... = _, "-timeSeries.csv.gz",
+    paste0(... = _, "-timeSeries\\.csv\\.gz",
            collapse = "|") |>
     list.files(path = fdr_write,
                pattern = _,
@@ -194,7 +198,13 @@ apply_ox_walmsley <- function(vct_ox_input,
   } else if (chk_write) {
     vct_ox_input <- grep(
       x = vct_ox_input,
-      pattern = paste0(vct_fnm_write, collapse = "|"),
+      pattern =
+        vct_fpa_write |>
+        basename() |>
+        sub(x = _,
+             pattern = "-timeSeries\\.csv\\.gz",
+             replacement = "") |>
+        paste0(... = _, collapse = "|"),
       value = TRUE,
       invert = TRUE
     )
@@ -276,7 +286,7 @@ apply_ox_actinet <- function(vct_ox_input,
     file_path_sans_ext()
   vct_fpa_write <-
     vct_fnm_write |>
-    paste0(... = _, "-timeSeries.csv.gz",
+    paste0(... = _, "-timeSeries\\.csv\\.gz",
            collapse = "|") |>
     list.files(path = fdr_write,
                pattern = _,
@@ -290,7 +300,11 @@ apply_ox_actinet <- function(vct_ox_input,
   } else if (chk_write) {
     vct_ox_input <- grep(
       x = vct_ox_input,
-      pattern = paste0(vct_fnm_write, collapse = "|"),
+      pattern =
+        vct_fpa_write |>
+        dirname() |>
+        basename() |>
+        paste0(... = _, collapse = "|"),
       value = TRUE,
       invert = TRUE
     )
