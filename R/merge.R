@@ -218,7 +218,8 @@ merge_output_config <- function(lst_out.raw,
       by = join_by(id, datetime)
     ) |>
     left_join(
-      rbindlist(lst_out.oak.pre),
+      rbindlist(lst_out.oak.pre) |>
+        mutate(datetime = as.POSIXct(datetime, tz = my_tz)),
       by = join_by(id, datetime)
     ) |>
     left_join(
