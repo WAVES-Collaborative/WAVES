@@ -15,11 +15,11 @@ wrapper_GGIR <- function(vct_raw,
 
   if (is.null(vct_raw)) return(NULL)
 
-  chk_csv_type <- vct_raw_type %in% c(
+  chk_csv_type <- any(vct_raw_type %in% c(
     "GENEACTIV - CSV w/ HEADER",
     "ADHOC",
     "UKNOWN"
-  )
+  ))
 
   if (chk_csv_type) {
     cli::cli_abort(c(
