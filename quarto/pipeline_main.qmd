@@ -39,7 +39,7 @@ lgl_all <-
   df_out |> 
   mutate(
     all = all(
-      GGIR, calibration, `raw methods`, oak.pre, cutpoints, stepcount, walmsley, actinet, merged
+      GGIR, calibration, `raw methods`, oak.pre, cutpoints, stepcount, walmsley, actinet
     )
   ) |> 
   pull(all)
@@ -58,4 +58,22 @@ Below is a table listing if each major step was successful for a file (TRUE) or 
 #| label: tbl-major
 #| echo: false
 kable(df_out) 
+```
+
+# tar_meta
+
+```{r}
+#| label: tar_meta
+#| echo: false
+
+tar_meta()$warnings |> 
+  mutate(
+    warnings = gsub(
+      x = warnings,
+      pattern = "\\w{0,1}package '.*' was built under R version 4.5.2.",
+      replacement = ""
+    )
+  ) |> 
+  kable()
+
 ```
