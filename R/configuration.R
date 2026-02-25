@@ -134,7 +134,7 @@ config_miniconda <- function(df_pkgs_stepcount,
       # Install modules and check one more time afterwards.
       conda_install(
         envname  = "WHO_WAVES_stepcount",
-        packages = "stepcount==3.5",
+        packages = "stepcount==3.17.0",
         forge    = FALSE,
         pip      = TRUE
       )
