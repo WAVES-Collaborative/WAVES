@@ -421,7 +421,7 @@ merge_ox <- function(vct_ox_step,
               to = last(datetime) + 29,
               by = "1 sec"
             ),
-            intensity_wamsley = rep(intensity, each = 30)
+            intensity_walmsley = rep(intensity, each = 30)
           ),
         # actinet
         fread(
