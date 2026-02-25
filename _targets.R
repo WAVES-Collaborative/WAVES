@@ -114,20 +114,22 @@ options(datatable.print.class = TRUE)
 options(datatable.print.keys = TRUE)
 
 # Set target options:
-if (n_workers == 1) {
-  tar_option_set(
-    packages   = pkgs,
-    format     = "qs",
-    # trust_timestamps = TRUE
+tar_option_set(
+  packages   = pkgs,
+  format     = "qs",
+  controller = crew_controller_local(
+    name = "my_controller",
+    workers = n_workers,
+    options_metrics = crew_options_metrics(
+      path = "logs/",
+      seconds_interval = 1
+    ),
+    options_local = crew_options_local(
+      log_directory = "logs/"
+    )
   )
-} else {
-  tar_option_set(
-    packages   = pkgs,
-    format     = "qs",
-    controller = crew_controller_local(workers = n_workers)
-    # trust_timestamps = TRUE
-  )
-}
+  # trust_timestamps = TRUE
+)
 
 # Run the R scripts in the R/ folder with your custom functions:
 list.files(
@@ -169,6 +171,14 @@ list.files(
 ####                                                                         %%%%
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Start logging.
+if (tar_active()) {
+  log_start(
+    path = file.path("logs", "main_process.log"), # Statistics on the main process go here.
+    seconds = 1
+  )
+}
+
 tar_plan(
   my_tz = study_timezone,
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

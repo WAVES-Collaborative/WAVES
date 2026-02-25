@@ -66,7 +66,8 @@ The proposed flow diagram outlines the process for how the validation data and d
 
 4.  Within "INPUT" section, change the following:
 
-    1.  `n_workers`: The default is 3 workers, meaning 3 processes of the pipeline will run in parallel of each other. From testing, 3 workers has been the most memory and time efficient for systems operating with ≤ 16gb RAM or ≤ 4 cores. If your operating system has more RAM and cores available, feel free to increase the number of workers, with the max being one less than the number of cores available of your system (`parallel::detectCores() - 1`)
+    1.  `n_workers`: The default is 3 workers, meaning 3 processes of the pipeline will run in parallel of each other. From testing, 3 workers has been the most memory and time efficient for systems operating with ≤ 16gb RAM or ≤ 4 cores. If your operating system has more RAM and cores available, feel free to increase the number of workers, with the max being one less than the number of cores available of your system (`future::availableCores() - 1`)
+    2.  `n_workers` has to be AT LEAST 2.
 
 5.  Run all code within the "INPUT" section (Line 8 - Line 26) and save the script.
 
@@ -152,11 +153,11 @@ The proposed flow diagram outlines the process for how the validation data and d
 
 -   After running `renv::restore()` and starting a new R session, you may see the following in the console during startup:
 
-    ![](media/Screenshot 2026-01-22 153810.png)
+    ![](media/Screenshot%202026-01-22%20153810.png)
 
     Additionally, if you run `renv::status()`, the following will appear:
 
-    ![](media/Screenshot 2026-01-22 154057.png)
+    ![](media/Screenshot%202026-01-22%20154057.png)
 
     This is **normal and expected**. As long as the packages are installed, everything is good to go. For some reason, `renv` will always think the packages are not being used within the repository, which is most likely due to how the WAVES repository is dependent on the `targets` pipeline.
 

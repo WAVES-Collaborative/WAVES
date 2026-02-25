@@ -9,10 +9,11 @@ library(targets)
 library(tarchetypes)
 library(crew)
 Sys.setenv(TAR_PROJECT = "config")
+library(autometric)
 
 study_timezone     <- Sys.timezone()
 sampling_frequency <- 100
-n_workers          <- 3 # parallel::detectCores() - 1
+n_workers          <- 2 # future::availableCores() - 1
 
 vct_raw_fpa <- file.path(
   "data", "0_CONFIG", "RAW",
@@ -134,20 +135,22 @@ options(datatable.print.class = TRUE)
 options(datatable.print.keys = TRUE)
 
 # Set target options:
-if (n_workers == 1) {
-  tar_option_set(
-    packages   = pkgs,
-    format     = "qs",
-    # trust_timestamps = TRUE
+tar_option_set(
+  packages   = pkgs,
+  format     = "qs",
+  controller = crew_controller_local(
+    name = "my_controller",
+    workers = n_workers,
+    options_metrics = crew_options_metrics(
+      path = "logs/",
+      seconds_interval = 1
+    ),
+    options_local = crew_options_local(
+      log_directory = "logs/"
+    )
   )
-} else {
-  tar_option_set(
-    packages   = pkgs,
-    format     = "qs",
-    controller = crew_controller_local(workers = n_workers)
-    # trust_timestamps = TRUE
-  )
-}
+  # trust_timestamps = TRUE
+)
 
 # Run the R scripts in the R/ folder with your custom functions:
 list.files(
@@ -189,6 +192,14 @@ list.files(
 ####                                                                         %%%%
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Start logging.
+if (tar_active()) {
+  log_start(
+    path = file.path("logs", "config_process.log"), # Statistics on the main process go here.
+    seconds = 1
+  )
+}
+
 tar_plan(
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                             MINICONDA SETUP                            ----
