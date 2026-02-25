@@ -8,12 +8,16 @@
 library(targets)
 library(tarchetypes)
 library(crew)
-Sys.setenv(TAR_PROJECT = "main")
+library(autometric)
+Sys.setenv(
+  TAR_PROJECT = "main",
+  # change below environment variable if you already have a conda installation readily accessible.
+  RETICULATE_MINICONDA_PATH = reticulate::miniconda_path()
+)
 
-study_timezone <-
-  Sys.timezone()
+study_timezone     <- Sys.timezone()
 sampling_frequency <- 100
-n_workers          <- 3 # parallel::detectCores() - 1
+n_workers          <- 2 # future::availableCores() - 1
 
 vct_raw_fpa <- list.files(
   path = file.path(
