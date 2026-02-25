@@ -35,12 +35,73 @@ df_out <- summary_config(
   vct_ox_wlms,
   vct_ox_acti
 )
+df_test_out <- tibble(
+  file = c(
+    "WAVES_10002_RAW.csv.gz",
+    "WAVES_10003_RAW.csv.gz",
+    "WAVES_10004_RAW.gt3x",
+    "WAVES_10005_RAW.cwa",
+    "WAVES_10006_RAW.csv.gz"
+  ),
+  GGIR = c(
+    FALSE, FALSE, TRUE, TRUE, TRUE
+  ),
+  calibration = c(
+    FALSE, FALSE, TRUE, TRUE, TRUE
+  ),
+  `raw methods` = c(
+    FALSE, FALSE, TRUE, TRUE, TRUE
+  ),
+  oak.pre = c(
+    FALSE, FALSE, TRUE, TRUE, TRUE
+  ),
+  cutpoints = c(
+    FALSE, FALSE, TRUE, TRUE, TRUE
+  ),
+  stepcount = c(
+    FALSE, FALSE, TRUE, TRUE, FALSE
+  ),
+  walmsley = c(
+    FALSE, FALSE, TRUE, TRUE, FALSE
+  ),
+  actinet = c(
+    FALSE, FALSE, TRUE, TRUE, FALSE
+  )
+)
+df_equal <- 
+  (df_out[, -1] == df_test_out[, -1]) |>
+  as.data.frame() |>
+  mutate(file = df_out$file, .before = 1) |>
+  pivot_longer(cols = !file,
+               names_to = "step",
+               values_to = "equal") |>
+  mutate(
+    rowid = rleid(file),
+    clr = ifelse(
+      equal,
+      yes = "#D9F1D5",
+      no  = "#ea9999"
+    )
+  )
+tbl_out <- gt(df_out)
+
+for (i in seq_len(nrow(df_equal))) {
+  tbl_out <-
+    tbl_out |>
+    tab_style(
+      style = cell_fill(color = df_equal$clr[i]),
+      locations = cells_body(columns = df_equal$step[i],
+                             rows = df_equal$rowid[i])
+    )
+}
+
 lgl_all <- 
   df_out |> 
+  rowwise() |> 
   mutate(
-    all = all(
-      GGIR, calibration, `raw methods`, oak.pre, cutpoints, stepcount, walmsley, actinet
-    )
+    all = all(c_across(
+      GGIR:actinet
+    ))
   ) |> 
   pull(all)
 lst_summary <- metrics_config(fpa_merged)
@@ -58,7 +119,7 @@ Below is a table listing if each major step was successful for a file (TRUE) or 
 ```{r}
 #| label: tbl-major
 #| echo: false
-kable(df_out)
+tbl_out
 
 ```
 

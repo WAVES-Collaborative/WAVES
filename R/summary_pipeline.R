@@ -67,7 +67,79 @@ summary_config <- function(vct_raw,
     file_noext    = NULL
   )
 }
+make_table_agr.cor <- function(mtx_yours,
+                               mtx_waves,
+                               df_agr_waves) {
 
+  df_agr <-
+    mtx_yours |>
+    as.data.frame() |>
+    rownames_to_column(var = "method") |>
+    pivot_longer(cols = !method,
+                 names_to = "method2",
+                 values_to = "yours",
+                 values_drop_na = TRUE) |>
+    dplyr::filter(method != method2)
+  df_equal <-
+    left_join(
+      df_agr,
+      df_agr_waves,
+      by = join_by(method, method2)
+    ) |>
+    mutate(
+      rowid = rleid(method) + 1,
+      colid =
+        factor(method2) |>
+        as.integer(),
+      diff = round(abs(yours - waves), digits = 2),
+      clr = case_when(
+        yours == waves ~ "#D9F1D5",
+        diff <= 0.01 ~ "#FAFA8E",
+        .default = "#ea9999"
+      )
+    )
+  tbl_agr <-
+    pmax(mtx_yours, mtx_waves, na.rm = TRUE) |>
+    as.data.frame() |>
+    rownames_to_column(var = "method") |>
+    gt()
+  ind_equal <- which(df_equal$clr == "#D9F1D5")
+  ind_near <- which(df_equal$clr == "#FAFA8E")
+  ind_unequal <- which(df_equal$clr == "#ea9999")
+
+  for (i in seq_along(df_equal$clr)) {
+    tbl_agr <-
+      tbl_agr |>
+      tab_style(
+        style = cell_fill(color = df_equal$clr[i]),
+        locations = cells_body(columns = df_equal$method2[i],
+                               rows = df_equal$rowid[i])
+      )
+  }
+
+  for (ind in ind_near) {
+    tbl_agr <-
+      tbl_agr |>
+      tab_style(
+        style = cell_fill(color = df_equal$clr[ind]),
+        locations = cells_body(columns = df_equal$method[ind],
+                               rows = df_equal$colid[ind])
+      )
+  }
+
+  for (ind in ind_unequal) {
+    tbl_agr <-
+      tbl_agr |>
+      tab_style(
+        style = cell_fill(color = df_equal$clr[ind]),
+        locations = cells_body(columns = df_equal$method[ind],
+                               rows = df_equal$colid[ind])
+      )
+  }
+
+  return(tbl_agr)
+
+}
 metrics_config <- function(fpa_merged) {
 
   load("data/0_CONFIG/MERGED/WAVES_ALL_TEST.RData")
@@ -111,6 +183,322 @@ metrics_config <- function(fpa_merged) {
   df_step <- df_step[
     , c(names(df_step)[1], sort(names(df_step[-1])))
   ]
+
+  # Compare total ----
+  ## sed ----
+  df_sed[, -1] <- round(df_sed[, -1], digits = 1)
+  df_test_sed[, -1] <- round(df_test_sed[, -1], digits = 1)
+
+  # First see if they are equal to each other at the tenth level, then see if they
+  # are near each other +/- 0.01.
+  df_equal_sed <-
+    (df_sed[, -1] == df_test_sed[, -1]) |>
+    as.data.frame() |>
+    mutate(id = df_sed$id, .before = 1) |>
+    pivot_longer(cols = !id,
+                 names_to = "method",
+                 values_to = "equal") |>
+    mutate(
+      rowid = rleid(id),
+      yours = unlist(transpose(df_sed[, -1])),
+      waves = unlist(transpose(df_test_sed[, -1])),
+      diff = round(abs(yours - waves), digits = 1),
+      clr = case_when(
+        equal ~ "#D9F1D5",
+        diff <= 0.1 ~ "#FAFA8E",
+        .default = "#ea9999"
+      ),
+      equal = NULL,
+      id = NULL
+    )
+  tbl_sed <-
+    left_join(
+      df_sed |>
+        rename_with(
+          .cols = !id,
+          .fn = ~paste0("Yours_", .x)
+        ),
+      df_test_sed |>
+        rename_with(
+          .cols = !id,
+          .fn = ~paste0("WAVES_", .x)
+        ),
+      by = join_by(id)
+    ) |>
+    gt() |>
+    tab_spanner(
+      label = "Actinet", columns = ends_with("actinet")
+    ) |>
+    tab_spanner(
+      label = "Bakrania (ENMO Average)", columns = ends_with("bakrania.enmo.average")
+    ) |>
+    tab_spanner(
+      label = "Bakrania (ENMO Simple)", columns = ends_with("bakrania.enmo.simple")
+    ) |>
+    tab_spanner(
+      label = "Bakrania (MAD Average)", columns = ends_with("bakrania.mad.average")
+    ) |>
+    tab_spanner(
+      label = "Bakrania (MAD Simple)", columns = ends_with("bakrania.mad.simple")
+    ) |>
+    tab_spanner(
+      label = "Ellis", columns = ends_with("ellis")
+    ) |>
+    tab_spanner(
+      label = "Esliger", columns = ends_with("esliger")
+    ) |>
+    tab_spanner(
+      label = "Fraysee", columns = ends_with("fraysee")
+    ) |>
+    tab_spanner(
+      label = "Hildrebrand", columns = ends_with("hildebrand")
+    ) |>
+    tab_spanner(
+      label = "Mielke", columns = ends_with("mielke")
+    ) |>
+    tab_spanner(
+      label = "Montoye (DT)", columns = ends_with("montoye.dt")
+    ) |>
+    tab_spanner(
+      label = "Montoye (NN)", columns = ends_with("montoye.nn")
+    ) |>
+    tab_spanner(
+      label = "Montoye (RF)", columns = ends_with("montoye.rf")
+    ) |>
+    tab_spanner(
+      label = "Montoye (SVM)", columns = ends_with("montoye.svm")
+    ) |>
+    tab_spanner(
+      label = "Trost", columns = ends_with("trost")
+    ) |>
+    tab_spanner(
+      label = "Walmsley", columns = ends_with("walmsley")
+    ) |>
+    tab_spanner(
+      label = "White (ENMO Linear)", columns = ends_with("white.enmo.lin")
+    ) |>
+    tab_spanner(
+      label = "White (ENMO Polynomial)", columns = ends_with("white.enmo.pol")
+    ) |>
+    tab_spanner(
+      label = "White (HPFVM Linear)", columns = ends_with("white.hpfvm.lin")
+    ) |>
+    tab_spanner(
+      label = "White (HPFVM Polynomial)", columns = ends_with("white.hpfvm.pol")
+    )
+
+  for (i in seq_len(nrow(df_equal_sed))) {
+    tbl_sed <-
+      tbl_sed |>
+      tab_style(
+        style = cell_fill(color = df_equal_sed$clr[i]),
+        locations = cells_body(columns = ends_with(df_equal_sed$method[i]),
+                               rows = df_equal_sed$rowid[i])
+      )
+  }
+
+  tbl_sed <-
+    tbl_sed |>
+    cols_label_with(
+      columns = !id,
+      fn = ~sub(x = .x,
+                pattern = "_.*",
+                replacement = "")
+    ) |>
+    fmt_number(
+      columns = !id,
+      decimals = 1
+    )
+
+  ## mvpa ----
+  df_mvpa[, -1] <- round(df_mvpa[, -1], digits = 1)
+  df_test_mvpa[, -1] <- round(df_test_mvpa[, -1], digits = 1)
+  df_equal_mvpa <-
+    (df_mvpa[, -1] == df_test_mvpa[, -1]) |>
+    as.data.frame() |>
+    mutate(id = df_mvpa$id, .before = 1) |>
+    pivot_longer(cols = !id,
+                 names_to = "method",
+                 values_to = "equal") |>
+    mutate(
+      rowid = rleid(id),
+      yours = unlist(transpose(df_mvpa[, -1])),
+      waves = unlist(transpose(df_test_mvpa[, -1])),
+      diff = round(abs(yours - waves), digits = 1),
+      clr = case_when(
+        equal ~ "#D9F1D5",
+        diff <= 0.1 ~ "#FAFA8E",
+        .default = "#ea9999"
+      ),
+      equal = NULL,
+      id = NULL
+    )
+  tbl_mvpa <-
+    left_join(
+      df_mvpa |>
+        rename_with(
+          .cols = !id,
+          .fn = ~paste0("Yours_", .x)
+        ),
+      df_test_mvpa |>
+        rename_with(
+          .cols = !id,
+          .fn = ~paste0("WAVES_", .x)
+        ),
+      by = join_by(id)
+    ) |>
+    gt() |>
+    tab_spanner(
+      label = "Actinet", columns = ends_with("actinet")
+    ) |>
+    tab_spanner(
+      label = "Ellis", columns = ends_with("ellis")
+    ) |>
+    tab_spanner(
+      label = "Esliger", columns = ends_with("esliger")
+    ) |>
+    tab_spanner(
+      label = "Fraysee", columns = ends_with("fraysee")
+    ) |>
+    tab_spanner(
+      label = "Hildrebrand", columns = ends_with("hildebrand")
+    ) |>
+    tab_spanner(
+      label = "Mielke", columns = ends_with("mielke")
+    ) |>
+    tab_spanner(
+      label = "Montoye (DT)", columns = ends_with("montoye.dt")
+    ) |>
+    tab_spanner(
+      label = "Montoye (NN)", columns = ends_with("montoye.nn")
+    ) |>
+    tab_spanner(
+      label = "Montoye (RF)", columns = ends_with("montoye.rf")
+    ) |>
+    tab_spanner(
+      label = "Montoye (SVM)", columns = ends_with("montoye.svm")
+    ) |>
+    tab_spanner(
+      label = "Trost", columns = ends_with("trost")
+    ) |>
+    tab_spanner(
+      label = "Walmsley", columns = ends_with("walmsley")
+    ) |>
+    tab_spanner(
+      label = "White (ENMO Linear)", columns = ends_with("white.enmo.lin")
+    ) |>
+    tab_spanner(
+      label = "White (ENMO Polynomial)", columns = ends_with("white.enmo.pol")
+    ) |>
+    tab_spanner(
+      label = "White (HPFVM Linear)", columns = ends_with("white.hpfvm.lin")
+    ) |>
+    tab_spanner(
+      label = "White (HPFVM Polynomial)", columns = ends_with("white.hpfvm.pol")
+    )
+
+  for (i in seq_len(nrow(df_equal_mvpa))) {
+    tbl_mvpa <-
+      tbl_mvpa |>
+      tab_style(
+        style = cell_fill(color = df_equal_mvpa$clr[i]),
+        locations = cells_body(columns = ends_with(df_equal_mvpa$method[i]),
+                               rows = df_equal_mvpa$rowid[i])
+      )
+  }
+
+  tbl_mvpa <-
+    tbl_mvpa |>
+    cols_label_with(
+      columns = !id,
+      fn = ~sub(x = .x,
+                pattern = "_.*",
+                replacement = "")
+    ) |>
+    fmt_number(
+      columns = !id,
+      decimals = 1
+    )
+
+  ## steps ----
+  df_step[, -1] <- trunc(df_step[, -1])
+  df_test_step[, -1] <- trunc(df_test_step[, -1])
+  df_equal_step <-
+    (df_step[, -1] == df_test_step[, -1]) |>
+    as.data.frame() |>
+    mutate(id = df_step$id, .before = 1) |>
+    pivot_longer(cols = !id,
+                 names_to = "method",
+                 values_to = "equal") |>
+    mutate(
+      rowid = rleid(id),
+      yours = unlist(transpose(df_step[, -1])),
+      waves = unlist(transpose(df_test_step[, -1])),
+      diff = round(abs(yours - waves), digits = 0),
+      clr = case_when(
+        equal ~ "#D9F1D5",
+        diff <= 1 ~ "#FAFA8E",
+        .default = "#ea9999"
+      ),
+      equal = NULL,
+      id = NULL
+    )
+  tbl_step <-
+    left_join(
+      df_step |>
+        rename_with(
+          .cols = !id,
+          .fn = ~paste0("Yours_", .x)
+        ),
+      df_test_step |>
+        rename_with(
+          .cols = !id,
+          .fn = ~paste0("WAVES_", .x)
+        ),
+      by = join_by(id)
+    ) |>
+    gt() |>
+    tab_spanner(
+      label = "Oak 1.0", columns = ends_with("oak.1.0")
+    ) |>
+    tab_spanner(
+      label = "Oak Pre", columns = ends_with("oak.pre")
+    ) |>
+    tab_spanner(
+      label = "SDT", columns = ends_with("sdt")
+    ) |>
+    tab_spanner(
+      label = "Stepcount", columns = ends_with("stepcount")
+    ) |>
+    tab_spanner(
+      label = "Verisense (Original)", columns = ends_with("verisense.original")
+    ) |>
+    tab_spanner(
+      label = "Verisense (Revised)", columns = ends_with("verisense.revised")
+    )
+
+  for (i in seq_len(nrow(df_equal_step))) {
+    tbl_step <-
+      tbl_step |>
+      tab_style(
+        style = cell_fill(color = df_equal_step$clr[i]),
+        locations = cells_body(columns = ends_with(df_equal_step$method[i]),
+                               rows = df_equal_step$rowid[i])
+      )
+  }
+
+  tbl_step <-
+    tbl_step |>
+    cols_label_with(
+      columns = !id,
+      fn = ~sub(x = .x,
+                pattern = "_.*",
+                replacement = "")
+    ) |>
+    fmt_number(
+      columns = !id,
+      decimals = 0
+    )
 
   # agreement matrix ----
   ## sed ----
@@ -211,198 +599,126 @@ metrics_config <- function(fpa_merged) {
     mtx_step[le_x, le_y] <- NA
   }
 
-  # agreement table ----
-  df_agr_sed <-
-    mtx_sed |>
-    as.data.frame() |>
-    rownames_to_column(var = "method") |>
-    pivot_longer(cols = !method,
-                 names_to = "method2",
-                 values_to = "config",
-                 values_drop_na = TRUE) |>
-    dplyr::filter(method != method2)
-  df_agr_mvpa <-
-    mtx_mvpa |>
-    as.data.frame() |>
-    rownames_to_column(var = "method") |>
-    pivot_longer(cols = !method,
-                 names_to = "method2",
-                 values_to = "config",
-                 values_drop_na = TRUE) |>
-    dplyr::filter(method != method2)
-  df_agr_step <-
-    mtx_step |>
-    as.data.frame() |>
-    rownames_to_column(var = "method") |>
-    pivot_longer(cols = !method,
-                 names_to = "method2",
-                 values_to = "config",
-                 values_drop_na = TRUE) |>
-    dplyr::filter(method != method2)
-
-  # Compare total ----
+  # make agr/cor table ----
   ## sed ----
-  df_equal_sed <-
-    (df_sed[, -1] == df_test_sed[, -1]) |>
-    as.data.frame() |>
-    mutate(id = df_sed$id, .before = 1) |>
-    pivot_longer(cols = !id,
-                 names_to = "method",
-                 values_to = "equal") |>
-    mutate(rowid = rleid(id),
-           clr = ifelse(equal,
-                        yes = "#D9F1D5",
-                        no  = "#B31529"),
-           id = NULL,
-           equal = NULL)
-  tbl_sed <- gt(df_sed)
-
-  for (i in seq_len(nrow(df_equal_sed))) {
-    tbl_sed <-
-      tbl_sed |>
-      tab_style(
-        style = cell_fill(color = df_equal_sed$clr[i]),
-        locations = cells_body(columns = df_equal_sed$method[i],
-                               rows = df_equal_sed$rowid[i])
-      )
-  }
-
-  ## mvpa ----
-  df_equal_mvpa <-
-    (df_mvpa[, -1] == df_test_mvpa[, -1]) |>
-    as.data.frame() |>
-    mutate(id = df_mvpa$id, .before = 1) |>
-    pivot_longer(cols = !id,
-                 names_to = "method",
-                 values_to = "equal") |>
-    mutate(rowid = rleid(id),
-           clr = ifelse(equal,
-                        yes = "#D9F1D5",
-                        no  = "#B31529"),
-           id = NULL,
-           equal = NULL)
-  tbl_mvpa <- gt(df_mvpa)
-
-  for (i in seq_len(nrow(df_equal_mvpa))) {
-    tbl_mvpa <-
-      tbl_mvpa |>
-      tab_style(
-        style = cell_fill(color = df_equal_mvpa$clr[i]),
-        locations = cells_body(columns = df_equal_mvpa$method[i],
-                               rows = df_equal_mvpa$rowid[i])
-      )
-  }
-
-  ## steps ----
-  df_equal_step <-
-    (df_step[, -1] == df_test_step[, -1]) |>
-    as.data.frame() |>
-    mutate(id = df_step$id, .before = 1) |>
-    pivot_longer(cols = !id,
-                 names_to = "method",
-                 values_to = "equal") |>
-    mutate(rowid = rleid(id),
-           clr = ifelse(equal,
-                        yes = "#D9F1D5",
-                        no  = "#B31529"),
-           id = NULL,
-           equal = NULL)
-  tbl_step <- gt(df_step)
-
-  for (i in seq_len(nrow(df_equal_step))) {
-    tbl_step <-
-      tbl_step |>
-      tab_style(
-        style = cell_fill(color = df_equal_step$clr[i]),
-        locations = cells_body(columns = df_equal_step$method[i],
-                               rows = df_equal_step$rowid[i])
-      )
-  }
-
-  # Compare agreement/correlation ----
-  ## sed ----
-  df_equal_sed <-
-    left_join(
-      df_agr_sed,
-      df_test_agr_sed,
-      by = join_by(method, method2)
-    ) |>
-    mutate(rowid = rleid(method) + 1,
-           clr = ifelse(config == test,
-                        yes = "#D9F1D5",
-                        no  = "#B31529"),
-           method = NULL)
   tbl_agr_sed <-
-    pmax(mtx_sed, mtx_test_sed, na.rm = TRUE) |>
-    as.data.frame() |>
-    rownames_to_column(var = "method") |>
-    gt()
-
-  for (i in seq_len(nrow(df_equal_sed))) {
-    tbl_agr_sed <-
-      tbl_agr_sed |>
-      tab_style(
-        style = cell_fill(color = df_equal_sed$clr[i]),
-        locations = cells_body(columns = df_equal_sed$method2[i],
-                               rows = df_equal_sed$rowid[i])
-      )
-  }
+    make_table_agr.cor(
+      mtx_yours = mtx_sed,
+      mtx_waves = mtx_test_sed,
+      df_agr_waves = df_test_agr_sed
+    ) |>
+    cols_label(
+      "actinet" = "Actinet",
+      "bakrania.enmo.average" = "Bakrania (ENMO Average)",
+      "bakrania.enmo.simple" = "Bakrania (ENMO Simple)",
+      "bakrania.mad.average" = "Bakrania (MAD Average)",
+      "bakrania.mad.simple" = "Bakrania (MAD Simple)",
+      "ellis" = "Ellis",
+      "esliger" = "Esliger",
+      "fraysee" = "Fraysee",
+      "hildebrand" = "Hildrebrand",
+      "mielke" = "Mielke",
+      "montoye.dt" = "Montoye (DT)",
+      "montoye.nn" = "Montoye (NN)",
+      "montoye.rf" = "Montoye (RF)",
+      "montoye.svm" = "Montoye (SVM)",
+      "trost" = "Trost",
+      "walmsley" = "Walmsley",
+      "white.enmo.lin" = "White (ENMO Linear)",
+      "white.enmo.pol" = "White (ENMO Polynomial)",
+      "white.hpfvm.lin" = "White (HPFVM Linear)",
+      "white.hpfvm.pol" = "White (HPFVM Polynomial)"
+    )
+  tbl_agr_sed$`_data`$method <- case_match(
+    tbl_agr_sed$`_data`$method,
+    "actinet" ~ "Actinet",
+    "bakrania.enmo.average" ~ "Bakrania (ENMO Average)",
+    "bakrania.enmo.simple" ~ "Bakrania (ENMO Simple)",
+    "bakrania.mad.average" ~ "Bakrania (MAD Average)",
+    "bakrania.mad.simple" ~ "Bakrania (MAD Simple)",
+    "ellis" ~ "Ellis",
+    "esliger" ~ "Esliger",
+    "fraysee" ~ "Fraysee",
+    "hildebrand" ~ "Hildrebrand",
+    "mielke" ~ "Mielke",
+    "montoye.dt" ~ "Montoye (DT)",
+    "montoye.nn" ~ "Montoye (NN)",
+    "montoye.rf" ~ "Montoye (RF)",
+    "montoye.svm" ~ "Montoye (SVM)",
+    "trost" ~ "Trost",
+    "walmsley" ~ "Walmsley",
+    "white.enmo.lin" ~ "White (ENMO Linear)",
+    "white.enmo.pol" ~ "White (ENMO Polynomial)",
+    "white.hpfvm.lin" ~ "White (HPFVM Linear)",
+    "white.hpfvm.pol" ~ "White (HPFVM Polynomial)"
+  )
 
   ## mvpa ----
-  df_equal_mvpa <-
-    left_join(
-      df_agr_mvpa,
-      df_test_agr_mvpa,
-      by = join_by(method, method2)
-    ) |>
-    mutate(rowid = rleid(method) + 1,
-           clr = ifelse(config == test,
-                        yes = "#D9F1D5",
-                        no  = "#B31529"),
-           method = NULL)
-  tbl_agr_mvpa <-
-    pmax(mtx_mvpa, mtx_test_mvpa, na.rm = TRUE) |>
-    as.data.frame() |>
-    rownames_to_column(var = "method") |>
-    gt()
-
-  for (i in seq_len(nrow(df_equal_mvpa))) {
-    tbl_agr_mvpa <-
-      tbl_agr_mvpa |>
-      tab_style(
-        style = cell_fill(color = df_equal_mvpa$clr[i]),
-        locations = cells_body(columns = df_equal_mvpa$method2[i],
-                               rows = df_equal_mvpa$rowid[i])
-      )
-  }
-
+  tbl_agr_mvpa <- make_table_agr.cor(
+    mtx_yours = mtx_mvpa,
+    mtx_waves = mtx_test_mvpa,
+    df_agr_waves = df_test_agr_mvpa
+  ) |>
+    cols_label(
+      "actinet" = "Actinet",
+      "ellis" = "Ellis",
+      "esliger" = "Esliger",
+      "fraysee" = "Fraysee",
+      "hildebrand" = "Hildrebrand",
+      "mielke" = "Mielke",
+      "montoye.dt" = "Montoye (DT)",
+      "montoye.nn" = "Montoye (NN)",
+      "montoye.rf" = "Montoye (RF)",
+      "montoye.svm" = "Montoye (SVM)",
+      "trost" = "Trost",
+      "walmsley" = "Walmsley",
+      "white.enmo.lin" = "White (ENMO Linear)",
+      "white.enmo.pol" = "White (ENMO Polynomial)",
+      "white.hpfvm.lin" = "White (HPFVM Linear)",
+      "white.hpfvm.pol" = "White (HPFVM Polynomial)"
+    )
+  tbl_agr_mvpa$`_data`$method <- case_match(
+    tbl_agr_mvpa$`_data`$method,
+    "actinet" ~ "Actinet",
+    "ellis" ~ "Ellis",
+    "esliger" ~ "Esliger",
+    "fraysee" ~ "Fraysee",
+    "hildebrand" ~ "Hildrebrand",
+    "mielke" ~ "Mielke",
+    "montoye.dt" ~ "Montoye (DT)",
+    "montoye.nn" ~ "Montoye (NN)",
+    "montoye.rf" ~ "Montoye (RF)",
+    "montoye.svm" ~ "Montoye (SVM)",
+    "trost" ~ "Trost",
+    "walmsley" ~ "Walmsley",
+    "white.enmo.lin" ~ "White (ENMO Linear)",
+    "white.enmo.pol" ~ "White (ENMO Polynomial)",
+    "white.hpfvm.lin" ~ "White (HPFVM Linear)",
+    "white.hpfvm.pol" ~ "White (HPFVM Polynomial)"
+  )
   ## step ----
-  df_equal_step <-
-    left_join(
-      df_agr_step,
-      df_test_agr_step,
-      by = join_by(method, method2)
-    ) |>
-    mutate(rowid = rleid(method) + 1,
-           clr = ifelse(config == test,
-                        yes = "#D9F1D5",
-                        no  = "#B31529"),
-           method = NULL)
-  tbl_agr_step <-
-    pmax(mtx_step, mtx_test_step, na.rm = TRUE) |>
-    as.data.frame() |>
-    rownames_to_column(var = "method") |>
-    gt()
-
-  for (i in seq_len(nrow(df_equal_step))) {
-    tbl_agr_step <-
-      tbl_agr_step |>
-      tab_style(
-        style = cell_fill(color = df_equal_step$clr[i]),
-        locations = cells_body(columns = df_equal_step$method2[i],
-                               rows = df_equal_step$rowid[i])
-      )
-  }
+  tbl_agr_step <- make_table_agr.cor(
+    mtx_yours = mtx_step,
+    mtx_waves = mtx_test_step,
+    df_agr_waves = df_test_agr_step
+  ) |>
+    cols_label(
+      "oak.1.0" = "Oak 1.0",
+      "oak.pre" = "Oak Pre",
+      "sdt" = "SDT",
+      "stepcount" = "Stepcount",
+      "verisense.original" = "Verisense (Original)",
+      "verisense.revised" = "Verisense (Revised)"
+    )
+  tbl_agr_step$`_data`$method <- case_match(
+    tbl_agr_step$`_data`$method,
+    "oak.1.0" ~ "Oak 1.0",
+    "oak.pre" ~ "Oak Pre",
+    "sdt" ~ "SDT",
+    "stepcount" ~ "Stepcount",
+    "verisense.original" ~ "Verisense (Original)",
+    "verisense.revised" ~ "Verisense (Revised)"
+  )
 
   # return ----
   return(list(
