@@ -72,7 +72,7 @@ apply_ox_stepcount <- function(vct_ox_input,
                                fdr_write,
                                fdr_log,
                                log_prefix = "",
-                               ...) {
+                               lst_miniconda) {
 
   chk_windows <- grepl(
     x = Sys.getenv("OS"),
@@ -166,7 +166,7 @@ apply_ox_walmsley <- function(vct_ox_input,
                               fdr_log,
                               log_prefix = "",
                               my_tz,
-                              ...) {
+                              lst_miniconda) {
 
   chk_windows <- grepl(
     x = Sys.getenv("OS"),
@@ -268,7 +268,7 @@ apply_ox_actinet <- function(vct_ox_input,
                              fdr_write,
                              fdr_log,
                              log_prefix = "",
-                             ...) {
+                             lst_miniconda) {
 
   chk_windows <- grepl(
     x = Sys.getenv("OS"),

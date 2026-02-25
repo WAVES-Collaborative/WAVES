@@ -341,7 +341,7 @@ tar_plan(
       fdr_write    = file.path(getwd(), dir_stepcount),
       fdr_log      = dir_logs,
       log_prefix   = "config_",
-      ...          = df_miniconda
+      lst_miniconda = lst_miniconda
     ),
     format = "file"
   ),
@@ -353,7 +353,7 @@ tar_plan(
       fdr_log      = dir_logs,
       my_tz        = my_tz,
       log_prefix   = "config_",
-      ...          = df_miniconda
+      lst_miniconda = lst_miniconda
     ),
     format = "file"
   ),
@@ -364,7 +364,7 @@ tar_plan(
       fdr_write    = file.path(getwd(), dir_actinet),
       fdr_log      = dir_logs,
       log_prefix   = "config_",
-      ...          = df_miniconda
+      lst_miniconda = lst_miniconda
     ),
     format = "file"
   ),
@@ -397,7 +397,7 @@ tar_plan(
       dir_models    = dir_models,
       dir_write     = dir_out.raw,
       my_tz         = my_tz,
-      ...           = df_miniconda
+      lst_miniconda = lst_miniconda
     ),
     pattern   = map(vct_cal),
     iteration = "list",
@@ -410,7 +410,7 @@ tar_plan(
       vct_fpa_basic = vct_basic,
       dir_write     = dir_out.oak.pre,
       my_tz         = my_tz,
-      ...           = df_miniconda
+      lst_miniconda = lst_miniconda
     ),
     pattern   = map(vct_cal),
     iteration = "list",

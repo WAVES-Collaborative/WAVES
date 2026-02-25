@@ -184,6 +184,12 @@ if (tar_active()) {
 }
 
 tar_plan(
+  tar_file_read(
+    name    = lst_miniconda,
+    command = file.path("_targets_config", "objects", "lst_miniconda"),
+    read    = qs2::qs_read(!!.x),
+    format  = "qs"
+  ),
   my_tz = study_timezone,
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                             FILE DIRECTORIES                           ----
@@ -242,7 +248,7 @@ tar_plan(
       fdr_write    = file.path(getwd(), dir_stepcount),
       fdr_log      = dir_logs,
       log_prefix   = "main_",
-      ...          = df_miniconda
+      lst_miniconda = lst_miniconda
     ),
     format = "file"
   ),
@@ -254,7 +260,7 @@ tar_plan(
       fdr_log      = dir_logs,
       my_tz        = my_tz,
       log_prefix   = "main_",
-      ...          = df_miniconda
+      lst_miniconda = lst_miniconda
     ),
     format = "file"
   ),
@@ -265,7 +271,7 @@ tar_plan(
       fdr_write    = file.path(getwd(), dir_actinet),
       fdr_log      = dir_logs,
       log_prefix   = "main_",
-      ...          = df_miniconda
+      lst_miniconda = lst_miniconda
     ),
     format = "file"
   ),
@@ -298,7 +304,7 @@ tar_plan(
       dir_models    = dir_models,
       dir_write     = dir_out.raw,
       my_tz         = my_tz,
-      ...           = df_miniconda
+      lst_miniconda = lst_miniconda
     ),
     pattern   = map(vct_cal),
     iteration = "list",
@@ -311,7 +317,7 @@ tar_plan(
       vct_fpa_basic = vct_basic,
       dir_write     = dir_out.oak.pre,
       my_tz         = my_tz,
-      ...           = df_miniconda
+      lst_miniconda = lst_miniconda
     ),
     pattern   = map(vct_cal),
     iteration = "list",
