@@ -8,8 +8,12 @@
 library(targets)
 library(tarchetypes)
 library(crew)
-Sys.setenv(TAR_PROJECT = "config")
 library(autometric)
+Sys.setenv(
+  TAR_PROJECT = "config",
+  # change below environment variable if you already have a conda installation readily accessible.
+  RETICULATE_MINICONDA_PATH = reticulate::miniconda_path()
+)
 
 study_timezone     <- Sys.timezone()
 sampling_frequency <- 100
