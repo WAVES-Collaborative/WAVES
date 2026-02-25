@@ -14,15 +14,78 @@ editor_options:
 #| echo: false
 #| warning: false
 
-tar_load(df_miniconda)
+# tar_load(lst_miniconda)
 
 ```
 
-## Miniconda Configuration
+## Miniconda
 
 ```{r}
 #| label: miniconda
 #| echo: false
-kable(df_miniconda)
+kable(
+  lst_miniconda$df_msg[c("miniconda_install", "miniconda_version"), ],
+  row.names = FALSE
+)
 
+```
+
+## Stepcount
+
+```{r}
+#| label: step
+#| echo: false
+kable(
+  lst_miniconda$df_msg[c("step_env", "step_pkg"), ],
+  row.names = FALSE
+)
+lst_miniconda$tbl_step
+```
+
+## Walmsley
+
+```{r}
+#| label: wlms
+#| echo: false
+kable(
+  lst_miniconda$df_msg[c("wlms_env", "wlms_pkg"), ],
+  row.names = FALSE
+)
+lst_miniconda$tbl_wlms
+```
+
+## Actinet
+
+```{r}
+#| label: acti
+#| echo: false
+kable(
+  lst_miniconda$df_msg[c("acti_env", "acti_pkg"), ],
+  row.names = FALSE
+)
+lst_miniconda$tbl_acti
+```
+
+## Oak 1.0
+
+```{r}
+#| label: oak1
+#| echo: false
+kable(
+  lst_miniconda$df_msg[c("oak_1.0_env", "oak_1.0_pkg"), ],
+  row.names = FALSE
+)
+lst_miniconda$tbl_oak1
+```
+
+## Oak Pre
+
+```{r}
+#| label: oakp
+#| echo: false
+kable(
+  lst_miniconda$df_msg[c("oak_pre_env", "oak_pre_pkg"), ],
+  row.names = FALSE
+)
+lst_miniconda$tbl_oakp
 ```

@@ -1,4 +1,44 @@
-config_miniconda <- function(...) {
+get_tbl_pkgs <- function(df_pkgs_WAVES,
+                         conda_env) {
+
+  df_pkgs_installed <-
+    left_join(
+      df_pkgs_WAVES,
+      py_list_packages(conda_env) |>
+        mutate(
+          Package = package,
+          `Version Installed` = version,
+          .keep = "none"
+        ),
+      by = join_by(Package)
+    ) |>
+    select(Package, starts_with("Version"), Channel = channel) |>
+    mutate(clr = ifelse(`Version WAVES` == `Version Installed`,
+                        yes = "#D9F1D5",
+                        no  = "#ea9999"))
+  tbl_pkgs <-
+    df_pkgs_installed |>
+    select(-clr) |>
+    gt()
+
+  for (i in seq_len(nrow(df_pkgs_installed))) {
+    tbl_pkgs <-
+      tbl_pkgs |>
+      tab_style(
+        style = cell_fill(color = df_pkgs_installed$clr[i]),
+        locations = cells_body(columns = starts_with("Version"),
+                               rows    = i)
+      )
+  }
+
+  tbl_pkgs
+
+}
+config_miniconda <- function(df_pkgs_stepcount,
+                             df_pkgs_walmsley,
+                             df_pkgs_actinet,
+                             df_pkgs_oak_1.0,
+                             df_pkgs_oak_pre) {
 
   # conda ----
   chk_conda <-
@@ -39,307 +79,13 @@ config_miniconda <- function(...) {
   chk_oak_1.0 <- !condaenv_exists("WHO_WAVES_oak_1.0")
   chk_oak_pre <- !condaenv_exists("WHO_WAVES_oak_pre")
 
-  # packages in each environment ----
-  vct_pkg_step <- c(
-    "actipy_3.8.0",
-    "bzip2_1.0.8",
-    "ca-certificates_2025.11.12",
-    "certifi_2025.11.12",
-    "charset-normalizer_3.4.4",
-    "colorama_0.4.6",
-    "contourpy_1.3.0",
-    "cycler_0.12.1",
-    "fonttools_4.60.2",
-    "hmmlearn_0.3.3",
-    "idna_3.11",
-    "imbalanced-learn_0.9.1",
-    "importlib-resources_6.5.2",
-    "joblib_1.2.0",
-    "kiwisolver_1.4.7",
-    "libexpat_2.7.3",
-    "libffi_3.5.2",
-    "liblzma_5.8.1",
-    "libsqlite_3.51.1",
-    "libzlib_1.3.1",
-    "llvmlite_0.41.1",
-    "matplotlib_3.7.5",
-    "numba_0.58.1",
-    "numpy_1.24.4",
-    "openjdk_25.0.1",
-    "openssl_3.6.0",
-    "packaging_25.0",
-    "pandas_2.0.3",
-    "patsy_1.0.2",
-    "pillow_11.3.0",
-    "pip_25.2",
-    "pyparsing_3.3.1",
-    "python_3.9.23",
-    "python-dateutil_2.9.0.post0",
-    "pytz_2025.2",
-    "requests_2.32.5",
-    "scikit-learn_1.1.1",
-    "scipy_1.10.1",
-    "setuptools_80.9.0",
-    "six_1.17.0",
-    "statsmodels_0.14.6",
-    "stepcount_3.17.0",
-    "symlink-exe-runtime_1.0",
-    "threadpoolctl_3.6.0",
-    "tk_8.6.13",
-    "torch_1.13.1",
-    "torchvision_0.14.1",
-    "tqdm_4.64.1",
-    "transforms3d_0.4.2",
-    "typing-extensions_4.15.0",
-    "tzdata_2025.3",
-    "ucrt_10.0.26100.0",
-    "urllib3_2.6.2",
-    "vc_14.3",
-    "vc14_runtime_14.44.35208",
-    "vcomp14_14.44.35208",
-    "vs2015_runtime_14.44.35208",
-    "wheel_0.45.1",
-    "zipp_3.23.0"
-  )
-  vct_pkg_acc <- c(
-    "accelerometer_7.3.0",
-    "bzip2_1.0.8",
-    "ca-certificates_2025.11.12",
-    "colorama_0.4.6",
-    "cycler_0.12.1",
-    "fonttools_4.60.1",
-    "imbalanced-learn_0.8.1",
-    "joblib_1.1.1",
-    "kiwisolver_1.4.7",
-    "libexpat_2.7.3",
-    "libffi_3.5.2",
-    "liblzma_5.8.1",
-    "libsqlite_3.51.1",
-    "libzlib_1.3.1",
-    "matplotlib_3.5.3",
-    "numpy_1.21.6",
-    "openjdk_25.0.1",
-    "openssl_3.6.0",
-    "packaging_25.0",
-    "pandas_1.3.5",
-    "patsy_1.0.2",
-    "pillow_11.3.0",
-    "pip_25.2",
-    "pyparsing_3.2.5",
-    "python_3.9.23",
-    "python-dateutil_2.9.0.post0",
-    "pytz_2025.2",
-    "scikit-learn_1.0.2",
-    "scipy_1.7.3",
-    "setuptools_80.9.0",
-    "six_1.17.0",
-    "statsmodels_0.13.5",
-    "symlink-exe-runtime_1.0",
-    "threadpoolctl_3.6.0",
-    "tk_8.6.13",
-    "tqdm_4.65.2",
-    "tzdata_2025b",
-    "ucrt_10.0.26100.0",
-    "vc_14.3",
-    "vc14_runtime_14.44.35208",
-    "vcomp14_14.44.35208",
-    "vs2015_runtime_14.44.35208",
-    "wheel_0.45.1"
-  )
-  vct_pkg_acti <- c(
-    "actinet_0.4.2",
-    "actipy_3.8.0",
-    "bzip2_1.0.8",
-    "ca-certificates_2025.11.12",
-    "certifi_2025.11.12",
-    "charset-normalizer_3.4.4",
-    "colorama_0.4.6",
-    "cycler_0.12.1",
-    "fonttools_4.60.1",
-    "idna_3.11",
-    "imbalanced-learn_0.9.1",
-    "joblib_1.2.0",
-    "kiwisolver_1.4.7",
-    "libexpat_2.7.3",
-    "libffi_3.5.2",
-    "liblzma_5.8.1",
-    "libsqlite_3.51.1",
-    "libzlib_1.3.1",
-    "matplotlib_3.5.3",
-    "numpy_1.24.4",
-    "openjdk_25.0.1",
-    "openssl_3.6.0",
-    "packaging_25.0",
-    "pandas_2.0.3",
-    "patsy_1.0.2",
-    "pillow_11.3.0",
-    "pip_25.2",
-    "pyparsing_3.2.5",
-    "python_3.9.23",
-    "python-dateutil_2.9.0.post0",
-    "pytz_2025.2",
-    "requests_2.32.5",
-    "scikit-learn_1.1.1",
-    "scipy_1.10.1",
-    "setuptools_80.9.0",
-    "six_1.17.0",
-    "statsmodels_0.14.6",
-    "symlink-exe-runtime_1.0",
-    "threadpoolctl_3.6.0",
-    "tk_8.6.13",
-    "torch_1.13.1",
-    "torchvision_0.14.1",
-    "tqdm_4.64.1",
-    "transforms3d_0.4.2",
-    "typing-extensions_4.15.0",
-    "tzdata_2025.2",
-    "ucrt_10.0.26100.0",
-    "urllib3_2.6.1",
-    "vc_14.3",
-    "vc14_runtime_14.44.35208",
-    "vcomp14_14.44.35208",
-    "vs2015_runtime_14.44.35208",
-    "wheel_0.45.1"
-  )
-  vct_pkg_oak <- c(
-    "audioread_3.1.0",
-    "beiwe-forest_1.0",
-    "bzip2_1.0.8",
-    "ca-certificates_2025.11.12",
-    "certifi_2025.11.12",
-    "cffi_2.0.0",
-    "charset-normalizer_3.4.4",
-    "decorator_5.2.1",
-    "h3_4.3.0",
-    "h3-py_4.3.0",
-    "holidays_0.86",
-    "idna_3.11",
-    "joblib_1.5.2",
-    "lazy-loader_0.4",
-    "libblas_3.11.0",
-    "libcblas_3.11.0",
-    "libexpat_2.7.3",
-    "libffi_3.5.2",
-    "libhwloc_2.12.1",
-    "libiconv_1.18",
-    "liblapack_3.11.0",
-    "liblzma_5.8.1",
-    "librosa_0.11.0",
-    "libsqlite_3.51.1",
-    "libwinpthread_12.0.0.r4.gg4f2fc60ca",
-    "libxml2_2.15.1",
-    "libxml2-16_2.15.1",
-    "libzlib_1.3.1",
-    "llvm-openmp_21.1.7",
-    "llvmlite_0.45.1",
-    "mkl_2025.3.0",
-    "msgpack_1.1.2",
-    "numba_0.62.1",
-    "numpy_2.3.5",
-    "openrouteservice_2.3.3",
-    "openssl_3.6.0",
-    "packaging_25.0",
-    "pandas_2.3.3",
-    "pip_25.3",
-    "platformdirs_4.5.1",
-    "pooch_1.8.2",
-    "pycparser_2.22",
-    "pyproj_3.7.2",
-    "python_3.12.12",
-    "python-dateutil_2.9.0.post0",
-    "python-flatbuffers_25.9.23",
-    "python_abi_3.12",
-    "pytz_2025.2",
-    "ratelimit_2.2.1",
-    "requests_2.32.5",
-    "scikit-learn_1.7.2",
-    "scipy_1.16.3",
-    "setuptools_80.9.0",
-    "shapely_2.1.2",
-    "six_1.17.0",
-    "soundfile_0.13.1",
-    "soxr_1.0.0",
-    "ssqueezepy_0.6.6",
-    "tbb_2022.3.0",
-    "threadpoolctl_3.6.0",
-    "timezonefinder_8.1.0",
-    "tk_8.6.13",
-    "typing-extensions_4.15.0",
-    "tzdata_2025.2",
-    "ucrt_10.0.26100.0",
-    "urllib3_2.6.1",
-    "vc_14.3",
-    "vc14_runtime_14.44.35208",
-    "vcomp14_14.44.35208",
-    "wheel_0.45.1"
-  )
-  vct_pkg_oak_pre <- c(
-    "audioread_3.1.0",
-    "bzip2_1.0.8",
-    "ca-certificates_2026.1.4",
-    "certifi_2026.1.4",
-    "cffi_2.0.0",
-    "charset-normalizer_3.4.4",
-    "decorator_5.2.1",
-    "flatbuffers_25.12.19",
-    "forest-analysis_1.0.dev3",
-    "h3_4.4.1",
-    "holidays_0.89",
-    "idna_3.11",
-    "joblib_1.5.3",
-    "lazy-loader_0.4",
-    "libexpat_2.7.3",
-    "libffi_3.5.2",
-    "liblzma_5.8.2",
-    "librosa_0.11.0",
-    "libsqlite_3.51.2",
-    "libzlib_1.3.1",
-    "llvmlite_0.46.0",
-    "msgpack_1.1.2",
-    "numba_0.63.1",
-    "numpy_2.3.5",
-    "openrouteservice_2.3.3",
-    "openssl_3.6.0",
-    "packaging_26.0",
-    "pandas_3.0.0",
-    "pip_25.3",
-    "platformdirs_4.5.1",
-    "pooch_1.8.2",
-    "pycparser_3.0",
-    "pyproj_3.7.2",
-    "python_3.11.14",
-    "python-dateutil_2.9.0.post0",
-    "pytz_2025.2",
-    "ratelimit_2.2.1",
-    "requests_2.32.5",
-    "scikit-learn_1.8.0",
-    "scipy_1.17.0",
-    "setuptools_80.10.1",
-    "shapely_2.1.2",
-    "six_1.17.0",
-    "soundfile_0.13.1",
-    "soxr_1.0.0",
-    "ssqueezepy_0.6.6",
-    "threadpoolctl_3.6.0",
-    "timezonefinder_8.2.1",
-    "tk_8.6.13",
-    "typing-extensions_4.15.0",
-    "tzdata_2025.3",
-    "ucrt_10.0.26100.0",
-    "urllib3_2.6.3",
-    "vc_14.3",
-    "vc14_runtime_14.44.35208",
-    "vcomp14_14.44.35208",
-    "wheel_0.46.2"
-  )
-
   # stepcount ----
   if (chk_stepcount) {
 
     conda_create(
       envname = "WHO_WAVES_stepcount",
       packages = "openjdk",
-      forge = TRUE,
+      forge = FALSE,
       python_version = 3.9,
       pip = TRUE
     )
@@ -354,26 +100,15 @@ config_miniconda <- function(...) {
         forge    = FALSE,
         pip      = TRUE
       )
-      vct_installed <-
-        py_list_packages("WHO_WAVES_stepcount") |>
-        unite(col = "pkg", package, version) |>
-        pull(pkg)
-      # vct_installed |>
-      #   paste0('"', ... = _, '",\n') |>
-      #   cat(sep = "")
-      chk_package <- all(
-        vct_pkg_step %in% vct_installed
+      tbl_pkgs_stepcount <- get_tbl_pkgs(
+        df_pkgs_stepcount,
+        conda_env = "WHO_WAVES_stepcount"
       )
-
-      if (chk_package) {
-        msg_step_pkg <- "Modules successfully installed."
-      } else {
-        vct_fudge <- vct_installed[!vct_pkg_step %in% vct_installed]
-        msg_step_pkg <- paste0(
-          "Unsuccessful module installation. The following modules were not installed: ",
-          paste0('"', vct_fudge, '"',  collapse = " "), ". Share with WHO WAVES team."
-        )
-      }
+      msg_step_pkg <- ifelse(
+        all(tbl_pkgs_stepcount$`_data`$`Version WAVES` == tbl_pkgs_stepcount$`_data`$`Version Installed`),
+        yes = "Modules successfully installed.",
+        no  = "Modules installated do not completely match WAVES configuration. Please see the table below for module versions that do not match or are completely missing."
+      )
 
     } else {
       msg_step_env <- "Not created. Share report with WHO_WAVES team."
@@ -385,13 +120,12 @@ config_miniconda <- function(...) {
     msg_step_env <- "Already exists."
 
     # Check packages are installed.
-    vct_installed <-
-      py_list_packages("WHO_WAVES_stepcount") |>
-      unite(col = "pkg", package, version) |>
-      pull(pkg)
-    chk_package <- all(
-      vct_pkg_step %in% vct_installed
+    tbl_pkgs_stepcount <- get_tbl_pkgs(
+      df_pkgs_stepcount,
+      conda_env = "WHO_WAVES_stepcount"
     )
+    chk_package <-
+      all(tbl_pkgs_stepcount$`_data`$`Version WAVES` == tbl_pkgs_stepcount$`_data`$`Version Installed`)
 
     if (chk_package) {
       msg_step_pkg <- "Modules already installed."
@@ -401,28 +135,19 @@ config_miniconda <- function(...) {
       conda_install(
         envname  = "WHO_WAVES_stepcount",
         packages = "stepcount==3.5",
-        forge    = TRUE,
+        forge    = FALSE,
         pip      = TRUE
       )
-
-      vct_installed <-
-        py_list_packages("WHO_WAVES_stepcount") |>
-        unite(col = "pkg", package, version) |>
-        pull(pkg)
-      chk_package <- all(
-        vct_pkg_step %in% vct_installed
+      tbl_pkgs_stepcount <- get_tbl_pkgs(
+        df_pkgs_stepcount,
+        conda_env = "WHO_WAVES_stepcount"
+      )
+      msg_step_pkg <- ifelse(
+        all(tbl_pkgs_stepcount$`_data`$`Version WAVES` == tbl_pkgs_stepcount$`_data`$`Version Installed`),
+        yes = "Modules successfully installed.",
+        no  = "Modules installated do not completely match WAVES configuration. Please see the table below for module versions that do not match or are completely missing."
       )
 
-      if (chk_package) {
-        msg_step_pkg <- "Modules successfully installed."
-      } else {
-        vct_fudge <- vct_installed[!vct_pkg_step %in% vct_installed]
-        msg_step_pkg <- paste0(
-          "Unsuccessful module installation. The following modules were not installed: ",
-          paste0('"', vct_fudge, '"',  collapse = " "), ". Share with WHO WAVES team."
-        )
-
-      }
     }
   }
 
@@ -432,7 +157,7 @@ config_miniconda <- function(...) {
     conda_create(
       envname = "WHO_WAVES_accelerometer",
       packages = "openjdk",
-      forge = TRUE,
+      forge = FALSE,
       python_version = 3.9,
       pip = TRUE
     )
@@ -447,26 +172,15 @@ config_miniconda <- function(...) {
         forge    = FALSE,
         pip      = TRUE
       )
-      vct_installed <-
-        py_list_packages("WHO_WAVES_accelerometer") |>
-        unite(col = "pkg", package, version) |>
-        pull(pkg)
-      # vct_installed |>
-      #   paste0('"', ... = _, '",\n') |>
-      #   cat(sep = "")
-      chk_package <- all(
-        vct_pkg_acc %in% vct_installed
+      tbl_pkgs_walmsley <- get_tbl_pkgs(
+        df_pkgs_walmsley,
+        conda_env = "WHO_WAVES_accelerometer"
       )
-
-      if (chk_package) {
-        msg_acc_pkg <- "Modules successfully installed."
-      } else {
-        vct_fudge <- vct_installed[!vct_pkg_acc %in% vct_installed]
-        msg_acc_pkg <- paste0(
-          "Unsuccessful module installation. The following modules were not installed: ",
-          paste0('"', vct_fudge, '"',  collapse = " "), ". Share with WHO WAVES team."
-        )
-      }
+      msg_acc_pkg <- ifelse(
+        all(tbl_pkgs_walmsley$`_data`$`Version WAVES` == tbl_pkgs_walmsley$`_data`$`Version Installed`),
+        yes = "Modules successfully installed.",
+        no  = "Modules installated do not completely match WAVES configuration. Please see the table below for module versions that do not match or are completely missing."
+      )
 
     } else {
       msg_acc_env <- "Not created. Share report with WHO_WAVES team."
@@ -478,13 +192,12 @@ config_miniconda <- function(...) {
     msg_acc_env <- "Already exists."
 
     # Check packages are installed.
-    vct_installed <-
-      py_list_packages("WHO_WAVES_accelerometer") |>
-      unite(col = "pkg", package, version) |>
-      pull(pkg)
-    chk_package <- all(
-      vct_pkg_acc %in% vct_installed
+    tbl_pkgs_walmsley <- get_tbl_pkgs(
+      df_pkgs_walmsley,
+      conda_env = "WHO_WAVES_accelerometer"
     )
+    chk_package <-
+      all(tbl_pkgs_walmsley$`_data`$`Version WAVES` == tbl_pkgs_walmsley$`_data`$`Version Installed`)
 
     if (chk_package) {
       msg_acc_pkg <- "Modules already installed."
@@ -494,28 +207,19 @@ config_miniconda <- function(...) {
       conda_install(
         envname  = "WHO_WAVES_accelerometer",
         packages = "accelerometer==7.3.0",
-        forge    = TRUE,
+        forge    = FALSE,
         pip      = TRUE
       )
-
-      vct_installed <-
-        py_list_packages("WHO_WAVES_accelerometer") |>
-        unite(col = "pkg", package, version) |>
-        pull(pkg)
-      chk_package <- all(
-        vct_pkg_acc %in% vct_installed
+      tbl_pkgs_walmsley <- get_tbl_pkgs(
+        df_pkgs_walmsley,
+        conda_env = "WHO_WAVES_accelerometer"
+      )
+      msg_acc_pkg <- ifelse(
+        all(tbl_pkgs_walmsley$`_data`$`Version WAVES` == tbl_pkgs_walmsley$`_data`$`Version Installed`),
+        yes = "Modules successfully installed.",
+        no  = "Modules installated do not completely match WAVES configuration. Please see the table below for module versions that do not match or are completely missing."
       )
 
-      if (chk_package) {
-        msg_acc_pkg <- "Modules successfully installed."
-      } else {
-        vct_fudge <- vct_installed[!vct_pkg_acc %in% vct_installed]
-        msg_acc_pkg <- paste0(
-          "Unsuccessful module installation. The following modules were not installed: ",
-          paste0('"', vct_fudge, '"',  collapse = " "), ". Share with WHO WAVES team."
-        )
-
-      }
     }
   }
 
@@ -525,7 +229,7 @@ config_miniconda <- function(...) {
     conda_create(
       envname = "WHO_WAVES_actinet",
       packages = "openjdk",
-      forge = TRUE,
+      forge = FALSE,
       python_version = 3.9,
       pip = TRUE
     )
@@ -540,26 +244,15 @@ config_miniconda <- function(...) {
         forge    = FALSE,
         pip      = TRUE
       )
-      vct_installed <-
-        py_list_packages("WHO_WAVES_actinet") |>
-        unite(col = "pkg", package, version) |>
-        pull(pkg)
-      # vct_installed |>
-      #   paste0('"', ... = _, '",\n') |>
-      #   cat(sep = "")
-      chk_package <- all(
-        vct_pkg_acti %in% vct_installed
+      tbl_pkgs_actinet <- get_tbl_pkgs(
+        df_pkgs_actinet,
+        conda_env = "WHO_WAVES_actinet"
       )
-
-      if (chk_package) {
-        msg_acti_pkg <- "Modules successfully installed."
-      } else {
-        vct_fudge <- vct_installed[!vct_pkg_acti %in% vct_installed]
-        msg_acti_pkg <- paste0(
-          "Unsuccessful module installation. The following modules were not installed: ",
-          paste0('"', vct_fudge, '"',  collapse = " "), ". Share with WHO WAVES team."
-        )
-      }
+      msg_acti_pkg <- ifelse(
+        all(tbl_pkgs_actinet$`_data`$`Version WAVES` == tbl_pkgs_actinet$`_data`$`Version Installed`),
+        yes = "Modules successfully installed.",
+        no  = "Modules installated do not completely match WAVES configuration. Please see the table below for module versions that do not match or are completely missing."
+      )
 
     } else {
       msg_acti_env <- "Not created. Share report with WHO_WAVES team."
@@ -571,13 +264,12 @@ config_miniconda <- function(...) {
     msg_acti_env <- "Already exists."
 
     # Check packages are installed.
-    vct_installed <-
-      py_list_packages("WHO_WAVES_actinet") |>
-      unite(col = "pkg", package, version) |>
-      pull(pkg)
-    chk_package <- all(
-      vct_pkg_acti %in% vct_installed
+    tbl_pkgs_actinet <- get_tbl_pkgs(
+      df_pkgs_actinet,
+      conda_env = "WHO_WAVES_actinet"
     )
+    chk_package <-
+      all(tbl_pkgs_actinet$`_data`$`Version WAVES` == tbl_pkgs_actinet$`_data`$`Version Installed`)
 
     if (chk_package) {
       msg_acti_pkg <- "Modules already installed."
@@ -587,28 +279,19 @@ config_miniconda <- function(...) {
       conda_install(
         envname  = "WHO_WAVES_actinet",
         packages = "actinet==0.4.2",
-        forge    = TRUE,
+        forge    = FALSE,
         pip      = TRUE
       )
-
-      vct_installed <-
-        py_list_packages("WHO_WAVES_actinet") |>
-        unite(col = "pkg", package, version) |>
-        pull(pkg)
-      chk_package <- all(
-        vct_pkg_acti %in% vct_installed
+      tbl_pkgs_actinet <- get_tbl_pkgs(
+        df_pkgs_actinet,
+        conda_env = "WHO_WAVES_actinet"
+      )
+      msg_acti_pkg <- ifelse(
+        all(tbl_pkgs_actinet$`_data`$`Version WAVES` == tbl_pkgs_actinet$`_data`$`Version Installed`),
+        yes = "Modules successfully installed.",
+        no  = "Modules installated do not completely match WAVES configuration. Please see the table below for module versions that do not match or are completely missing."
       )
 
-      if (chk_package) {
-        msg_acti_pkg <- "Modules successfully installed."
-      } else {
-        vct_fudge <- vct_installed[!vct_pkg_acti %in% vct_installed]
-        msg_acti_pkg <- paste0(
-          "Unsuccessful module installation. The following modules were not installed: ",
-          paste0('"', vct_fudge, '"',  collapse = " "), ". Share with WHO WAVES team."
-        )
-
-      }
     }
   }
 
@@ -621,7 +304,7 @@ config_miniconda <- function(...) {
     conda_create(
       envname = "WHO_WAVES_oak_1.0",
       packages = "timezonefinder==8.1.0",
-      forge = TRUE,
+      forge = FALSE,
       python_version = 3.12,
       pip = TRUE
     )
@@ -679,23 +362,15 @@ config_miniconda <- function(...) {
         # )
       }
 
-      vct_installed <-
-        py_list_packages("WHO_WAVES_oak_1.0") |>
-        unite(col = "pkg", package, version) |>
-        pull(pkg)
-      chk_package <- all(
-        vct_pkg_oak %in% vct_installed
+      tbl_pkgs_oak_1.0 <- get_tbl_pkgs(
+        df_pkgs_oak_1.0,
+        conda_env = "WHO_WAVES_oak_1.0"
       )
-
-      if (chk_package) {
-        msg_oak_pkg <- "Modules successfully installed."
-      } else {
-        vct_fudge <- vct_installed[!vct_pkg_oak %in% vct_installed]
-        msg_oak_pkg <- paste0(
-          "Unsuccessful module installation. The following modules were not installed: ",
-          paste0('"', vct_fudge, '"',  collapse = " "), ". Share with WHO WAVES team."
-        )
-      }
+      msg_oak_pkg <- ifelse(
+        all(tbl_pkgs_oak_1.0$`_data`$`Version WAVES` == tbl_pkgs_oak_1.0$`_data`$`Version Installed`),
+        yes = "Modules successfully installed.",
+        no  = "Modules installated do not completely match WAVES configuration. Please see the table below for module versions that do not match or are completely missing."
+      )
 
     } else {
       msg_oak_env <- "Not created. Share report with WHO_WAVES team."
@@ -707,13 +382,12 @@ config_miniconda <- function(...) {
     msg_oak_env <- "Already exists."
 
     # Check packages are installed.
-    vct_installed <-
-      py_list_packages("WHO_WAVES_oak_1.0") |>
-      unite(col = "pkg", package, version) |>
-      pull(pkg)
-    chk_package <- all(
-      vct_pkg_oak %in% vct_installed
+    tbl_pkgs_oak_1.0 <- get_tbl_pkgs(
+      df_pkgs_oak_1.0,
+      conda_env = "WHO_WAVES_oak_1.0"
     )
+    chk_package <-
+      all(tbl_pkgs_oak_1.0$`_data`$`Version WAVES` == tbl_pkgs_oak_1.0$`_data`$`Version Installed`)
 
     if (chk_package) {
       msg_oak_pkg <- "Modules already installed."
@@ -757,27 +431,16 @@ config_miniconda <- function(...) {
         # )
       }
 
-      vct_installed <-
-        py_list_packages("WHO_WAVES_oak_1.0") |>
-        unite(col = "pkg", package, version) |>
-        pull(pkg)
-      # vct_installed |>
-      #   paste0('"', ... = _, '",\n') |>
-      #   cat(sep = "")
-      chk_package <- all(
-        vct_pkg_oak %in% vct_installed
+      tbl_pkgs_oak_1.0 <- get_tbl_pkgs(
+        df_pkgs_oak_1.0,
+        conda_env = "WHO_WAVES_oak_1.0"
+      )
+      msg_oak_pkg <- ifelse(
+        all(tbl_pkgs_oak_1.0$`_data`$`Version WAVES` == tbl_pkgs_oak_1.0$`_data`$`Version Installed`),
+        yes = "Modules successfully installed.",
+        no  = "Modules installated do not completely match WAVES configuration. Please see the table below for module versions that do not match or are completely missing."
       )
 
-      if (chk_package) {
-        msg_oak_pkg <- "Modules successfully installed."
-      } else {
-        vct_fudge <- vct_installed[!vct_pkg_oak %in% vct_installed]
-        msg_oak_pkg <- paste0(
-          "Unsuccessful module installation. The following modules were not installed: ",
-          paste0('"', vct_fudge, '"',  collapse = " "), ". Share with WHO WAVES team."
-        )
-
-      }
     }
   }
 
@@ -790,7 +453,7 @@ config_miniconda <- function(...) {
     conda_create(
       envname = "WHO_WAVES_oak_pre",
       # packages = "timezonefinder==8.1.0",
-      forge = TRUE,
+      forge = FALSE,
       python_version = 3.11, # match version in walking R package
       pip = TRUE
     )
@@ -840,26 +503,15 @@ config_miniconda <- function(...) {
         # )
       }
 
-      vct_installed <-
-        py_list_packages("WHO_WAVES_oak_pre") |>
-        unite(col = "pkg", package, version) |>
-        pull(pkg)
-      # vct_installed |>
-      #   paste0('"', ... = _, '",\n') |>
-      #   cat(sep = "")
-      chk_package <- all(
-        vct_pkg_oak_pre %in% vct_installed
+      tbl_pkgs_oak_pre <- get_tbl_pkgs(
+        df_pkgs_oak_pre,
+        conda_env = "WHO_WAVES_oak_pre"
       )
-
-      if (chk_package) {
-        msg_oak_pre_pkg <- "Modules successfully installed."
-      } else {
-        vct_fudge <- vct_installed[!vct_pkg_oak_pre %in% vct_installed]
-        msg_oak_pre_pkg <- paste0(
-          "Unsuccessful module installation. The following modules were not installed: ",
-          paste0('"', vct_fudge, '"',  collapse = " "), ". Share with WHO WAVES team."
-        )
-      }
+      msg_oak_pre_pkg <- ifelse(
+        all(tbl_pkgs_oak_pre$`_data`$`Version WAVES` == tbl_pkgs_oak_pre$`_data`$`Version Installed`),
+        yes = "Modules successfully installed.",
+        no  = "Modules installated do not completely match WAVES configuration. Please see the table below for module versions that do not match or are completely missing."
+      )
 
     } else {
       msg_oak_pre_env <- "Not created. Share report with WHO_WAVES team."
@@ -871,13 +523,12 @@ config_miniconda <- function(...) {
     msg_oak_pre_env <- "Already exists."
 
     # Check packages are installed.
-    vct_installed <-
-      py_list_packages("WHO_WAVES_oak_pre") |>
-      unite(col = "pkg", package, version) |>
-      pull(pkg)
-    chk_package <- all(
-      vct_pkg_oak_pre %in% vct_installed
+    tbl_pkgs_oak_pre <- get_tbl_pkgs(
+      df_pkgs_oak_pre,
+      conda_env = "WHO_WAVES_oak_pre"
     )
+    chk_package <-
+      all(tbl_pkgs_oak_pre$`_data`$`Version WAVES` == tbl_pkgs_oak_pre$`_data`$`Version Installed`)
 
     if (chk_package) {
       msg_oak_pre_pkg <- "Modules already installed."
@@ -921,47 +572,36 @@ config_miniconda <- function(...) {
         # )
       }
 
-      vct_installed <-
-        py_list_packages("WHO_WAVES_oak_pre") |>
-        unite(col = "pkg", package, version) |>
-        pull(pkg)
-      # vct_installed |>
-      #   paste0('"', ... = _, '",\n') |>
-      #   cat(sep = "")
-      chk_package <- all(
-        vct_pkg_oak_pre %in% vct_installed
+      tbl_pkgs_oak_pre <- get_tbl_pkgs(
+        df_pkgs_oak_pre,
+        conda_env = "WHO_WAVES_oak_pre"
+      )
+      msg_oak_pre_pkg <- ifelse(
+        all(tbl_pkgs_oak_pre$`_data`$`Version WAVES` == tbl_pkgs_oak_pre$`_data`$`Version Installed`),
+        yes = "Modules successfully installed.",
+        no  = "Modules installated do not completely match WAVES configuration. Please see the table below for module versions that do not match or are completely missing."
       )
 
-      if (chk_package) {
-        msg_oak_pre_pkg <- "Modules successfully installed."
-      } else {
-        vct_fudge <- vct_installed[!vct_pkg_oak_pre %in% vct_installed]
-        msg_oak_pre_pkg <- paste0(
-          "Unsuccessful module installation. The following modules were not installed: ",
-          paste0('"', vct_fudge, '"',  collapse = " "), ". Share with WHO WAVES team."
-        )
-
-      }
     }
   }
 
   # return ----
-  data.frame(
+  df_msg <- data.frame(
     Item = c(
-      "Miniconda",
-      "Miniconda Version",
-      "stepcount environment",
-      "stepcount modules",
-      "accelerometer environment",
-      "accelerometer modules",
-      "actinet environment",
-      "actinet modules",
-      "oak.1.0 environment",
-      "oak.1.0 modules",
-      "oak.pre environment",
-      "oak.pre modules"
+      "Status",
+      "Version",
+      "Environment",
+      "Modules",
+      "Environment",
+      "Modules",
+      "Environment",
+      "Modules",
+      "Environment",
+      "Modules",
+      "Environment",
+      "Modules"
     ),
-    `Message/Value` = c(
+    Message = c(
       msg_conda,
       conda_version(),
       msg_step_env,
@@ -976,6 +616,28 @@ config_miniconda <- function(...) {
       msg_oak_pre_pkg
     )
   )
+  rownames(df_msg) <- c(
+    "miniconda_install",
+    "miniconda_version",
+    "step_env",
+    "step_pkg",
+    "wlms_env",
+    "wlms_pkg",
+    "acti_env",
+    "acti_pkg",
+    "oak_1.0_env",
+    "oak_1.0_pkg",
+    "oak_pre_env",
+    "oak_pre_pkg"
+  )
+  return(list(
+    df_msg   = df_msg,
+    tbl_step = tbl_pkgs_stepcount,
+    tbl_wlms = tbl_pkgs_walmsley,
+    tbl_acti = tbl_pkgs_actinet,
+    tbl_oak1 = tbl_pkgs_oak_1.0,
+    tbl_oakp = tbl_pkgs_oak_pre
+  ))
 
 }
 #' Determine format of raw files

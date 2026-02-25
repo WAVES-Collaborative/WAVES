@@ -193,9 +193,70 @@ tar_plan(
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                             MINICONDA SETUP                            ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  tar_parquet(
-    name    = df_miniconda,
-    command = config_miniconda()
+  tar_file_read(
+    name    = df_pkgs_stepcount,
+    command = file.path("data", "0_CONFIG", "RAW", "df_pkgs_stepcount.csv"),
+    read    = fread(!!.x, sep = ","),
+    format  = "parquet"
+  ),
+  tar_file_read(
+    name    = df_pkgs_walmsley,
+    command = file.path("data", "0_CONFIG", "RAW", "df_pkgs_walmsley.csv"),
+    read    =
+      fread(!!.x, sep = ",") |>
+      mutate(
+        `Version WAVES` = case_when(
+          Package %in% c("packaging", "symlink-exe-runtime") ~ paste0(`Version WAVES`, ".0"),
+          .default = `Version WAVES`
+        )
+      ),
+    format  = "parquet"
+  ),
+  tar_file_read(
+    name    = df_pkgs_actinet,
+    command = file.path("data", "0_CONFIG", "RAW", "df_pkgs_actinet.csv"),
+    read    =
+      fread(!!.x, sep = ",") |>
+      mutate(
+        `Version WAVES` = case_when(
+          Package %in% c("packaging", "symlink-exe-runtime") ~ paste0(`Version WAVES`, ".0"),
+          .default = `Version WAVES`
+        )
+      ),
+    format  = "parquet"
+  ),
+  tar_file_read(
+    name    = df_pkgs_oak_1.0,
+    command = file.path("data", "0_CONFIG", "RAW", "df_pkgs_oak1.0.csv"),
+    read    =
+      fread(!!.x, sep = ",") |>
+      mutate(
+        `Version WAVES` = case_when(
+          Package %in% c("packaging", "symlink-exe-runtime") ~ paste0(`Version WAVES`, ".0"),
+          .default = `Version WAVES`
+        )
+      ),
+    format  = "parquet"
+  ),
+  tar_file_read(
+    name    = df_pkgs_oak_pre,
+    command = file.path("data", "0_CONFIG", "RAW", "df_pkgs_oakpre.csv"),
+    read    =
+      fread(!!.x, sep = ",") |>
+      mutate(
+        `Version WAVES` = case_when(
+          Package %in% c("packaging", "symlink-exe-runtime") ~ paste0(`Version WAVES`, ".0"),
+          .default = `Version WAVES`
+        )
+      ),
+    format  = "parquet"
+  ),
+  lst_miniconda = config_miniconda(
+    df_pkgs_stepcount,
+    df_pkgs_walmsley,
+    df_pkgs_actinet,
+    df_pkgs_oak_1.0,
+    df_pkgs_oak_pre
   ),
   tar_render(
     name = minconda_summary,
