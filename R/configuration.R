@@ -1,6 +1,16 @@
 get_tbl_pkgs <- function(df_pkgs_WAVES,
                          conda_env) {
 
+  le_primary_module <-
+    sub(x = conda_env,
+        pattern = "WHO_WAVES_",
+        replacement = "")
+  le_primary_module <- ifelse(
+    grepl(x = le_primary_module, pattern = "oak"),
+    yes = "forest",
+    no  = le_primary_module
+  )
+
   df_pkgs_installed <-
     left_join(
       df_pkgs_WAVES,
@@ -13,9 +23,22 @@ get_tbl_pkgs <- function(df_pkgs_WAVES,
       by = join_by(Package)
     ) |>
     select(Package, starts_with("Version"), Channel = channel) |>
-    mutate(clr = ifelse(`Version WAVES` == `Version Installed`,
-                        yes = "#D9F1D5",
-                        no  = "#ea9999"))
+    mutate(
+      clr = case_when(
+        # The below packages don't matter for version/date.
+        Package %in% c("ca-certificates", "certifi") ~ "#FFFFFF",
+        # Package appears in WAVES install but not your install.
+        is.na(`Version Installed`)                   ~ "#ea9999",
+        # Package appear in your install but not WAVES install.
+        is.na(`Version WAVES`)                       ~ "#ea9999",
+        # Package version for "primary module is different version.
+        Package == le_primary_module &
+          (`Version WAVES` != `Version Installed`)   ~ "#ea9999",
+        # Package version for other modules do not match.
+        `Version WAVES` != `Version Installed`       ~ "#FAFA8E",
+        .default                                     = "#D9F1D5"
+      )
+    )
   tbl_pkgs <-
     df_pkgs_installed |>
     select(-clr) |>
@@ -53,24 +76,15 @@ config_miniconda <- function(df_pkgs_stepcount,
     if (chk_successful) {msg_conda <- paste0(
       "Not previously installed. Installed at ", '"',
       miniconda_path(), '"'
-    )} else {msg_conda <- paste0(
-      'Unsuccessful installation. Share report with WHO_WAVES team.'
-    )}
-
-  } else {
-
-    # If they already have miniconda installed, user may have defined their
-    # own path to conda.
-    chk_path <-
-      Sys.getenv("RETICULATE_MINICONDA_PATH") == ""
-
-    if (chk_path) {msg_conda <- paste0(
-      "Already installed. Found at ", '"', miniconda_path(), '"'
-    )} else {msg_conda <- paste0(
-      "Already installed. Found at ", '"', Sys.getenv("RETICULATE_MINICONDA_PATH"), '"'
-    )}
-
-  }
+    )} else {
+      stop(
+        'Unsuccessful installation. If the environment variable "RETICULATE_MINICONDA_PATH" was changed, please make sure the directory exisits. If it was not changed, Share report with WHO_WAVES team.',
+        call. = FALSE
+      )
+    }
+  } else {msg_conda <- paste0(
+    "Already installed. Found at ", '"', miniconda_path(), '"'
+  )}
 
   # setup environment ----
   chk_stepcount <- !condaenv_exists("WHO_WAVES_stepcount")
@@ -303,10 +317,16 @@ config_miniconda <- function(df_pkgs_stepcount,
     # for it.
     conda_create(
       envname = "WHO_WAVES_oak_1.0",
-      packages = "timezonefinder==8.1.0",
+      # packages = "timezonefinder==8.1.0",
       forge = FALSE,
       python_version = 3.12,
       pip = TRUE
+    )
+    conda_install(
+      envname  = "WHO_WAVES_oak_1.0",
+      packages = "timezonefinder==8.1.0",
+      forge    = FALSE,
+      channel  = "conda-forge"
     )
     chk_successful <- condaenv_exists("WHO_WAVES_oak_1.0")
 
@@ -452,7 +472,6 @@ config_miniconda <- function(df_pkgs_stepcount,
     # for it.
     conda_create(
       envname = "WHO_WAVES_oak_pre",
-      # packages = "timezonefinder==8.1.0",
       forge = FALSE,
       python_version = 3.11, # match version in walking R package
       pip = TRUE
