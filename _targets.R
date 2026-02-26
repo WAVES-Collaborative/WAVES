@@ -38,9 +38,7 @@ vct_raw_fpa <- list.files(
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Load packages required to define the pipeline:
-source("_packages.R")
-# Interactive use
-# for (package in pkgs) library(package, character.only = TRUE)
+suppressMessages(source("packages.R"))
 
 # Make sure conda isn't being used by another process: TEST ON MAC
 chk_conda <-
@@ -119,7 +117,6 @@ options(datatable.print.keys = TRUE)
 
 # Set target options:
 tar_option_set(
-  packages   = pkgs,
   format     = "qs",
   controller = crew_controller_local(
     name = "my_controller",

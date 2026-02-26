@@ -38,9 +38,7 @@ vct_raw_fpa <- file.path(
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Load packages required to define the pipeline:
-source("_packages.R")
-# Interactive use
-# for (package in pkgs) library(package, character.only = TRUE)
+suppressMessages(source("packages.R"))
 
 # Decompress config files.
 chk_10004 <- !file.exists(vct_raw_fpa[3])
@@ -140,7 +138,6 @@ options(datatable.print.keys = TRUE)
 
 # Set target options:
 tar_option_set(
-  packages   = pkgs,
   format     = "qs",
   controller = crew_controller_local(
     name = "my_controller",
