@@ -265,12 +265,16 @@ tar_plan(
       ),
     format  = "parquet"
   ),
-  lst_miniconda = config_miniconda(
-    df_pkgs_stepcount,
-    df_pkgs_walmsley,
-    df_pkgs_actinet,
-    df_pkgs_oak_1.0,
-    df_pkgs_oak_pre
+  tar_qs(
+    name = lst_miniconda,
+    command = config_miniconda(
+      df_pkgs_stepcount,
+      df_pkgs_walmsley,
+      df_pkgs_actinet,
+      df_pkgs_oak_1.0,
+      df_pkgs_oak_pre
+    ),
+    cue = tar_cue(mode = "always")
   ),
   tar_render(
     name = minconda_summary,
