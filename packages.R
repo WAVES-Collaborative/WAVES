@@ -1,4 +1,4 @@
-arrow::write_parquet
+library(arrow)
 crew::crew_controller_local
 library(data.table)
 library(dplyr)

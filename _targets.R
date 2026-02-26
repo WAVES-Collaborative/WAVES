@@ -38,7 +38,9 @@ vct_raw_fpa <- list.files(
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Load packages required to define the pipeline:
-suppressMessages(source("packages.R"))
+source("packages.R") |>
+  suppressMessages() |>
+  suppressWarnings()
 
 # Make sure conda isn't being used by another process: TEST ON MAC
 chk_conda <-

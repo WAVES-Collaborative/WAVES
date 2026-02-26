@@ -38,7 +38,9 @@ vct_raw_fpa <- file.path(
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Load packages required to define the pipeline:
-suppressMessages(source("packages.R"))
+source("packages.R") |>
+  suppressMessages() |>
+  suppressWarnings()
 
 # Decompress config files.
 chk_10004 <- !file.exists(vct_raw_fpa[3])
