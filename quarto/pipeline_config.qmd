@@ -2,6 +2,7 @@
 title: "Configuration Pipeline Summary"
 format: 
   html: 
+    page-layout: full
     embed-resources: true
 editor: visual
 editor_options: 
@@ -24,7 +25,7 @@ tar_load(vct_ox_acti)
 tar_load(fpa_merged)
 
 len_raw <- length(vct_raw)
-df_out <- summary_config(
+df_out <- summarize_major_steps(
   vct_raw,
   vct_basic,
   vct_cal,
@@ -104,7 +105,7 @@ lgl_all <-
     ))
   ) |> 
   pull(all)
-lst_summary <- metrics_config(fpa_merged)
+lst_summary <- summarize_metrics_config(fpa_merged)
 
 ```
 

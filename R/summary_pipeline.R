@@ -1,12 +1,12 @@
-summary_config <- function(vct_raw,
-                           vct_basic,
-                           vct_cal,
-                           lst_out.raw,
-                           lst_out.oak.pre,
-                           lst_out.cut,
-                           vct_ox_step,
-                           vct_ox_wlms,
-                           vct_ox_acti) {
+summarize_major_steps <- function(vct_raw,
+                                  vct_basic,
+                                  vct_cal,
+                                  lst_out.raw,
+                                  lst_out.oak.pre,
+                                  lst_out.cut,
+                                  vct_ox_step,
+                                  vct_ox_wlms,
+                                  vct_ox_acti) {
 
   lst_out.raw[sapply(lst_out.raw, is.null)] <- NULL
   lst_out.oak.pre[sapply(lst_out.oak.pre, is.null)] <- NULL
@@ -140,7 +140,7 @@ make_table_agr.cor <- function(mtx_yours,
   return(tbl_agr)
 
 }
-metrics_config <- function(fpa_merged) {
+summarize_metrics_config <- function(fpa_merged) {
 
   load("data/0_CONFIG/MERGED/WAVES_ALL_TEST.RData")
   df_pipe <- read_parquet(fpa_merged)
@@ -728,6 +728,116 @@ metrics_config <- function(fpa_merged) {
     agree_sed = tbl_agr_sed,
     agree_mvpa = tbl_agr_mvpa,
     cor_step = tbl_agr_step
+  ))
+
+}
+summarize_metrics_main <- function(fpa_merged) {
+
+  df_pipe <- read_parquet(fpa_merged)
+
+  # total ----
+  df_sed <-
+    df_pipe |>
+    select(id, starts_with("intensity")) |>
+    rename_with(.cols = !id,
+                .fn = ~sub(x = .x, pattern = "intensity_", replacement = "")) |>
+    summarise(across(
+      .cols = everything(),
+      .fns = ~sum(.x == "sedentary", na.rm = TRUE) / 60
+    ), .by = id)
+  df_sed <- df_sed[
+    , c(names(df_sed)[1], sort(names(df_sed[-1])))
+  ]
+  tbl_sed <-
+    df_sed |>
+    gt() |>
+      cols_label(
+        "actinet" = "Actinet",
+        "bakrania.enmo.average" = "Bakrania (ENMO Average)",
+        "bakrania.enmo.simple" = "Bakrania (ENMO Simple)",
+        "bakrania.mad.average" = "Bakrania (MAD Average)",
+        "bakrania.mad.simple" = "Bakrania (MAD Simple)",
+        "ellis" = "Ellis",
+        "esliger" = "Esliger",
+        "fraysee" = "Fraysee",
+        "hildebrand" = "Hildrebrand",
+        "mielke" = "Mielke",
+        "montoye.dt" = "Montoye (DT)",
+        "montoye.nn" = "Montoye (NN)",
+        "montoye.rf" = "Montoye (RF)",
+        "montoye.svm" = "Montoye (SVM)",
+        "trost" = "Trost",
+        "walmsley" = "Walmsley",
+        "white.enmo.lin" = "White (ENMO Linear)",
+        "white.enmo.pol" = "White (ENMO Polynomial)",
+        "white.hpfvm.lin" = "White (HPFVM Linear)",
+        "white.hpfvm.pol" = "White (HPFVM Polynomial)"
+      )
+  df_mvpa <-
+    df_pipe |>
+    select(id, starts_with("intensity")) |>
+    rename_with(.cols = !id,
+                .fn = ~sub(x = .x, pattern = "intensity_", replacement = "")) |>
+    select(id, !starts_with("bakrania")) |>
+    summarise(across(
+      .cols = everything(),
+      .fns = ~sum(.x == "mvpa", na.rm = TRUE) / 60
+    ), .by = id)
+  df_mvpa <- df_mvpa[
+    , c(names(df_mvpa)[1], sort(names(df_mvpa[-1])))
+  ]
+  tbl_mvpa <-
+    df_mvpa |>
+    gt() |>
+    cols_label(
+      "actinet" = "Actinet",
+      "ellis" = "Ellis",
+      "esliger" = "Esliger",
+      "fraysee" = "Fraysee",
+      "hildebrand" = "Hildrebrand",
+      "mielke" = "Mielke",
+      "montoye.dt" = "Montoye (DT)",
+      "montoye.nn" = "Montoye (NN)",
+      "montoye.rf" = "Montoye (RF)",
+      "montoye.svm" = "Montoye (SVM)",
+      "trost" = "Trost",
+      "walmsley" = "Walmsley",
+      "white.enmo.lin" = "White (ENMO Linear)",
+      "white.enmo.pol" = "White (ENMO Polynomial)",
+      "white.hpfvm.lin" = "White (HPFVM Linear)",
+      "white.hpfvm.pol" = "White (HPFVM Polynomial)"
+    )
+  df_step <-
+    df_pipe |>
+    select(id, starts_with("steps")) |>
+    rename_with(.cols = !id,
+                .fn = ~sub(x = .x, pattern = "steps_", replacement = "")) |>
+    summarise(across(
+      .cols = everything(),
+      .fns = ~sum(.x, na.rm = TRUE)
+    ), .by = id)
+  df_step <- df_step[
+    , c(names(df_step)[1], sort(names(df_step[-1])))
+  ]
+
+   ## step ----
+  tbl_step <-
+    df_step |>
+    gt() |>
+    cols_label(
+      "oak.1.0" = "Oak 1.0",
+      "oak.pre" = "Oak Pre",
+      "sdt" = "SDT",
+      "stepcount" = "Stepcount",
+      "verisense.original" = "Verisense (Original)",
+      "verisense.revised" = "Verisense (Revised)"
+    )
+
+  # return ----
+  return(list(
+    total_sed = tbl_sed,
+    total_mvpa = tbl_mvpa,
+    total_step = tbl_step
   ))
 
 }
