@@ -135,8 +135,8 @@ apply_ox_stepcount <- function(vct_ox_input,
     )
   } else {
     # The `system2` command uses a shell within MacOS and Linux.
-    # TODO Ask Kirsten for testing this.
-    # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_stepcount ; stepcount stepcountTest.gt3x -o ~/WAVES/data/stepcount
+    # TODO Ask Dan for testing this.
+    # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_stepcount ; stepcount "data/0_CONFIG/RAW/WAVES_10004_RAW.gt3x" -o ~/WAVES/data/stepcount
     system2(
       command = "source",
       args = paste(
@@ -238,8 +238,8 @@ apply_ox_walmsley <- function(vct_ox_input,
 
   } else {
     # The `system2` command uses a shell within MacOS and Linux.
-    # TODO Ask Kirsten for testing this.
-    # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_accelerometer ; accProcess stepcountTest.gt3x -o ~/WAVES/data/stepcount --timeZone America/Chicago
+    # TODO Ask Dan for testing this.
+    # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_accelerometer ; accProcess "data/0_CONFIG/RAW/WAVES_10004_RAW.gt3x" -o ~/WAVES/data/walmsley --timeZone America/Chicago
     system2(
       command = "source",
       args = paste(
@@ -333,8 +333,8 @@ apply_ox_actinet <- function(vct_ox_input,
 
   } else {
     # The `system2` command uses a shell within MacOS and Linux.
-    # TODO Ask Kirsten for testing this.
-    # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_actinet ; actinet stepcountTest.gt3x -o ~/WAVES/data/stepcount
+    # TODO Ask Dan for testing this.
+    # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_actinet ; actinet "data/0_CONFIG/RAW/WAVES_10004_RAW.gt3x" -o ~/WAVES/data/actinet
     system2(
       command = "source",
       args = paste(
