@@ -14,7 +14,7 @@ editor_options:
 #| echo: false
 #| warning: false
 
-# tar_load(lst_miniconda)
+tar_load(lst_miniconda)
 
 ```
 

@@ -54,6 +54,8 @@ potentially available validation data.
 
 ## Instructions
 
+### Configuration Pipeline
+
 1.  Open WAVES.RProj
 
     1.  This will automatically open the RStudio IDE.
@@ -73,16 +75,15 @@ potentially available validation data.
     2.  Alternatively, open “\_targets*\_*config.R” with the system File
         Explorer. It should open the script within RStudio.
 
-4.  Within “INPUT” section, change the following:
+4.  Within “INPUT” section, check the following:
 
-    1.  `n_workers`: The default is 3 workers, meaning 3 processes of
-        the pipeline will run in parallel of each other. From testing, 3
-        workers has been the most memory and time efficient for systems
-        operating with ≤ 16gb RAM or ≤ 4 cores. If your operating system
-        has more RAM and cores available, feel free to increase the
-        number of workers, with the max being one less than the number
-        of cores available of your system
-        (`parallel::detectCores() - 1`)
+    1.  `n_workers`: The default is 2 workers, meaning 2 processes of
+        the pipeline will run in parallel of each other.
+        1.  `n_workers` should always be at least 2!
+        2.  If your operating system has more RAM and cores available,
+            feel free to increase the number of workers, with the max
+            being one less than the number of cores available of your
+            system (`future::availableCores() - 1`)
 
 5.  Run all code within the “INPUT” section (Line 8 - Line 26) and save
     the script.
@@ -135,56 +136,67 @@ potentially available validation data.
 10. If the pipeline successfully completed, a
     “summary_pipeline_config.html” file will have been created under the
     “reports” folder of the main WAVES repository. Open the file and
-    ensure:
+    follow the directions stated within the report.
 
-    1.  WAVES_10002 and WAVES_10003 do not go through the pipeline at
-        all.
+11. If the “summary_pipeline_config.html” indicates no warnings or
+    errors, then the WAVES code is working properly on your computer!
+    Woo.
 
-    2.  WAVES_10003 and WAVES_10004 completely go through the pipeline.
+### Main Pipeline
 
-    3.  WAVES_10006 goes through everything except for stepcount,
-        walmsley and actinet.
+1.  Open “\_targets.R”
 
-    4.  All summary metrics are highlighted green
+    1.  Navigate to the “Files” tab within Rstudio (located either in
+        the bottom left or top left pane of the RStudio window IF you
+        haven’t changed the pane layout in “Global Settings”). Click on
+        “\_targets.R”
 
-11. If all conditions for step 10 are met, then the WAVES code is
-    working properly on your computer! Woo.
+    2.  Alternatively, open “\_targets.R” with the system File Explorer.
+        It should open the script within RStudio.
 
-12. Open the “\_targets.R” script
+2.  Within “INPUT” section, check the following:
 
-13. Change vct_raw_fpa to your path of raw files.
-
-    1.  Suggest having it lead to directory of files, but then put
-        “\[1\]” at the end to make sure pipeline works with one file.
-        (image below)
+    1.  `study_timezone`: Change from `Sys.timezone()` if data was
+        collected in another timezone. Supply it as country/city
+        (e.g. `America/Los Angeles`, `Europe/London`, etc.)
+    2.  `sampling_frequency`: The sampling frequency set for
+        accelerometers during data collection. If using .bin/.cwa/.gt3x
+        data then this doesn’t matter, but does for .csv data.
+    3.  `n_workers`: The default is 2 workers, meaning 2 processes of
+        the pipeline will run in parallel of each other.
+        1.  `n_workers` should always be at least 2!
+        2.  If your operating system has more RAM and cores available,
+            feel free to increase the number of workers, with the max
+            being one less than the number of cores available of your
+            system (`future::availableCores() - 1`)
+    4.  `vct_raw_fpa`: Change vct_raw_fpa to your path of raw files.
+        1.  Suggest having it lead to directory of files, but then put
+            “\[1\]” at the end of `list.files` to make sure pipeline
+            works with one file. (image below)
 
     TODO IMAGE (use UWM computer for this part)
 
-14. Change study_timezone, sample_frequency.
+3.  Save the “\_targets.R” script.
 
-15. Change workers if necessary.
+4.  Run code within “INPUT” section.
 
-    1.  See Step 4.
-
-16. Run code within “INPUT” section and save the “\_targets.R” script.
-
-17. In Console, run “tar_make()”. For one file that is a whole day, it
+5.  In Console, run “tar_make()”. For one file that is a whole day, it
     can take anywhere between 15-30 minutes on a potato computer. For
     one file that is a whole week, it may take up to 24 hours.
 
-18. Once the pipeline has completed, a .html file should have been
+6.  Once the pipeline has completed, a .html file should have been
     created under the “reports” folder called
     “summary_pipeline_main.html”. Open the file and double-check file
     went through entire pipeline successfully under the “By Major Steps”
     section.
 
-19. If pipeline works successfully, close the
+7.  If pipeline works successfully, close the
     “summary_pipeline_main.html” file and run pipeline on all files
-    available by removing the the “\[1\]” at the end of the `file.path`
+    available by removing the the “\[1\]” at the end of the `list.files`
     function.
 
-    1.  Make sure to rerun the code within “INPUT” section and save the
-        “\_targets.R” script.
+    1.  Make sure to save the “\_targets.R” script and rerun the code
+        within “INPUT” section.
 
     2.  This WILL take multiple days if the repository is not being ran
         on a high performance cluster.
@@ -198,29 +210,13 @@ potentially available validation data.
             pipeline. Re-follow steps 12-13 the pipeline will pick up
             from the last major step.
 
-20. Open “summary_pipeline_main.html” once again and check to see what
+8.  Open “summary_pipeline_main.html” once again and check to see what
     files have made it through. If all files have made it through, or at
     least the file’s you would’ve expected to be successfully processed,
-    share the “WAVES_MERGED_SITE.parquet” with WAVES data team, where
-    “SITE” is renamed with the study acronym or the 3-4 letter
-    abbreviation given to you by the WAVES study team.
+    share the “3_MERGED” folder with WAVES data team, where “3_MERGED”
+    is renamed with the study acronym.
 
 ## Notes
-
-- After running `renv::restore()` and starting a new R session, you may
-  see the following in the console during startup:
-
-  ![](media/Screenshot%202026-01-22%20153810.png)
-
-  Additionally, if you run `renv::status()`, the following will appear:
-
-  ![](media/Screenshot%202026-01-22%20154057.png)
-
-  This is **normal and expected**. As long as the packages are
-  installed, everything is good to go. For some reason, `renv` will
-  always think the packages are not being used within the repository,
-  which is most likely due to how the WAVES repository is dependent on
-  the `targets` pipeline.
 
 - Even if a pipeline finishes successfully, you may in the console
   “There were XX warnings (use warnings() to see them)”. This is normal
