@@ -63,6 +63,13 @@ config_miniconda <- function(df_pkgs_stepcount,
                              df_pkgs_oak_1.0,
                              df_pkgs_oak_pre) {
 
+  chk_windows <- grepl(
+    x = Sys.getenv(c("OS", "R_PLATFORM")),
+    pattern = "windows",
+    ignore.case = TRUE
+  ) |>
+    any()
+
   # conda ----
   chk_conda <-
     class(tryCatch(conda_version(), error = \(e) e))[1] == "simpleError"
@@ -87,11 +94,21 @@ config_miniconda <- function(df_pkgs_stepcount,
   )}
 
   # setup environment ----
-  chk_stepcount <- !condaenv_exists("WHO_WAVES_stepcount")
-  chk_accelerometer <- !condaenv_exists("WHO_WAVES_accelerometer")
-  chk_actinet <- !condaenv_exists("WHO_WAVES_actinet")
-  chk_oak_1.0 <- !condaenv_exists("WHO_WAVES_oak_1.0")
-  chk_oak_pre <- !condaenv_exists("WHO_WAVES_oak_pre")
+  # The "condaenv_exists()" function looks to see if there is an environment
+  # with the supplied name in all conda installations, even if you specify
+  # a specific conda binary with argument `conda`. Therefore just list
+  # environments manually. This normally wouldn't be a problem but as the
+  # entire WAVES project is still in pre-release, this can get messy really
+  # quick if a user re-runs the pipeline while changing where conda is being
+  # installed or the WAVES team makes changes to this function.
+  vct_env <- list.files(
+    file.path(miniconda_path(), "envs")
+  )
+  chk_stepcount <- !"WHO_WAVES_stepcount" %in% vct_env
+  chk_accelerometer <- !"WHO_WAVES_accelerometer" %in% vct_env
+  chk_actinet <- !"WHO_WAVES_actinet" %in% vct_env
+  chk_oak_1.0 <- !"WHO_WAVES_oak_1.0" %in% vct_env
+  chk_oak_pre <- !"WHO_WAVES_oak_pre" %in% vct_env
 
   # stepcount ----
   if (chk_stepcount) {
@@ -103,7 +120,12 @@ config_miniconda <- function(df_pkgs_stepcount,
       python_version = 3.9,
       pip = TRUE
     )
-    chk_successful <- condaenv_exists("WHO_WAVES_stepcount")
+    chk_successful <-
+      list.files(
+        file.path(miniconda_path(), "envs")
+      ) |> grepl(x = _,
+                 pattern = "WHO_WAVES_stepcount") |>
+      any()
 
     if (chk_successful) {
 
@@ -175,7 +197,12 @@ config_miniconda <- function(df_pkgs_stepcount,
       python_version = 3.9,
       pip = TRUE
     )
-    chk_successful <- condaenv_exists("WHO_WAVES_accelerometer")
+    chk_successful <-
+      list.files(
+        file.path(miniconda_path(), "envs")
+      ) |> grepl(x = _,
+                 pattern = "WHO_WAVES_accelerometer") |>
+      any()
 
     if (chk_successful) {
 
@@ -247,7 +274,12 @@ config_miniconda <- function(df_pkgs_stepcount,
       python_version = 3.9,
       pip = TRUE
     )
-    chk_successful <- condaenv_exists("WHO_WAVES_actinet")
+    chk_successful <-
+      list.files(
+        file.path(miniconda_path(), "envs")
+      ) |> grepl(x = _,
+                 pattern = "WHO_WAVES_actinet") |>
+      any()
 
     if (chk_successful) {
 
@@ -328,7 +360,12 @@ config_miniconda <- function(df_pkgs_stepcount,
       forge    = FALSE,
       channel  = "conda-forge"
     )
-    chk_successful <- condaenv_exists("WHO_WAVES_oak_1.0")
+    chk_successful <-
+      list.files(
+        file.path(miniconda_path(), "envs")
+      ) |> grepl(x = _,
+                 pattern = "WHO_WAVES_oak_1.0") |>
+      any()
 
     if (chk_successful) {
 
@@ -344,12 +381,6 @@ config_miniconda <- function(df_pkgs_stepcount,
       # Commit: https://github.com/onnela-lab/forest/commit/adada3f1fb8d43b4d2c2a3451dbcbedcb3b52be4
       # Therefore, download from the creation of this function, 2025-11-18.
       # ffb36be508d6161e8fbfe70a27048e218cc9394d
-
-      chk_windows <- grepl(
-        x = Sys.getenv("OS"),
-        pattern = "windows",
-        ignore.case = TRUE
-      )
 
       if (chk_windows) {
         system2(
@@ -414,12 +445,6 @@ config_miniconda <- function(df_pkgs_stepcount,
     } else {
 
       # Install modules and check one more time afterwards.
-      chk_windows <- grepl(
-        x = Sys.getenv("OS"),
-        pattern = "windows",
-        ignore.case = TRUE
-      )
-
       if (chk_windows) {
         system2(
           command = file.path(miniconda_path(), "Scripts", "activate.bat"),
@@ -476,7 +501,12 @@ config_miniconda <- function(df_pkgs_stepcount,
       python_version = 3.11, # match version in walking R package
       pip = TRUE
     )
-    chk_successful <- condaenv_exists("WHO_WAVES_oak_pre")
+    chk_successful <-
+      list.files(
+        file.path(miniconda_path(), "envs")
+      ) |> grepl(x = _,
+                 pattern = "WHO_WAVES_oak_pre") |>
+      any()
 
     if (chk_successful) {
 
@@ -484,13 +514,6 @@ config_miniconda <- function(df_pkgs_stepcount,
 
       # The Forest module in the `Walking` R package from Muscheli is from
       # Dec 13, 2024 https://github.com/onnela-lab/forest/commit/45fb41038bd46c25d9e6a4442aa74fa03b501317
-
-      chk_windows <- grepl(
-        x = Sys.getenv("OS"),
-        pattern = "windows",
-        ignore.case = TRUE
-      )
-
       if (chk_windows) {
         system2(
           command = file.path(miniconda_path(), "Scripts", "activate.bat"),
@@ -554,30 +577,24 @@ config_miniconda <- function(df_pkgs_stepcount,
     } else {
 
       # Install modules and check one more time afterwards.
-      chk_windows <- grepl(
-        x = Sys.getenv("OS"),
-        pattern = "windows",
-        ignore.case = TRUE
-      )
-
       if (chk_windows) {
         system2(
           command = file.path(miniconda_path(), "Scripts", "activate.bat"),
           args = paste(
             "activate WHO_WAVES_oak_pre",
-            "pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d",
+            "pip install git+https://github.com/onnela-lab/forest@45fb41038bd46c25d9e6a4442aa74fa03b501317",
             sep = " & "
           )
         )
       } else {
         # TODO CHECK
-        # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_oak_pre ; pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d
+        # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_oak_pre ; pip install git+https://github.com/onnela-lab/forest@45fb41038bd46c25d9e6a4442aa74fa03b501317
         system2(
           command = "source",
           args = paste(
             paste0('"', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
             "conda activate WHO_WAVES_oak_pre",
-            "pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d",
+            "pip install git+https://github.com/onnela-lab/forest@45fb41038bd46c25d9e6a4442aa74fa03b501317",
             sep = " ; "
           )
         )
@@ -585,7 +602,7 @@ config_miniconda <- function(df_pkgs_stepcount,
         #   command = paste0('source "', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
         #   args = paste(
         #     "conda activate WHO_WAVES_oak_pre",
-        #     "pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d",
+        #     "pip install git+https://github.com/onnela-lab/forest@45fb41038bd46c25d9e6a4442aa74fa03b501317",
         #     sep = " ; "
         #   )
         # )
