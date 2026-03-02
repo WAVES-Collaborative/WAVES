@@ -77,7 +77,20 @@ potentially available validation data.
 
 4.  Within “INPUT” section, check the following:
 
-    1.  `n_workers`: The default is 2 workers, meaning 2 processes of
+    1.  `RETICULATE_MINICONDA_PATH`: The path to an existing conda
+        installation or where you want a new minconda distribution to be
+        installed.
+        1.  If this is changed, please ensure there are no spaces within
+            the file path
+        2.  Note that if the WAVES directory is located under another
+            directory with the names `bash`, `data`, `logs`, `media`,
+            `models`, `quarto`, `R`, `renv` or `reports`, the config
+            pipeline will install miniconda underneath the corresponding
+            folder *in the WAVES directory*.
+            1.  For example, if the WAVES directory was installed under
+                “/data/martinez/”, then miniconda will be installed in
+                “/data/martinez/WAVES/data/martinez/r-miniconda”
+    2.  `n_workers`: The default is 2 workers, meaning 2 processes of
         the pipeline will run in parallel of each other.
         1.  `n_workers` should always be at least 2!
         2.  If your operating system has more RAM and cores available,
@@ -167,20 +180,22 @@ potentially available validation data.
 
 2.  Within “INPUT” section, check the following:
 
-    1.  `study_timezone`: Change from `Sys.timezone()` if data was
+    1.  `RETICULATE_MINICONDA_PATH`: The path to the conda installation
+        specified within the configuration pipeline.
+    2.  `study_timezone`: Change from `Sys.timezone()` if data was
         collected in another timezone. Supply it as country/city
         (e.g. `America/Los Angeles`, `Europe/London`, etc.)
-    2.  `sampling_frequency`: The sampling frequency set for
+    3.  `sampling_frequency`: The sampling frequency set for
         accelerometers during data collection. If using .bin/.cwa/.gt3x
         data then this doesn’t matter, but does for .csv data.
-    3.  `n_workers`: The default is 2 workers, meaning 2 processes of
+    4.  `n_workers`: The default is 2 workers, meaning 2 processes of
         the pipeline will run in parallel of each other.
         1.  `n_workers` should always be at least 2!
         2.  If your operating system has more RAM and cores available,
             feel free to increase the number of workers, with the max
             being one less than the number of cores available of your
             system (`future::availableCores() - 1`)
-    4.  `vct_raw_fpa`: Change vct_raw_fpa such that it creates a
+    5.  `vct_raw_fpa`: Change vct_raw_fpa such that it creates a
         character vector that points towards your raw files.
         1.  We provide an example of how to do so using the `list.files`
             function, where the `file.path` function is used to list

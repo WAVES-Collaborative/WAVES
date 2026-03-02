@@ -37,6 +37,10 @@ vct_raw_fpa <- file.path(
 ####                                                                         %%%%
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Sys.setenv(
+  RETICULATE_CONDA = file.path(Sys.getenv("RETICULATE_MINICONDA_PATH"), "bin", "conda")
+)
+
 # Load packages required to define the pipeline:
 source("packages.R") |>
   suppressMessages() |>
