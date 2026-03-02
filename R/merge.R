@@ -29,7 +29,7 @@ merge_output <- function(lst_out.raw,
 
   vct_id_all <-
     union(vct_id_out.raw, vct_id_out.oak.pre) |>
-    union(vct_id_out.cut)
+    union(vct_id_out.cut) |>
     union(vct_id_ox)
   vct_fpa_write <- file.path(
     dir_merged, paste0(vct_id_all, ".parquet")
@@ -58,9 +58,11 @@ merge_output <- function(lst_out.raw,
     # From union, get the earliest datetime so merge will go smoothly.
     dttm_earliest <-
       union(dttm_raw, dttm_oak.pre) |>
-      union(dttm_cut)
+      union(dttm_cut) |>
       union(dttm_ox) |>
-      as.POSIXct(tz = my_tz)
+      as.POSIXct(tz = my_tz) |>
+      sort() |>
+      vctrs::vec_slice(1)
     chk_raw <- !le_id %in% vct_id_out.raw
     chk_oak.pre <- !le_id %in% vct_id_out.oak.pre
     chk_cut <- !le_id %in% vct_id_out.cut
@@ -124,7 +126,7 @@ merge_output <- function(lst_out.raw,
       full_join(
         lst_out.cut[[le_id]],
         by = join_by(id, datetime)
-      )
+      ) |>
       left_join(
         lst_ox[[le_id]],
         by = join_by(id, datetime)
