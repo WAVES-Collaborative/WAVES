@@ -398,7 +398,7 @@ merge_ox <- function(vct_ox_step,
         # walmsley
         fread(
           grep(x = vct_ox_wlms,
-               pattern = le_fnm,
+               pattern = stringr::str_escape(le_fnm),
                value = TRUE),
           sep = ","
         ) |>
@@ -426,7 +426,7 @@ merge_ox <- function(vct_ox_step,
         # actinet
         fread(
           grep(x = vct_ox_acti,
-               pattern = le_fnm,
+               pattern = stringr::str_escape(le_fnm),
                value = TRUE),
           sep = ","
         ) |>
@@ -457,7 +457,7 @@ merge_ox <- function(vct_ox_step,
         # stepcount
         fread(
           grep(x = vct_ox_step,
-               pattern = le_fnm,
+               pattern = stringr::str_escape(le_fnm),
                value = TRUE),
           sep = ","
         ) |>

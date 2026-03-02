@@ -38,7 +38,7 @@ read_acc_raw <- function(fpa_read,
   ## GGIR Basic ----
   grep(
     x       = vct_fpa_basic,
-    pattern = fnm_sans_ext,
+    pattern = stringr::str_escape(fnm_sans_ext),
     value   = TRUE
   ) |>
     load()

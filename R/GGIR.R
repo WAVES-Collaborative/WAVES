@@ -40,11 +40,15 @@ wrapper_GGIR <- function(vct_raw,
     configfile = "data/GGIR/config_WAVES.csv"
   )
 
+  # Make regex that collates vct_raw and escapes regex characters.
+  le_regex <-
+    vct_raw |>
+    basename() |>
+    stringr::str_escape() |>
+    paste0(collapse = "|")
   list.files(
     file.path("data", "GGIR", "output_WAVES", "meta", "basic"),
-    pattern =
-      basename(vct_raw) |>
-      paste0(collapse = "|"),
+    pattern = le_regex,
     full.names = TRUE
   )
 

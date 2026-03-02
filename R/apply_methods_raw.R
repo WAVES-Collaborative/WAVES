@@ -287,7 +287,10 @@ apply_methods_raw <- function(fpa_read,
 
   grep(
     x       = vct_fpa_basic,
-    pattern = tools::file_path_sans_ext(fnm_sans_ext),
+    pattern =
+      fnm_sans_ext |>
+      file_path_sans_ext() |>
+      stringr::str_escape(),
     value   = TRUE
   ) |>
     load()
@@ -854,7 +857,10 @@ apply_oak.pre <- function(fpa_read,
 
   grep(
     x       = vct_fpa_basic,
-    pattern = tools::file_path_sans_ext(fnm_sans_ext),
+    pattern =
+      fnm_sans_ext |>
+      file_path_sans_ext() |>
+      stringr::str_escape(),
     value   = TRUE
   ) |>
     load()
