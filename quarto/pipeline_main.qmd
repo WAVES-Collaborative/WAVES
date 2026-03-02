@@ -80,7 +80,7 @@ lst_summary$total_mvpa
 ## Sedentary (minutes)
 
 ```{r}
-#| label: tbl-mvpa_total 
+#| label: tbl-sed_total 
 #| echo: false 
 lst_summary$total_sed
 
@@ -89,7 +89,7 @@ lst_summary$total_sed
 ## Steps
 
 ```{r}
-#| label: tbl-mvpa_total 
+#| label: tbl-step_total 
 #| echo: false 
 lst_summary$total_step
 
