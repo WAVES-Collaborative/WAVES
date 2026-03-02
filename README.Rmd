@@ -100,17 +100,19 @@ The proposed flow diagram outlines the process for how the validation data and d
 
 8.  A "summary_miniconda.html" will have been created under the "reports" folder of the main WAVES repository. Within the html file:
 
-    1.  Check Miniconda configuration is good.
+    1.  Check Miniconda configuration is good, where status is not "Unsuccessful installation".
 
-        1.  All environments should say "Successfuly created"
+    2.  No packages/modules are highlighted red for each environment.
 
-        2.  All modules should say "Modules successfully installed."
+        1.  For a environment, the Modules message may say "Modules installated do not completely match WAVES configuration". This is expected with slight changes in package/module versions within each environment, and are highlighted yellow. This shouldn't impact pipeline processes or computations, but are still noted to assist with diagnosing potential problems.
 
-9.  If the config pipeline errored, please share a screenshot of the messages in the console (like the previous screenshot in this README, but also show the error message) to the WAVES data team.
+9.  If the config pipeline errored, please post on issue on Github following the convention set forth under [Posting an Issue on GitHub] section of the README.
 
 10. If the pipeline successfully completed, a "summary_pipeline_config.html" file will have been created under the "reports" folder of the main WAVES repository. Open the file and follow the directions stated within the report.
 
 11. If the "summary_pipeline_config.html" indicates no warnings or errors, then the WAVES code is working properly on your computer! Woo.
+
+12. If the "summary_pipeline_config" report is red for any reason, please post the issue with the title as "Config - Summary Report - [Quick Description]" with the html attached to the issue.
 
 ### Main Pipeline
 
@@ -127,14 +129,15 @@ The proposed flow diagram outlines the process for how the validation data and d
     3.  `n_workers`: The default is 2 workers, meaning 2 processes of the pipeline will run in parallel of each other.
         1.  `n_workers` should always be at least 2!
         2.  If your operating system has more RAM and cores available, feel free to increase the number of workers, with the max being one less than the number of cores available of your system (`future::availableCores() - 1`)
-    4.  `vct_raw_fpa`: Change vct_raw_fpa to your path of raw files.
-        1.  Suggest having it lead to directory of files, but then put "[1]" at the end of `list.files` to make sure pipeline works with one file. (image below)
+    4.  `vct_raw_fpa`: Change vct_raw_fpa such that it creates a character vector that points towards your raw files.
+        1.  We provide an example of how to do so using the `list.files` function, where the `file.path` function is used to list multiple directories at once.
+        2.  We suggest putting a "[1]" at the end of `list.files` to make sure pipeline works with one file. (image below)
 
-    TODO IMAGE (use UWM computer for this part)
+    ![](media/Screenshot 2026-03-02 114951.png)
 
 3.  Save the "\_targets.R" script.
 
-4.  Run code within "INPUT" section.
+4.  Run the code within "INPUT" section.
 
 5.  In Console, run "tar_make()". For one file that is a whole day, it can take anywhere between 15-30 minutes on a potato computer. For one file that is a whole week, it may take up to 24 hours.
 
@@ -154,9 +157,9 @@ The proposed flow diagram outlines the process for how the validation data and d
 
 ## Notes
 
--   Even if a pipeline finishes successfully, you may in the console "There were XX warnings (use warnings() to see them)". This is normal if working on an R version that is not 4.5.2., as the messages will be warnings that the packages are meant to work on the latest R version. As long as the R version being used is R 4.4 or beyond, everything should still work. We have not tested the WAVES repository on R versions below 4.4.
+-   Even if a pipeline finishes successfully, you may see in the console "There were XX warnings (use warnings() to see them)". This is normal if working on an R version that is not 4.5.2., as the messages will be warnings that the packages are meant to work on the latest R version. As long as the R version being used is R 4.4 or beyond, everything should still work. We have not tested the WAVES repository on R versions below 4.4.
 
--   If working on a high performance cluster...TODO (work with Hayden)
+-   If working on a high performance cluster...TODO (work with Hayden, Ben on swarm and batch scripts)
 
 -   If the pipeline appears "stuck" after 24hrs, as in it looks like there has been no change in the processing time or the console messages have been the same for quite awhile, its most likely that your computer does not have enough computing resources to do parallel processing. In that case:
 
@@ -165,6 +168,82 @@ The proposed flow diagram outlines the process for how the validation data and d
     ![](media/Screenshot%202026-01-17%20132513.png)
 
     -   Change the `n_workers` object to 1, which will remove parallel processing.
+
+## Posting an Issue on GitHub
+
+After navigating to the Issues tab of WAVES, please use the following naming convention for the title of the issue:
+
+```         
+[Pipeline] - [Target/Report] - [Quick Description]
+```
+
+where:
+
+-   Pipeline: `Config` or `Main`
+
+    -   If the error occurred while running the `Config` pipeline or `Main` pipeline.
+
+-   Target/Report: any of the targets within a pipeline or a report such as `summary_pipeline_main` or `summary_miniconda`
+
+    -   A "target" is another name for a step within the pipeline.
+
+    -   The target that errored is usually what appears after an ❌. So in Step 7 of the Configuration pipeline instructions, the target was `fpa_merged`
+
+    -   The following is a list of targets within the pipelines where errors may occur:
+
+        -   vct_raw
+
+        -   vct_raw_type
+
+        -   vct_basic
+
+        -   lst_out.cut
+
+        -   vct_ox_input
+
+        -   vct_ox_step
+
+        -   vct_ox_wlms
+
+        -   vct_ox_acti
+
+        -   lst_ox
+
+        -   vct_cal
+
+        -   lst_out.raw
+
+        -   lst_out.oak.pre
+
+        -   fpa_merged
+
+        -   pipeline_summary
+
+    -   The below only appear within the `config` pipeline:
+
+        -   lst_miniconda
+
+        -   minconda_summary
+
+-   Quick Description: The error itself if it is ≤ 10 words or a summary
+
+Within the description of the issue, please either:
+
+-   screenshot your console that includes the pipeline output and the error itself (example below)
+
+![](media/example_issue_screenshot.png)
+
+-   Copy the output from the console into a codeblock
+
+    -   With the description box highlighted, enter a forward slash `/` and then select "Code Block"
+
+    ![](media/example_issue_pasting_code.png)
+
+    -   For language, select "R"
+
+    -   Within the code block, paste the console output
+
+Additionally, if the error occured at `lst_out.raw` , `vct_ox_step` , `vct_ox_wlms` , `vct_ox_acti` `lst_out.raw` or `lst_out.oak.pre` , then please also attach the "summary_miniconda.html" report.
 
 ## Methods Implemented
 
