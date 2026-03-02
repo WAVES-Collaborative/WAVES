@@ -60,7 +60,7 @@ Below is a table listing if each major step was successful for a file (TRUE) or 
 ```{r}
 #| label: tbl-major
 #| echo: false
-tbl_out
+gt(df_out)
 
 ```
 
@@ -101,7 +101,9 @@ lst_summary$total_step
 #| label: tar_meta
 #| echo: false
 
-tar_meta()$warnings |> 
+tar_meta(targets_only = TRUE) |> 
+  dplyr::filter(type != "branch") |> 
+  select(name, warnings, error) |> 
   mutate(
     warnings = gsub(
       x = warnings,
