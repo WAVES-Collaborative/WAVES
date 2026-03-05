@@ -1544,14 +1544,65 @@ get_equal.behavior_uwm <- function(vct_behavior,
     activity      = vct_activity,
     environment   = vct_environment,
     event_beh     = vctrs::vec_identify_runs(behavior),
-    event_env     = vctrs::vec_identify_runs(environment)
+    event_env     = vctrs::vec_identify_runs(environment),
+    # For merging at the very end, as the equal.behavior at the end
+    # is dependent on behavior & environment.
+    event_any     = rleid(paste0(event_beh, "-", event_env))
   )
   df_collapse <-
     df_init |>
-    group_by(event_beh) |>
+    group_by(event_beh, event_env) |>
     mutate(duration = n()) |>
     slice(1) |>
     ungroup()
+
+  # There are instances when a coder will annotate a change in environment but
+  # keep the same behavior, such as annotating "[m] travel - transportation" but
+  # annotating a change to "non-domestic" environment a little late, by 5 seconds.
+  # If this occurs, then change the environment to "non-domestic" and
+  # change event_env to when "non-domestic" first occurs.
+  df_dup <-
+    df_collapse |>
+    mutate(
+      le_dup = duplicated(rleid(event_beh)),
+    ) |>
+    mutate(
+      le_dup = any(le_dup),
+      .by = event_beh
+    ) |>
+    dplyr::filter(
+      le_dup,
+      activity %in% c("[m] exercise", "[m] travel")
+    )
+
+  if (nrow(df_dup) != 0) {
+
+    df_dup <-
+      df_dup |>
+      mutate(
+        event_env = event_env[which(environment == "non-domestic")[1]],
+        environment = "non-domestic",
+        .by = event_beh
+      ) |>
+      select(!le_dup)
+    vct_event <-
+      unique(df_dup$event_beh)
+    for (i in seq_along(vct_event)) {
+      le_event <- vct_event[i]
+      df_collapse[df_collapse$event_beh == le_event, ] <-
+        df_dup[df_dup$event_beh == le_event, ]
+
+    }
+
+    df_collapse <-
+      df_collapse |>
+      group_by(event_beh, event_env) |>
+      mutate(duration = sum(duration)) |>
+      slice(1) |>
+      ungroup()
+
+  }
+
 
   # Double-check "occupation" OR "organizational/civic/religious" appear. If both
   # appear within the same visit, then we are assuming the coder meant to annotate
@@ -1783,8 +1834,7 @@ get_equal.behavior_uwm <- function(vct_behavior,
         )
       ) |>
       dplyr::filter(
-        environment == "occupation",
-        !is.na(type_occupation)
+        environment == "occupation"
       ) |>
       summarise(
         duration = sum(duration),
@@ -1794,7 +1844,14 @@ get_equal.behavior_uwm <- function(vct_behavior,
         which.max(duration),
         .by = event_env
       ) |>
-      select(!duration)
+      # If type_occupation is still NA, then just call the occupation "general".
+      mutate(
+        type_occupation = ifelse(
+          is.na(type_occupation),
+          yes = "general",
+          no  = type_occupation
+        )
+      )
 
     if (nrow(df_occupation) != 0) {
 
@@ -1816,11 +1873,11 @@ get_equal.behavior_uwm <- function(vct_behavior,
         } else {
 
           ind <-
-            df_occupation$event_env[i]
+            which(df_occupation$event_env == i)
           le_type <-
-            df_occupation$type_occupation[i]
+            df_occupation$type_occupation[ind]
           le_maj <-
-            df_occupation$collapse2[i]
+            df_occupation$collapse2[ind]
 
           # The two vectors below are codes to NOT roll over depending on type. The
           # majority code is removed from the appropriate vector.
@@ -1840,8 +1897,8 @@ get_equal.behavior_uwm <- function(vct_behavior,
             x = vct_dont_roll,
             pattern = le_maj
           )]
-          lst_collapse[[ind]] <-
-            lst_collapse[[ind]] |>
+          lst_collapse[[i]] <-
+            lst_collapse[[i]] |>
             mutate(
               collapse3 = ifelse(
                 collapse2 %in% vct_dont_roll,
@@ -2025,12 +2082,16 @@ get_equal.behavior_uwm <- function(vct_behavior,
   df_event <-
     df_collapse |>
     slice(1, .by = event_beh4)
+
+  # We consider "interrupting" behavior as anything less than 45 seconds, except
+  # if the very first behavior in the visit/file.
   vct_ind_roll <- df_event$event_beh4[
     df_event$duration4 < 45
   ]
+  vct_ind_roll <- vct_ind_roll[vct_ind_roll != 1]
 
   # Keep indices within vct_ind_roll that have a previous behavior that occurs
-  # >= 45 seconds.
+  # >= 45 seconds. These are the indices that we will roll over.
   vct_ind_roll <- vct_ind_roll[
     df_event$duration4[vct_ind_roll - 1] >= 45
   ]
@@ -2125,8 +2186,8 @@ get_equal.behavior_uwm <- function(vct_behavior,
   left_join(
     df_init,
     select(df_collapse,
-           collapse7, event_beh),
-    by = join_by(event_beh)
+           collapse7, event_any),
+    by = join_by(event_any)
   ) |>
     pull(collapse7) |>
     factor(levels = c(
