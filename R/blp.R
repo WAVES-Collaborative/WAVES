@@ -1594,6 +1594,8 @@ get_equal.behavior_uwm <- function(vct_behavior,
 
     }
 
+    # Below will remove event_any indices. Will add them back in at the end
+    # to not mess up each stage when calculating duration.
     df_collapse <-
       df_collapse |>
       group_by(event_beh, event_env) |>
@@ -1689,6 +1691,7 @@ get_equal.behavior_uwm <- function(vct_behavior,
       .before = behavior
     ) |>
     mutate(
+      collapse8 = "",
       collapse7 = "",
       collapse6 = "",
       collapse5 = "",
@@ -2163,12 +2166,37 @@ get_equal.behavior_uwm <- function(vct_behavior,
     }
   }
 
-  # 7th: Final renaming ----
+  # 7th: Roll backward 1st-event "other"/"noPAbehavior" ----
+  chk_other <-
+    any(vct_other %in% df_collapse$collapse6)
+
+  if (!chk_other) {
+
+    df_collapse$collapse7 <-
+      df_collapse$collapse6
+
+  } else {
+
+    df_collapse <-
+      df_collapse |>
+      mutate(
+        collapse7 = ifelse(
+          collapse6 %in% vct_other,
+          yes = NA_character_,
+          no = collapse6
+        )
+      ) |>
+      fill(collapse7,
+           .direction = "up")
+
+   }
+
+  # 8th: Final renaming ----
   df_collapse <-
     df_collapse |>
     mutate(
-      collapse7 = case_match(
-        collapse6,
+      collapse8 = case_match(
+        collapse7,
         "eating/drinking"   ~ "leisure inactive", # do this after occupation
         "electronics"       ~ "leisure inactive", # do this after occupation
         "talking"           ~ "leisure inactive",
@@ -2176,20 +2204,59 @@ get_equal.behavior_uwm <- function(vct_behavior,
         "care personal"     ~ "housework",
         "food prep"         ~ "housework",
         "travel other"      ~ "other",
-        .default = collapse6
+        .default = collapse7
       )
     )
 
   # Wrap up ----
+  # Add back in missing indices within event_any.
+  if(nrow(df_collapse) != last(df_init$event_any)) {
+
+    # Figure out which is missing.
+    vct_event_any <-
+      last(df_init$event_any) |>
+      seq_len()
+    vct_event_missing <- vct_event_any[
+      !vct_event_any %in% df_collapse$event_any
+    ]
+    df_collapse <-
+      df_collapse |>
+      add_row(event_any = vct_event_missing) |>
+      arrange(event_any) |>
+      # The missing indices will have been part of the event_beh of the
+      # previous event_any, so always fill down.
+      fill(collapse8,
+           .direction = "down")
+
+  }
+
   # Now left bind df_collapse to df using event column as joiner which
   # automatically "fills" the manip column.
   left_join(
     df_init,
     select(df_collapse,
-           collapse7, event_any),
+           collapse8, event_any),
     by = join_by(event_any)
   ) |>
-    pull(collapse7) |>
+    # mutate(
+    #   le_fact = factor(collapse8, levels = c(
+    #     "housework",
+    #     "shopping/errands",
+    #     "leisure active",
+    #     "leisure inactive",
+    #     "occupation active",
+    #     "occupation general",
+    #     "travel active",
+    #     "travel driving",
+    #     "travel passenger",
+    #     "other",
+    #     "no PA behavior",
+    #     "not coded"
+    #   ))
+    # ) |>
+    # dplyr::filter(is.na(le_fact)) |>
+    # View()
+    pull(collapse8) |>
     factor(levels = c(
       "housework",
       "shopping/errands",
