@@ -1863,7 +1863,13 @@ get_equal.behavior_uwm <- function(vct_behavior,
         df_collapse$event_env
       )
 
-      for (i in seq_along(lst_collapse)) {
+      # In rare cases (like 5098_1), an entire event_env will be replaced by
+      # the previous event_env. Don't just subset from list then.
+      vct_event_env <- unique(df_collapse$event_env)
+
+      for (i in seq_along(vct_event_env)) {
+
+        le_event_env <- vct_event_env[i]
 
         if (lst_collapse[[i]]$environment[1] != "occupation") {
 
@@ -1876,7 +1882,7 @@ get_equal.behavior_uwm <- function(vct_behavior,
         } else {
 
           ind <-
-            which(df_occupation$event_env == i)
+            which(df_occupation$event_env == le_event_env)
           le_type <-
             df_occupation$type_occupation[ind]
           le_maj <-
