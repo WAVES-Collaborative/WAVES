@@ -2311,6 +2311,35 @@ get_broad.behavior = function(vct_equal.behavior) {
     ))
 
 }
+get_domain_do = function(vct_equal.behavior) {
+
+  case_match(
+    vct_equal.behavior,
+    "housework"          ~ "household",
+    "shopping/errands"   ~ "other",
+    "leisure active"     ~ "leisure",
+    "leisure inactive"   ~ "leisure",
+    "occupation active"  ~ "occupation",
+    "occupation general" ~ "occupation",
+    "travel active"      ~ "transportation",
+    "travel driving"     ~ "transportation",
+    "travel passenger"   ~ "transportation",
+    "other"              ~ "other",
+    "no PA behavior"     ~ "other",
+    "not coded"          ~ "not coded",
+    .default = "RECHECK R CODE/DATA"
+  ) |>
+    factor(levels = c(
+      "leisure",
+      "household",
+      "transportation",
+      "occupation",
+      "other",
+      "not coded",
+      "RECHECK R CODE/DATA"
+    ))
+
+}
 get_equal.posture_calpoly <- function(vct_posture) {
 
   case_match(
@@ -2417,22 +2446,51 @@ get_broad.posture <- function(vct_equal.posture) {
     ))
 
 }
-get_sed.posture <- function(vct_equal.posture,
-                            vct_equal.behavior) {
+get_posture_do <- function(vct_equal.posture) {
+
+  case_match(
+    vct_equal.posture,
+    "sitting"            ~ "sedentary",
+    "lying"              ~ "sedentary",
+    "crouching/kneeling" ~ "mixed movement",
+    "standing"           ~ "mixed movement",
+    "stationary"         ~ "mixed movement",
+    "walking"            ~ "walking",
+    "running"            ~ "running",
+    "ascending stairs"   ~ "mixed movement",
+    "descending stairs"  ~ "mixed movement",
+    "cycling"            ~ "biking",
+    "mixed movement"     ~ "mixed movement",
+    "not coded"          ~ "not coded",
+    .default             = "RECHECK R CODE/DATA"
+  ) |>
+    factor(levels = c(
+      "sedentary",
+      "mixed movement",
+      "walking",
+      "running",
+      "biking",
+      "not coded",
+      "RECHECK R CODE/DATA"
+    ))
+
+}
+get_sedtype_do <- function(vct_equal.posture,
+                           vct_equal.behavior) {
 
   vct_broad <-   case_match(
     vct_equal.posture,
     "sitting"            ~ "sitting",
     "lying"              ~ "lying",
-    "crouching/kneeling" ~ "non-sedentary",
-    "standing"           ~ "non-sedentary",
-    "stationary"         ~ "non-sedentary",
-    "walking"            ~ "non-sedentary",
-    "running"            ~ "non-sedentary",
-    "ascending stairs"   ~ "non-sedentary",
-    "descending stairs"  ~ "non-sedentary",
-    "cycling"            ~ "non-sedentary",
-    "mixed movement"     ~ "non-sedentary",
+    "crouching/kneeling" ~ "non_sed",
+    "standing"           ~ "non_sed",
+    "stationary"         ~ "non_sed",
+    "walking"            ~ "non_sed",
+    "running"            ~ "non_sed",
+    "ascending stairs"   ~ "non_sed",
+    "descending stairs"  ~ "non_sed",
+    "cycling"            ~ "non_sed",
+    "mixed movement"     ~ "non_sed",
     "not coded"          ~ "not coded",
     .default             = "RECHECK R CODE/DATA"
   )
@@ -2443,10 +2501,10 @@ get_sed.posture <- function(vct_equal.posture,
     .default = vct_broad
   ) |>
     factor(levels = c(
+      "non_sed",
       "sitting",
       "lying",
       "vehicle",
-      "non-sedentary",
       "not coded",
       "RECHECK R CODE/DATA"
     ))
