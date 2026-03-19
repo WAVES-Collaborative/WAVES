@@ -108,6 +108,9 @@ make_table_agr.cor <- function(mtx_yours,
   ind_unequal <- which(df_equal$clr == "#ea9999")
 
   for (i in seq_along(df_equal$clr)) {
+    if (!df_equal$method2[i] %in% names(tbl_agr[["_data"]])) {
+      next()
+    }
     tbl_agr <-
       tbl_agr |>
       tab_style(
@@ -118,6 +121,9 @@ make_table_agr.cor <- function(mtx_yours,
   }
 
   for (ind in ind_near) {
+    if (!df_equal$method[ind] %in% names(tbl_agr[["_data"]])) {
+      next()
+    }
     tbl_agr <-
       tbl_agr |>
       tab_style(
@@ -128,6 +134,9 @@ make_table_agr.cor <- function(mtx_yours,
   }
 
   for (ind in ind_unequal) {
+    if (!df_equal$method[ind] %in% names(tbl_agr[["_data"]])) {
+      next()
+    }
     tbl_agr <-
       tbl_agr |>
       tab_style(
@@ -144,6 +153,67 @@ summarize_metrics_config <- function(fpa_merged) {
 
   load("data/0_CONFIG/MERGED/WAVES_ALL_TEST.RData")
   df_pipe <- read_parquet(fpa_merged)
+
+  align_summary_tables <- function(df_yours, df_waves) {
+    common_ids <- intersect(df_yours$id, df_waves$id)
+    common_cols <- intersect(names(df_yours), names(df_waves))
+    common_cols <- c("id", setdiff(common_cols, "id"))
+
+    list(
+      yours =
+        df_yours |>
+        filter(id %in% common_ids) |>
+        select(all_of(common_cols)) |>
+        arrange(id),
+      waves =
+        df_waves |>
+        filter(id %in% common_ids) |>
+        select(all_of(common_cols)) |>
+        arrange(id)
+    )
+  }
+
+  add_spanner_if_present <- function(tbl, label, suffix) {
+    matching_cols <- names(tbl[["_data"]])[stringr::str_ends(names(tbl[["_data"]]), suffix)]
+
+    if (length(matching_cols) == 0) {
+      return(tbl)
+    }
+
+    tbl |>
+      tab_spanner(
+        label = label,
+        columns = all_of(matching_cols)
+      )
+  }
+
+  style_if_present <- function(tbl, column_suffix, row_index, color) {
+    matching_cols <- names(tbl[["_data"]])[stringr::str_ends(names(tbl[["_data"]]), column_suffix)]
+
+    if (length(matching_cols) == 0) {
+      return(tbl)
+    }
+
+    tbl |>
+      tab_style(
+        style = cell_fill(color = color),
+        locations = cells_body(columns = all_of(matching_cols),
+                               rows = row_index)
+      )
+  }
+
+  cols_label_if_present <- function(tbl, labels) {
+    labels <- labels[names(labels) %in% names(tbl[["_data"]])]
+
+    if (length(labels) == 0) {
+      return(tbl)
+    }
+
+    do.call(
+      gt::cols_label,
+      c(list(data = tbl), as.list(labels))
+    )
+  }
 
   # total ----
   df_sed <-
@@ -188,6 +258,9 @@ summarize_metrics_config <- function(fpa_merged) {
   ## sed ----
   df_sed[, -1] <- round(df_sed[, -1], digits = 1)
   df_test_sed[, -1] <- round(df_test_sed[, -1], digits = 1)
+  aligned_sed <- align_summary_tables(df_sed, df_test_sed)
+  df_sed <- aligned_sed$yours
+  df_test_sed <- aligned_sed$waves
 
   # First see if they are equal to each other at the tenth level, then see if they
   # are near each other +/- 0.01.
@@ -200,8 +273,8 @@ summarize_metrics_config <- function(fpa_merged) {
                  values_to = "equal") |>
     mutate(
       rowid = rleid(id),
-      yours = unlist(transpose(df_sed[, -1])),
-      waves = unlist(transpose(df_test_sed[, -1])),
+      yours = unlist(as.list(df_sed[, -1]), use.names = FALSE),
+      waves = unlist(as.list(df_test_sed[, -1]), use.names = FALSE),
       diff = round(abs(yours - waves), digits = 1),
       clr = case_when(
         equal ~ "#D9F1D5",
@@ -225,75 +298,37 @@ summarize_metrics_config <- function(fpa_merged) {
         ),
       by = join_by(id)
     ) |>
-    gt() |>
-    tab_spanner(
-      label = "Actinet", columns = ends_with("actinet")
-    ) |>
-    tab_spanner(
-      label = "Bakrania (ENMO Average)", columns = ends_with("bakrania.enmo.average")
-    ) |>
-    tab_spanner(
-      label = "Bakrania (ENMO Simple)", columns = ends_with("bakrania.enmo.simple")
-    ) |>
-    tab_spanner(
-      label = "Bakrania (MAD Average)", columns = ends_with("bakrania.mad.average")
-    ) |>
-    tab_spanner(
-      label = "Bakrania (MAD Simple)", columns = ends_with("bakrania.mad.simple")
-    ) |>
-    tab_spanner(
-      label = "Ellis", columns = ends_with("ellis")
-    ) |>
-    tab_spanner(
-      label = "Esliger", columns = ends_with("esliger")
-    ) |>
-    tab_spanner(
-      label = "Fraysee", columns = ends_with("fraysee")
-    ) |>
-    tab_spanner(
-      label = "Hildrebrand", columns = ends_with("hildebrand")
-    ) |>
-    tab_spanner(
-      label = "Mielke", columns = ends_with("mielke")
-    ) |>
-    tab_spanner(
-      label = "Montoye (DT)", columns = ends_with("montoye.dt")
-    ) |>
-    tab_spanner(
-      label = "Montoye (NN)", columns = ends_with("montoye.nn")
-    ) |>
-    tab_spanner(
-      label = "Montoye (RF)", columns = ends_with("montoye.rf")
-    ) |>
-    tab_spanner(
-      label = "Montoye (SVM)", columns = ends_with("montoye.svm")
-    ) |>
-    tab_spanner(
-      label = "Trost", columns = ends_with("trost")
-    ) |>
-    tab_spanner(
-      label = "Walmsley", columns = ends_with("walmsley")
-    ) |>
-    tab_spanner(
-      label = "White (ENMO Linear)", columns = ends_with("white.enmo.lin")
-    ) |>
-    tab_spanner(
-      label = "White (ENMO Polynomial)", columns = ends_with("white.enmo.pol")
-    ) |>
-    tab_spanner(
-      label = "White (HPFVM Linear)", columns = ends_with("white.hpfvm.lin")
-    ) |>
-    tab_spanner(
-      label = "White (HPFVM Polynomial)", columns = ends_with("white.hpfvm.pol")
-    )
+    gt()
+
+  tbl_sed <- tbl_sed |>
+    add_spanner_if_present("Actinet", "actinet") |>
+    add_spanner_if_present("Bakrania (ENMO Average)", "bakrania.enmo.average") |>
+    add_spanner_if_present("Bakrania (ENMO Simple)", "bakrania.enmo.simple") |>
+    add_spanner_if_present("Bakrania (MAD Average)", "bakrania.mad.average") |>
+    add_spanner_if_present("Bakrania (MAD Simple)", "bakrania.mad.simple") |>
+    add_spanner_if_present("Ellis", "ellis") |>
+    add_spanner_if_present("Esliger", "esliger") |>
+    add_spanner_if_present("Fraysee", "fraysee") |>
+    add_spanner_if_present("Hildrebrand", "hildebrand") |>
+    add_spanner_if_present("Mielke", "mielke") |>
+    add_spanner_if_present("Montoye (DT)", "montoye.dt") |>
+    add_spanner_if_present("Montoye (NN)", "montoye.nn") |>
+    add_spanner_if_present("Montoye (RF)", "montoye.rf") |>
+    add_spanner_if_present("Montoye (SVM)", "montoye.svm") |>
+    add_spanner_if_present("Trost", "trost") |>
+    add_spanner_if_present("Walmsley", "walmsley") |>
+    add_spanner_if_present("White (ENMO Linear)", "white.enmo.lin") |>
+    add_spanner_if_present("White (ENMO Polynomial)", "white.enmo.pol") |>
+    add_spanner_if_present("White (HPFVM Linear)", "white.hpfvm.lin") |>
+    add_spanner_if_present("White (HPFVM Polynomial)", "white.hpfvm.pol")
 
   for (i in seq_len(nrow(df_equal_sed))) {
     tbl_sed <-
-      tbl_sed |>
-      tab_style(
-        style = cell_fill(color = df_equal_sed$clr[i]),
-        locations = cells_body(columns = ends_with(df_equal_sed$method[i]),
-                               rows = df_equal_sed$rowid[i])
+      style_if_present(
+        tbl = tbl_sed,
+        column_suffix = df_equal_sed$method[i],
+        row_index = df_equal_sed$rowid[i],
+        color = df_equal_sed$clr[i]
       )
   }
 
@@ -313,6 +348,9 @@ summarize_metrics_config <- function(fpa_merged) {
   ## mvpa ----
   df_mvpa[, -1] <- round(df_mvpa[, -1], digits = 1)
   df_test_mvpa[, -1] <- round(df_test_mvpa[, -1], digits = 1)
+  aligned_mvpa <- align_summary_tables(df_mvpa, df_test_mvpa)
+  df_mvpa <- aligned_mvpa$yours
+  df_test_mvpa <- aligned_mvpa$waves
   df_equal_mvpa <-
     (df_mvpa[, -1] == df_test_mvpa[, -1]) |>
     as.data.frame() |>
@@ -322,8 +360,8 @@ summarize_metrics_config <- function(fpa_merged) {
                  values_to = "equal") |>
     mutate(
       rowid = rleid(id),
-      yours = unlist(transpose(df_mvpa[, -1])),
-      waves = unlist(transpose(df_test_mvpa[, -1])),
+      yours = unlist(as.list(df_mvpa[, -1]), use.names = FALSE),
+      waves = unlist(as.list(df_test_mvpa[, -1]), use.names = FALSE),
       diff = round(abs(yours - waves), digits = 1),
       clr = case_when(
         equal ~ "#D9F1D5",
@@ -347,63 +385,33 @@ summarize_metrics_config <- function(fpa_merged) {
         ),
       by = join_by(id)
     ) |>
-    gt() |>
-    tab_spanner(
-      label = "Actinet", columns = ends_with("actinet")
-    ) |>
-    tab_spanner(
-      label = "Ellis", columns = ends_with("ellis")
-    ) |>
-    tab_spanner(
-      label = "Esliger", columns = ends_with("esliger")
-    ) |>
-    tab_spanner(
-      label = "Fraysee", columns = ends_with("fraysee")
-    ) |>
-    tab_spanner(
-      label = "Hildrebrand", columns = ends_with("hildebrand")
-    ) |>
-    tab_spanner(
-      label = "Mielke", columns = ends_with("mielke")
-    ) |>
-    tab_spanner(
-      label = "Montoye (DT)", columns = ends_with("montoye.dt")
-    ) |>
-    tab_spanner(
-      label = "Montoye (NN)", columns = ends_with("montoye.nn")
-    ) |>
-    tab_spanner(
-      label = "Montoye (RF)", columns = ends_with("montoye.rf")
-    ) |>
-    tab_spanner(
-      label = "Montoye (SVM)", columns = ends_with("montoye.svm")
-    ) |>
-    tab_spanner(
-      label = "Trost", columns = ends_with("trost")
-    ) |>
-    tab_spanner(
-      label = "Walmsley", columns = ends_with("walmsley")
-    ) |>
-    tab_spanner(
-      label = "White (ENMO Linear)", columns = ends_with("white.enmo.lin")
-    ) |>
-    tab_spanner(
-      label = "White (ENMO Polynomial)", columns = ends_with("white.enmo.pol")
-    ) |>
-    tab_spanner(
-      label = "White (HPFVM Linear)", columns = ends_with("white.hpfvm.lin")
-    ) |>
-    tab_spanner(
-      label = "White (HPFVM Polynomial)", columns = ends_with("white.hpfvm.pol")
-    )
+    gt()
+
+  tbl_mvpa <- tbl_mvpa |>
+    add_spanner_if_present("Actinet", "actinet") |>
+    add_spanner_if_present("Ellis", "ellis") |>
+    add_spanner_if_present("Esliger", "esliger") |>
+    add_spanner_if_present("Fraysee", "fraysee") |>
+    add_spanner_if_present("Hildrebrand", "hildebrand") |>
+    add_spanner_if_present("Mielke", "mielke") |>
+    add_spanner_if_present("Montoye (DT)", "montoye.dt") |>
+    add_spanner_if_present("Montoye (NN)", "montoye.nn") |>
+    add_spanner_if_present("Montoye (RF)", "montoye.rf") |>
+    add_spanner_if_present("Montoye (SVM)", "montoye.svm") |>
+    add_spanner_if_present("Trost", "trost") |>
+    add_spanner_if_present("Walmsley", "walmsley") |>
+    add_spanner_if_present("White (ENMO Linear)", "white.enmo.lin") |>
+    add_spanner_if_present("White (ENMO Polynomial)", "white.enmo.pol") |>
+    add_spanner_if_present("White (HPFVM Linear)", "white.hpfvm.lin") |>
+    add_spanner_if_present("White (HPFVM Polynomial)", "white.hpfvm.pol")
 
   for (i in seq_len(nrow(df_equal_mvpa))) {
     tbl_mvpa <-
-      tbl_mvpa |>
-      tab_style(
-        style = cell_fill(color = df_equal_mvpa$clr[i]),
-        locations = cells_body(columns = ends_with(df_equal_mvpa$method[i]),
-                               rows = df_equal_mvpa$rowid[i])
+      style_if_present(
+        tbl = tbl_mvpa,
+        column_suffix = df_equal_mvpa$method[i],
+        row_index = df_equal_mvpa$rowid[i],
+        color = df_equal_mvpa$clr[i]
       )
   }
 
@@ -423,6 +431,9 @@ summarize_metrics_config <- function(fpa_merged) {
   ## steps ----
   df_step[, -1] <- trunc(df_step[, -1])
   df_test_step[, -1] <- trunc(df_test_step[, -1])
+  aligned_step <- align_summary_tables(df_step, df_test_step)
+  df_step <- aligned_step$yours
+  df_test_step <- aligned_step$waves
   df_equal_step <-
     (df_step[, -1] == df_test_step[, -1]) |>
     as.data.frame() |>
@@ -432,8 +443,8 @@ summarize_metrics_config <- function(fpa_merged) {
                  values_to = "equal") |>
     mutate(
       rowid = rleid(id),
-      yours = unlist(transpose(df_step[, -1])),
-      waves = unlist(transpose(df_test_step[, -1])),
+      yours = unlist(as.list(df_step[, -1]), use.names = FALSE),
+      waves = unlist(as.list(df_test_step[, -1]), use.names = FALSE),
       diff = round(abs(yours - waves), digits = 0),
       clr = case_when(
         equal ~ "#D9F1D5",
@@ -457,33 +468,23 @@ summarize_metrics_config <- function(fpa_merged) {
         ),
       by = join_by(id)
     ) |>
-    gt() |>
-    tab_spanner(
-      label = "Oak 1.0", columns = ends_with("oak.1.0")
-    ) |>
-    tab_spanner(
-      label = "Oak Pre", columns = ends_with("oak.pre")
-    ) |>
-    tab_spanner(
-      label = "SDT", columns = ends_with("sdt")
-    ) |>
-    tab_spanner(
-      label = "Stepcount", columns = ends_with("stepcount")
-    ) |>
-    tab_spanner(
-      label = "Verisense (Original)", columns = ends_with("verisense.original")
-    ) |>
-    tab_spanner(
-      label = "Verisense (Revised)", columns = ends_with("verisense.revised")
-    )
+    gt()
+
+  tbl_step <- tbl_step |>
+    add_spanner_if_present("Oak 1.0", "oak.1.0") |>
+    add_spanner_if_present("Oak Pre", "oak.pre") |>
+    add_spanner_if_present("SDT", "sdt") |>
+    add_spanner_if_present("Stepcount", "stepcount") |>
+    add_spanner_if_present("Verisense (Original)", "verisense.original") |>
+    add_spanner_if_present("Verisense (Revised)", "verisense.revised")
 
   for (i in seq_len(nrow(df_equal_step))) {
     tbl_step <-
-      tbl_step |>
-      tab_style(
-        style = cell_fill(color = df_equal_step$clr[i]),
-        locations = cells_body(columns = ends_with(df_equal_step$method[i]),
-                               rows = df_equal_step$rowid[i])
+      style_if_present(
+        tbl = tbl_step,
+        column_suffix = df_equal_step$method[i],
+        row_index = df_equal_step$rowid[i],
+        color = df_equal_step$clr[i]
       )
   }
 
@@ -515,7 +516,7 @@ summarize_metrics_config <- function(fpa_merged) {
                 labels = c("sedentary", rep("not sedentary", times = 5))) |>
         as.numeric() - 1)
     ))
-  df_agr <- df_agr[complete.cases(df_agr)]
+  df_agr <- df_agr |> filter(if_all(everything(), ~ !is.na(.x)))
   nrow_agr <- nrow(df_agr)
   vct_methods <-
     names(df_agr) |>
@@ -554,7 +555,7 @@ summarize_metrics_config <- function(fpa_merged) {
                  labels = c(rep("not mvpa", times = 2), "mvpa", rep("not mvpa", times = 3))) |>
             as.numeric() - 1)
     ))
-  df_agr <- df_agr[complete.cases(df_agr)]
+  df_agr <- df_agr |> filter(if_all(everything(), ~ !is.na(.x)))
   nrow_agr <- nrow(df_agr)
   vct_methods <-
     names(df_agr) |>
@@ -585,7 +586,7 @@ summarize_metrics_config <- function(fpa_merged) {
     rename_with(.cols = everything(),
                 .fn = ~sub(x = .x, pattern = "steps_", replacement = "")) |>
     as_tibble()
-  df_agr <- df_agr[complete.cases(df_agr), ]
+  df_agr <- df_agr |> filter(if_all(everything(), ~ !is.na(.x)))
   df_agr <- df_agr[, sort(names(df_agr))]
   mtx_step <-
     cor(df_agr) |>
@@ -606,8 +607,10 @@ summarize_metrics_config <- function(fpa_merged) {
       mtx_yours = mtx_sed,
       mtx_waves = mtx_test_sed,
       df_agr_waves = df_test_agr_sed
-    ) |>
-    cols_label(
+    )
+  tbl_agr_sed <- cols_label_if_present(
+    tbl_agr_sed,
+    c(
       "actinet" = "Actinet",
       "bakrania.enmo.average" = "Bakrania (ENMO Average)",
       "bakrania.enmo.simple" = "Bakrania (ENMO Simple)",
@@ -629,6 +632,7 @@ summarize_metrics_config <- function(fpa_merged) {
       "white.hpfvm.lin" = "White (HPFVM Linear)",
       "white.hpfvm.pol" = "White (HPFVM Polynomial)"
     )
+  )
   tbl_agr_sed$`_data`$method <- case_match(
     tbl_agr_sed$`_data`$method,
     "actinet" ~ "Actinet",
@@ -658,8 +662,10 @@ summarize_metrics_config <- function(fpa_merged) {
     mtx_yours = mtx_mvpa,
     mtx_waves = mtx_test_mvpa,
     df_agr_waves = df_test_agr_mvpa
-  ) |>
-    cols_label(
+  )
+  tbl_agr_mvpa <- cols_label_if_present(
+    tbl_agr_mvpa,
+    c(
       "actinet" = "Actinet",
       "ellis" = "Ellis",
       "esliger" = "Esliger",
@@ -677,6 +683,7 @@ summarize_metrics_config <- function(fpa_merged) {
       "white.hpfvm.lin" = "White (HPFVM Linear)",
       "white.hpfvm.pol" = "White (HPFVM Polynomial)"
     )
+  )
   tbl_agr_mvpa$`_data`$method <- case_match(
     tbl_agr_mvpa$`_data`$method,
     "actinet" ~ "Actinet",
@@ -701,8 +708,10 @@ summarize_metrics_config <- function(fpa_merged) {
     mtx_yours = mtx_step,
     mtx_waves = mtx_test_step,
     df_agr_waves = df_test_agr_step
-  ) |>
-    cols_label(
+  )
+  tbl_agr_step <- cols_label_if_present(
+    tbl_agr_step,
+    c(
       "oak.1.0" = "Oak 1.0",
       "oak.pre" = "Oak Pre",
       "sdt" = "SDT",
@@ -710,6 +719,7 @@ summarize_metrics_config <- function(fpa_merged) {
       "verisense.original" = "Verisense (Original)",
       "verisense.revised" = "Verisense (Revised)"
     )
+  )
   tbl_agr_step$`_data`$method <- case_match(
     tbl_agr_step$`_data`$method,
     "oak.1.0" ~ "Oak 1.0",

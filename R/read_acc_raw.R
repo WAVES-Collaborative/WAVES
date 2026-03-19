@@ -17,7 +17,7 @@ read_acc_raw <- function(fpa_read,
   chk_gen <- le_type %in% c(
     "GENEACTIV - CSV w/ HEADER",
     "ADHOC",
-    "UKNOWN"
+    "UNKNOWN"
   )
 
   if (chk_gen) {
@@ -36,12 +36,24 @@ read_acc_raw <- function(fpa_read,
   )}
 
   ## GGIR Basic ----
-  grep(
+  fpa_basic_match <- grep(
     x       = vct_fpa_basic,
     pattern = stringr::str_escape(fnm_sans_ext),
     value   = TRUE
-  ) |>
-    load()
+  )
+
+  if (length(fpa_basic_match) == 0) {
+    warning(
+      sprintf(
+        "Skipping calibration for '%s' because no matching GGIR basic file was found.",
+        basename(fpa_read)
+      ),
+      call. = FALSE
+    )
+    return(NULL)
+  }
+
+  load(fpa_basic_match[[1]])
   # Don't need output from `g.getmeta`
   rm(M); gc()
 
@@ -80,17 +92,37 @@ read_acc_raw <- function(fpa_read,
 
     cat(blocknumber, " ")
     # 1 - read chunk
-    data <- GGIR::g.readaccfile(
-      filename          = fpa_read,
-      blocksize         = params_nw.clip.block$blocksize,
-      blocknumber       = blocknumber,
-      filequality       = NULL,
-      ws                = 3600,
-      PreviousEndPage   = PreviousEndPage,
-      inspectfileobject = I,
-      PreviousLastValue = PreviousLastValue,
-      PreviousLastTime  = PreviousLastTime
-    )$P$data
+    data <- tryCatch(
+      {
+        GGIR::g.readaccfile(
+          filename          = fpa_read,
+          blocksize         = params_nw.clip.block$blocksize,
+          blocknumber       = blocknumber,
+          filequality       = NULL,
+          ws                = 3600,
+          PreviousEndPage   = PreviousEndPage,
+          inspectfileobject = I,
+          PreviousLastValue = PreviousLastValue,
+          PreviousLastTime  = PreviousLastTime
+        )$P$data
+      },
+      error = function(e) NULL
+    )
+
+    if (is.null(data) || length(data) == 0 || nrow(data) == 0) {
+      if (iteration == 1) {
+        warning(
+          sprintf(
+            "Skipping calibration for '%s' because GGIR could not read any raw chunks.",
+            basename(fpa_read)
+          ),
+          call. = FALSE
+        )
+        return(NULL)
+      }
+      isLastBlock <- TRUE
+      next()
+    }
     # data <-
     #   accread$P$data
     blocknumber <-

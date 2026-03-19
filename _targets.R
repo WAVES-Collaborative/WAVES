@@ -12,7 +12,15 @@ library(autometric)
 Sys.setenv(
   TAR_PROJECT = "main",
   # change below environment variable if you already have a conda installation readily accessible.
-  RETICULATE_MINICONDA_PATH = reticulate::miniconda_path()
+  RETICULATE_MINICONDA_PATH = normalizePath(
+    path.expand(
+      Sys.getenv(
+        "RETICULATE_MINICONDA_PATH",
+        unset = reticulate::miniconda_path()
+      )
+    ),
+    mustWork = FALSE
+  )
 )
 
 study_timezone     <- Sys.timezone()

@@ -114,10 +114,7 @@ apply_methods_cutpoints <- function(fpa_basic,
     sub(x = _,
         pattern = "meta_",
         replacement = "")
-  brand <- case_when(
-    I$monn != c("actigraph") ~ "other",
-    .default = I$monn
-  )
+  brand <- if (identical(I$monn, "actigraph")) "actigraph" else "other"
 
   # Check if file was already created from a previous run of the pipeline.
   fpa_write <- file.path(dir_write, paste0(fnm_sans_ext, ".parquet"))
@@ -125,6 +122,20 @@ apply_methods_cutpoints <- function(fpa_basic,
   if (file.exists(fpa_write)) {return(
       arrow::read_parquet(fpa_write)
   )}
+
+  if (!exists("M", inherits = FALSE) ||
+      is.null(M) ||
+      is.null(M$metashort) ||
+      nrow(M$metashort) == 0) {
+    warning(
+      sprintf(
+        "Skipping cutpoint output for '%s' because GGIR metadata is missing metashort data.",
+        basename(fpa_basic)
+      ),
+      call. = FALSE
+    )
+    return(NULL)
+  }
 
   df_cutpoint <-
     M$metashort |>

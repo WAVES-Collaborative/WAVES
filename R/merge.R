@@ -211,23 +211,73 @@ merge_output_config <- function(lst_out.raw,
                                 dir_merged,
                                 my_tz) {
 
+  compact_bind <- function(lst) {
+    lst <- lst[!sapply(lst, is.null)]
+
+    if (length(lst) == 0) {
+      return(tibble::tibble(
+        id = character(),
+        datetime = as.POSIXct(character(), tz = my_tz)
+      ))
+    }
+
+    data.table::rbindlist(lst, fill = TRUE) |>
+      tibble::as_tibble()
+  }
+
+  df_raw <-
+    compact_bind(lst_out.raw)
+  if ("datetime" %in% names(df_raw)) {
+    df_raw <- mutate(df_raw, datetime = as.POSIXct(datetime, tz = my_tz))
+  }
+
+  df_cut <-
+    compact_bind(lst_out.cut)
+  if ("datetime" %in% names(df_cut)) {
+    df_cut <- mutate(df_cut, datetime = as.POSIXct(datetime, tz = my_tz))
+  }
+
+  df_oak.pre <-
+    compact_bind(lst_out.oak.pre)
+  if ("datetime" %in% names(df_oak.pre)) {
+    df_oak.pre <- mutate(df_oak.pre, datetime = as.POSIXct(datetime, tz = my_tz))
+  }
+
+  df_ox <-
+    compact_bind(lst_ox)
+  if ("datetime" %in% names(df_ox)) {
+    df_ox <- mutate(df_ox, datetime = as.POSIXct(datetime, tz = my_tz))
+  }
+
   # Merge ----
   df <-
     full_join(
-      rbindlist(lst_out.raw) |>
-        mutate(datetime = as.POSIXct(datetime, tz = my_tz)),
-      rbindlist(lst_out.cut),
+      df_raw,
+      df_cut,
       by = join_by(id, datetime)
     ) |>
     left_join(
-      rbindlist(lst_out.oak.pre) |>
-        mutate(datetime = as.POSIXct(datetime, tz = my_tz)),
+      df_oak.pre,
       by = join_by(id, datetime)
     ) |>
     left_join(
-      rbindlist(lst_ox),
+      df_ox,
       by = join_by(id, datetime)
-    ) |>
+    )
+
+  missing_cols <- c(
+    "class_trost",
+    "class_ellis"
+  )
+
+  for (col in missing_cols) {
+    if (!col %in% names(df)) {
+      df[[col]] <- "9999"
+    }
+  }
+
+  df <-
+    df |>
     mutate(
       across(
         .cols = starts_with("intensity_montoye"),
