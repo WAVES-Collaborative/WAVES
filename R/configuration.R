@@ -723,8 +723,8 @@ config_raw_type <- function(vct_raw) {
       header_value <- tryCatch(I$header[1, 1], error = \(e) NA_character_)
       sf_value <- tryCatch(I$sf, error = \(e) NA_real_)
       chk_adhoc_csv <-
-        isTRUE(identical(header_value, "file does not have header")) &&
-        isTRUE(identical(sf_value, 0))
+        identical(header_value, "file does not have header") &&
+        identical(sf_value, 0)
 
       if (chk_adhoc_csv) {
         vct_type[i] <- "ADHOC"
