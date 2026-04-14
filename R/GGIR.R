@@ -69,18 +69,6 @@ wrapper_GGIR_config <- function(vct_raw,
 
   if (is.null(vct_raw)) return(NULL)
 
-  existing_basic <- list.files(
-    file.path("data", "0_CONFIG", "GGIR", "output_config", "meta", "basic"),
-    pattern =
-      basename(vct_raw) |>
-      paste0(collapse = "|"),
-    full.names = TRUE
-  )
-
-  if (length(existing_basic) > 0) {
-    return(existing_basic)
-  }
-
   successful_raw <- character()
 
   for (i in seq_along(vct_raw)) {
