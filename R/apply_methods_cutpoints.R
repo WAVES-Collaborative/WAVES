@@ -106,6 +106,21 @@ apply_methods_cutpoints <- function(fpa_basic,
   if (is.null(fpa_basic)) return(NULL)
 
   load(fpa_basic)
+
+  if (!exists("M", inherits = FALSE) ||
+      is.null(M) ||
+      is.null(M$metashort) ||
+      nrow(M$metashort) == 0) {
+    warning(
+      sprintf(
+        "Skipping cutpoint output for '%s' because GGIR metadata is missing metashort data.",
+        basename(fpa_basic)
+      ),
+      call. = FALSE
+    )
+    return(NULL)
+  }
+
   fnm_sans_ext <-
     fpa_basic |>
     basename() |>
@@ -122,20 +137,6 @@ apply_methods_cutpoints <- function(fpa_basic,
   if (file.exists(fpa_write)) {return(
       arrow::read_parquet(fpa_write)
   )}
-
-  if (!exists("M", inherits = FALSE) ||
-      is.null(M) ||
-      is.null(M$metashort) ||
-      nrow(M$metashort) == 0) {
-    warning(
-      sprintf(
-        "Skipping cutpoint output for '%s' because GGIR metadata is missing metashort data.",
-        basename(fpa_basic)
-      ),
-      call. = FALSE
-    )
-    return(NULL)
-  }
 
   df_cutpoint <-
     M$metashort |>
