@@ -111,7 +111,7 @@ wrapper_GGIR_config <- function(vct_raw,
       }
     )
 
-    if (isTRUE(ggir_result)) {
+    if (ggir_result) {
       successful_raw <- c(successful_raw, fpa_raw)
     }
   }
