@@ -92,37 +92,17 @@ read_acc_raw <- function(fpa_read,
 
     cat(blocknumber, " ")
     # 1 - read chunk
-    data <- tryCatch(
-      {
-        GGIR::g.readaccfile(
-          filename          = fpa_read,
-          blocksize         = params_nw.clip.block$blocksize,
-          blocknumber       = blocknumber,
-          filequality       = NULL,
-          ws                = 3600,
-          PreviousEndPage   = PreviousEndPage,
-          inspectfileobject = I,
-          PreviousLastValue = PreviousLastValue,
-          PreviousLastTime  = PreviousLastTime
-        )$P$data
-      },
-      error = function(e) NULL
-    )
-
-    if (is.null(data) || length(data) == 0 || nrow(data) == 0) {
-      if (iteration == 1) {
-        warning(
-          sprintf(
-            "Skipping calibration for '%s' because GGIR could not read any raw chunks.",
-            basename(fpa_read)
-          ),
-          call. = FALSE
-        )
-        return(NULL)
-      }
-      isLastBlock <- TRUE
-      next()
-    }
+    data <- GGIR::g.readaccfile(
+      filename          = fpa_read,
+      blocksize         = params_nw.clip.block$blocksize,
+      blocknumber       = blocknumber,
+      filequality       = NULL,
+      ws                = 3600,
+      PreviousEndPage   = PreviousEndPage,
+      inspectfileobject = I,
+      PreviousLastValue = PreviousLastValue,
+      PreviousLastTime  = PreviousLastTime
+    )$P$data
     # data <-
     #   accread$P$data
     blocknumber <-
