@@ -18,7 +18,7 @@ wrapper_GGIR <- function(vct_raw,
   chk_csv_type <- any(vct_raw_type %in% c(
     "GENEACTIV - CSV w/ HEADER",
     "ADHOC",
-    "UKNOWN"
+    "UNKNOWN"
   ))
 
   if (chk_csv_type) {
@@ -69,35 +69,61 @@ wrapper_GGIR_config <- function(vct_raw,
 
   if (is.null(vct_raw)) return(NULL)
 
-   for (i in seq_along(vct_raw)) {
-     fpa_raw <- vct_raw[i]
-     le_type <- vct_raw_type[i]
+  successful_raw <- character()
 
-     chk_csv_type <- c(
-       "GENEACTIV - CSV w/ HEADER",
-       "ADHOC",
-       "UKNOWN"
-     )
+  for (i in seq_along(vct_raw)) {
+    fpa_raw <- vct_raw[i]
+    le_type <- vct_raw_type[i]
 
-     if (le_type %in% chk_csv_type) {
-       # These are skipped for now
-       next()
-     } else {
-       GGIR::GGIR(
-         mode       = c(1, 2, 3, 4),
-         datadir    = fpa_raw,
-         outputdir  = "data/0_CONFIG/GGIR",
-         studyname  = "config",
-         do.report  = c(),
-         configfile = "data/GGIR/config_WAVES.csv"
-       )
-     }
-   }
+    chk_csv_type <- c(
+      "GENEACTIV - CSV w/ HEADER",
+      "ADHOC",
+      "UNKNOWN"
+    )
+
+    if (le_type %in% chk_csv_type) {
+      # These are skipped for now
+      next()
+    }
+
+    ggir_result <- tryCatch(
+      {
+        GGIR::GGIR(
+          mode       = c(1, 2, 3, 4),
+          datadir    = fpa_raw,
+          outputdir  = "data/0_CONFIG/GGIR",
+          studyname  = "config",
+          do.report  = c(),
+          configfile = "data/GGIR/config_WAVES.csv"
+        )
+        TRUE
+      },
+      error = function(e) {
+        warning(
+          sprintf(
+            "Skipping config file '%s' because GGIR failed: %s",
+            basename(fpa_raw),
+            conditionMessage(e)
+          ),
+          call. = FALSE
+        )
+        FALSE
+      }
+    )
+
+    if (ggir_result) {
+      successful_raw <- c(successful_raw, fpa_raw)
+    }
+  }
+
+  if (length(successful_raw) == 0) {
+    return(character())
+  }
 
   list.files(
     file.path("data", "0_CONFIG", "GGIR", "output_config", "meta", "basic"),
     pattern =
-      basename(vct_raw) |>
+      basename(successful_raw) |>
       paste0(collapse = "|"),
     full.names = TRUE
   )

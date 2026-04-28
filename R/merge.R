@@ -211,6 +211,10 @@ merge_output_config <- function(lst_out.raw,
                                 dir_merged,
                                 my_tz) {
 
+  lst_out.raw[sapply(lst_out.raw, is.null)] <- NULL
+  lst_out.oak.pre[sapply(lst_out.oak.pre, is.null)] <- NULL
+  lst_out.cut[sapply(lst_out.cut, is.null)] <- NULL
+
   # Merge ----
   df <-
     full_join(

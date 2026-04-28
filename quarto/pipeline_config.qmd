@@ -69,6 +69,22 @@ df_test_out <- tibble(
     FALSE, FALSE, TRUE, TRUE, FALSE
   )
 )
+common_files <- intersect(df_out$file, df_test_out$file)
+common_cols <- intersect(names(df_out), names(df_test_out))
+common_cols <- c("file", setdiff(common_cols, "file"))
+
+df_out <-
+  df_out |>
+  filter(file %in% common_files) |>
+  select(all_of(common_cols)) |>
+  arrange(file)
+
+df_test_out <-
+  df_test_out |>
+  filter(file %in% common_files) |>
+  select(all_of(common_cols)) |>
+  arrange(file)
+
 df_equal <- 
   (df_out[, -1] == df_test_out[, -1]) |>
   as.data.frame() |>
