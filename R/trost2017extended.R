@@ -287,12 +287,21 @@ trost2017.extended <- function(raw,
         mean(Enmo)
       tilt <-
         mean(acos(ay[, ii] / vm) * (180 / pi))
-      wx <-
-        extract.features(ax[,ii], window_size = win * Fs, sf = Fs)
-      wy <-
-        extract.features(ay[,ii], window_size = win * Fs, sf = Fs)
-      wz <-
-        extract.features(az[,ii], window_size = win * Fs, sf = Fs)
+      wx <- extract.features(
+        ax[, ii],
+        window_size = win * Fs,
+        sf = Fs
+      )
+      wy <- extract.features(
+        ay[, ii],
+        window_size = win * Fs,
+        sf = Fs
+      )
+      wz <- extract.features(
+        az[, ii],
+        window_size = win * Fs,
+        sf = Fs
+      )
       w <-
         as.matrix(cbind(wx,wy,wz))
       w <-
