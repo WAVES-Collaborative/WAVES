@@ -394,8 +394,7 @@ tar_plan(
       fpa_read      = vct_raw,
       le_type       = vct_raw_type,
       vct_fpa_basic = vct_basic,
-      dir_cal       = dir_cal,
-      my_tz         = my_tz
+      dir_cal       = dir_cal
     ),
     pattern   = map(vct_raw, vct_raw_type),
     iteration = "vector"

@@ -1,8 +1,7 @@
 read_acc_raw <- function(fpa_read,
                          le_type,
                          vct_fpa_basic,
-                         dir_cal,
-                         my_tz) {
+                         dir_cal) {
 
   if (is.null(fpa_read)) return(NULL)
 
