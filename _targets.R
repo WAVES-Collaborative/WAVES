@@ -226,6 +226,11 @@ tar_plan(
     command = wrapper_GGIR(vct_raw,
                            vct_raw_type)
   ),
+  tar_parquet(
+    name    = df_start_tz,
+    command = get_start_tz_df(vct_basic,
+                              my_tz)
+  ),
   tar_qs(
     name      = lst_out.cut,
     command   = apply_methods_cutpoints(
