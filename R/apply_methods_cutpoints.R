@@ -93,15 +93,13 @@
 #'
 #' @param fpa_basic
 #' @param dir_write
-#' @param my_tz
 #'
 #' @returns
 #' @export
 #'
 #' @examples
 apply_methods_cutpoints <- function(fpa_basic,
-                                    dir_write,
-                                    my_tz) {
+                                    dir_write) {
 
   if (is.null(fpa_basic)) return(NULL)
 
@@ -141,8 +139,9 @@ apply_methods_cutpoints <- function(fpa_basic,
   df_cutpoint <-
     M$metashort |>
     mutate(
-      datetime = ymd_hms(timestamp,
-                         tz = my_tz),
+      # GGIR goes to the next quarter of an hour for safety. Regardless, keep
+      # in UTC time until merging.
+      datetime = ymd_hms(timestamp, tz = "UTC"),
       # To millig
       ENMO = ENMO * 1000,
       ENMOa = ENMOa * 1000,

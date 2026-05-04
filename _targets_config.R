@@ -332,8 +332,7 @@ tar_plan(
     name      = lst_out.cut,
     command   = apply_methods_cutpoints(
       fpa_basic = vct_basic,
-      dir_write = dir_out.cut,
-      my_tz     = my_tz
+      dir_write = dir_out.cut
     ),
     pattern   = map(vct_basic),
     iteration = "list"
