@@ -129,3 +129,138 @@ wrapper_GGIR_config <- function(vct_raw,
   )
 
 }
+find_timezone_by_offset <- function(offset_hours,
+                                    dttm = Sys.time()) {
+  # Validate input
+  if (!is.numeric(offset_hours) || length(offset_hours) != 1) {
+    stop("offset_hours must be a single numeric value.")
+  }
+
+  # Get all available time zones
+  tz_list <- OlsonNames()
+
+  # Filter by matching offset
+  matching_tz <- tz_list[
+    sapply(tz_list, function(tz) {
+      # Get offset in hours for the given date
+      tz_offset <- as.numeric(format(as.POSIXct(dttm, tz = tz), "%z")) / 100
+      tz_offset == offset_hours
+    })
+  ]
+
+  grep(
+    x = matching_tz,
+    pattern = "Etc",
+    value = TRUE
+  )
+}
+find_offset <- function(tz) {
+  # Validate input: tz should be in Olson name format.
+  if(!tz %in% OlsonNames()) stop("tz not in Continent/City format")
+
+  (Sys.time() |>
+      as.POSIXct(tz = tz) |>
+      format("%z") |>
+      as.numeric()) /
+    100
+
+}
+get_start_tz_df <- function(vct_fpa_basic,
+                            my_tz) {
+
+  vct_fnm <-
+    vct_fpa_basic |>
+    basename() |>
+    file_path_sans_ext() |>
+    file_path_sans_ext() |>
+    gsub(
+      x = _,
+      pattern = "meta_",
+      replacement = ""
+    )
+
+  lst_start_tz <- vector(mode = "list", length = length(vct_fnm))
+
+  for (i in seq_along(vct_fnm)) {
+
+    fnm <-
+      vct_fnm[i]
+    load(vct_fpa_basic[i])
+    I$header
+
+    if (I$dformn == "gt3x") {
+
+      le_start_dttm <-
+        I$header["Start Date", "value"] |>
+        strptime(format = "%Y-%m-%d %H:%M:%OS",
+                 tz     = "UTC")
+      le_offset <-
+        I$header["TimeZone", "value"] |>
+        as.character() |>
+        stri_extract(
+          regex = "^[^\\:]+"
+        ) |>
+        as.numeric()
+      le_tz <-
+        find_timezone_by_offset(le_offset, le_start_dttm)
+
+    } else if (I$dformn == "cwa") {
+
+      # timezone information not saved in Axivity data. Since I specify
+      # "desiredtz" GGIR argument to "UTC", the start time value will already
+      # be in "UTC" timezone. Default to my_tz for Axivity files.
+      le_start_dttm <- I$header["start", "value"]$start
+      le_offset <- find_offset(my_tz)
+      le_tz <- my_tz
+
+    } else if (I$dformn == "bin"){
+
+      le_start_dttm <-
+        I$header["StarTime", "value"] |>
+        strptime(format = "%Y-%m-%d %H:%M:%OS",
+                 tz     = "UTC")
+      le_offset <-
+        (I$header["tzone", "value"] |>
+           as.character() |>
+           as.numeric()) /
+        3600
+      le_tz <-
+        find_timezone_by_offset(le_offset, le_start_dttm)
+
+    } else if (I$monn == "actigraph" && I$dformn == "csv") {
+
+      le_start_dttm <-
+        I$header["Start Date", "value"] |>
+        strptime(format = "%Y-%m-%d %H:%M:%OS",
+                 tz     = "UTC")
+      le_offset <-
+        I$header["TimeZone", "value"] |>
+        as.character() |>
+        stri_extract(
+          regex = "^[^\\:]+"
+        ) |>
+        as.numeric()
+      le_tz <-
+        find_timezone_by_offset(le_offset, le_start_dttm)
+
+    }
+
+    lst_start_tz[[i]] <-
+      list(
+        fnm,
+        le_start_dttm,
+        as.numeric(le_start_dttm),
+        le_offset,
+        le_tz
+      ) |>
+      setNames(c("fnm",
+                 "start_dttm",
+                 "start_secs",
+                 "offset",
+                 "tz"))
+
+  }
+
+  bind_rows(lst_start_tz)
+
+}
