@@ -381,8 +381,7 @@ tar_plan(
   lst_ox = merge_ox(
     vct_ox_step,
     vct_ox_wlms,
-    vct_ox_acti,
-    my_tz
+    vct_ox_acti
   ),
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                             PROCESS - CUSTOM                           ----

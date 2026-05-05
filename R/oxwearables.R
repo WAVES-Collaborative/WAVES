@@ -353,8 +353,7 @@ apply_ox_actinet <- function(vct_ox_input,
 }
 merge_ox <- function(vct_ox_step,
                      vct_ox_wlms,
-                     vct_ox_acti,
-                     my_tz) {
+                     vct_ox_acti) {
 
   # Only merge files that have gone through all three algorithms.
   vct_fnm <-
@@ -396,7 +395,7 @@ merge_ox <- function(vct_ox_step,
         ) |>
           mutate(
             datetime =
-              ymd_hms(time, tz = my_tz, quiet = TRUE) |>
+              ymd_hms(time, tz = "UTC", quiet = TRUE) |>
               floor_date(unit = "seconds"),
             intensity = case_when(
               sedentary == 1 ~ "sedentary",
@@ -423,9 +422,10 @@ merge_ox <- function(vct_ox_step,
           sep = ","
         ) |>
           mutate(
+            # time column when read with fread() function is automatically UTC
+            # and actinet already exports in UTC.
             datetime =
-              floor_date(time, unit = "seconds") |>
-              force_tz(tzone  = my_tz),
+              floor_date(time, unit = "seconds"),
             intensity = case_when(
               sedentary == 1 ~ "sedentary",
               light == 1     ~ "light",
@@ -454,10 +454,11 @@ merge_ox <- function(vct_ox_step,
           sep = ","
         ) |>
           mutate(
-            # Floor it to the nearest second
+            # time column when read with fread() function is automatically UTC
+            # and stepcount already exports in UTC. Contains fractional seconds
+            # though so floor it to the nearest second
             datetime =
-              floor_date(time, unit = "seconds") |>
-              force_tz(tzone  = my_tz)
+              floor_date(time, unit = "seconds")
           ) |>
           summarise(
             steps_stepcount = as.integer(n()),
