@@ -231,14 +231,14 @@ tar_plan(
     command = get_start_tz_df(vct_basic,
                               my_tz)
   ),
-  tar_qs(
-    name      = lst_out.cut,
+  tar_file(
+    name      = vct_out.cut,
     command   = apply_methods_cutpoints(
       fpa_basic = vct_basic,
       dir_write = dir_out.cut
     ),
     pattern   = map(vct_basic),
-    iteration = "list"
+    iteration = "vector"
   ),
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                           PROCESS - OXWEARABLES                        ----
@@ -289,7 +289,7 @@ tar_plan(
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                             PROCESS - CUSTOM                           ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  tar_qs(
+  tar_file(
     name      = vct_cal,
     command   = read_acc_raw(
       fpa_read      = vct_raw,
@@ -300,8 +300,8 @@ tar_plan(
     pattern   = map(vct_raw, vct_raw_type),
     iteration = "vector"
   ),
-  tar_qs(
-    name      = lst_out.raw,
+  tar_file(
+    name      = vct_out.raw,
     command   = apply_methods_raw(
       fpa_read      = vct_cal,
       vct_fpa_basic = vct_basic,
@@ -311,11 +311,11 @@ tar_plan(
       lst_miniconda = lst_miniconda
     ),
     pattern   = map(vct_cal),
-    iteration = "list",
+    iteration = "vector",
     error = "null"
   ),
-  tar_qs(
-    name      = lst_out.oak.pre,
+  tar_file(
+    name      = vct_out.oak.pre,
     command   = apply_oak.pre(
       fpa_read      = vct_cal,
       vct_fpa_basic = vct_basic,
@@ -324,7 +324,7 @@ tar_plan(
       lst_miniconda = lst_miniconda
     ),
     pattern   = map(vct_cal),
-    iteration = "list",
+    iteration = "vector",
     error = "null",
     deployment = "main" # in order to avoid error of loading two conda environments within the same R session
   ),
@@ -334,9 +334,9 @@ tar_plan(
   tar_target(
     name    = fpa_merged,
     command = merge_output(
-      lst_out.raw     = lst_out.raw,
-      lst_out.oak.pre = lst_out.oak.pre,
-      lst_out.cut     = lst_out.cut,
+      vct_out.raw     = vct_out.raw,
+      vct_out.oak.pre = vct_out.oak.pre,
+      vct_out.cut     = vct_out.cut,
       lst_ox          = lst_ox,
       dir_merged      = dir_merged,
       my_tz           = my_tz

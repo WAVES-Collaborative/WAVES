@@ -281,9 +281,7 @@ apply_methods_raw <- function(fpa_read,
     dir_write, paste0(fnm_sans_ext, ".parquet")
   )
 
-  if (file.exists(fpa_write)) {return(
-    arrow::read_parquet(fpa_write)
-  )}
+  if (file.exists(fpa_write)) return(fpa_write)
 
   grep(
     x       = vct_fpa_basic,
@@ -750,7 +748,7 @@ apply_methods_raw <- function(fpa_read,
     mutate(datetime = as.numeric(datetime)) |>
     arrow::write_parquet(sink = fpa_write)
 
-  return(df_all)
+  return(fpa_write)
 
 }
 
@@ -794,9 +792,7 @@ apply_oak.pre <- function(fpa_read,
     dir_write, paste0(fnm_sans_ext, ".parquet")
   )
 
-  if (file.exists(fpa_write)) {return(
-    arrow::read_parquet(fpa_write)
-  )}
+  if (file.exists(fpa_write)) return(fpa_write)
 
   grep(
     x       = vct_fpa_basic,
@@ -1040,6 +1036,6 @@ apply_oak.pre <- function(fpa_read,
     mutate(datetime = as.numeric(datetime)) |>
     arrow::write_parquet(sink = fpa_write)
 
-  return(df_all)
+  return(fpa_write)
 
 }

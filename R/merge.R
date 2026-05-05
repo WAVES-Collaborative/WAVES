@@ -1,30 +1,30 @@
-merge_output <- function(lst_out.raw,
-                         lst_out.oak.pre,
-                         lst_out.cut,
+merge_output <- function(vct_out.raw,
+                         vct_out.oak.pre,
+                         vct_out.cut,
                          lst_ox,
                          dir_merged,
                          my_tz) {
 
-  lst_out.raw[sapply(lst_out.raw, is.null)] <- NULL
-  lst_out.oak.pre[sapply(lst_out.oak.pre, is.null)] <- NULL
-  lst_out.cut[sapply(lst_out.cut, is.null)] <- NULL
+  vct_out.raw[sapply(vct_out.raw, is.null)] <- NULL
+  vct_out.oak.pre[sapply(vct_out.oak.pre, is.null)] <- NULL
+  vct_out.cut[sapply(vct_out.cut, is.null)] <- NULL
 
   vct_id_out.raw <- sapply(
-    lst_out.raw, \(.x) .x$id[1]
+    vct_out.raw, \(.x) .x$id[1]
   )
   vct_id_out.oak.pre <- sapply(
-    lst_out.oak.pre, \(.x) .x$id[1]
+    vct_out.oak.pre, \(.x) .x$id[1]
   )
   vct_id_out.cut <- sapply(
-    lst_out.cut, \(.x) .x$id[1]
+    vct_out.cut, \(.x) .x$id[1]
   )
   vct_id_ox <- sapply(
     lst_ox, \(.x) .x$id[1]
   )
 
-  names(lst_out.raw) <- vct_id_out.raw
-  names(lst_out.oak.pre) <- vct_id_out.oak.pre
-  names(lst_out.cut) <- vct_id_out.cut
+  names(vct_out.raw) <- vct_id_out.raw
+  names(vct_out.oak.pre) <- vct_id_out.oak.pre
+  names(vct_out.cut) <- vct_id_out.cut
   names(lst_ox) <- vct_id_ox
 
   vct_id_all <-
@@ -50,9 +50,9 @@ merge_output <- function(lst_out.raw,
     # First, get the earliest datetime from one of the lists that do have the ID.
     # Note: If one of the below `dttm_` objects are null, the `union` function
     # will return a numeric.
-    dttm_raw <- lst_out.raw[[le_id]]$datetime[1]
-    dttm_oak.pre <- lst_out.oak.pre[[le_id]]$datetime[1]
-    dttm_cut <- lst_out.cut[[le_id]]$datetime[1]
+    dttm_raw <- vct_out.raw[[le_id]]$datetime[1]
+    dttm_oak.pre <- vct_out.oak.pre[[le_id]]$datetime[1]
+    dttm_cut <- vct_out.cut[[le_id]]$datetime[1]
     dttm_ox <- lst_ox[[le_id]]$datetime[1]
 
     # From union, get the earliest datetime so merge will go smoothly.
@@ -69,7 +69,7 @@ merge_output <- function(lst_out.raw,
     chk_ox <- !le_id %in% vct_id_ox
 
     if (chk_raw) {
-      lst_out.raw[[le_id]] <- tibble(
+      vct_out.raw[[le_id]] <- tibble(
         id = le_id,
         datetime = dttm_earliest,
         intensity_montoye.rf  = "9999",
@@ -84,13 +84,13 @@ merge_output <- function(lst_out.raw,
         steps_verisense.revised  = 9999L
       )
     } else if (chk_oak.pre) {
-      lst_out.oak.pre[[le_id]] <- tibble(
+      vct_out.oak.pre[[le_id]] <- tibble(
         id = le_id,
         datetime = dttm_earliest,
         steps_oak.pre = 9999
       )
     }else if (chk_cut) {
-      lst_out.cut[[le_id]] <- tibble(
+      vct_out.cut[[le_id]] <- tibble(
         id = le_id,
         datetime = dttm_earliest,
         intensity_bakrania.enmo.simple = "9999",
@@ -117,14 +117,14 @@ merge_output <- function(lst_out.raw,
     }
     df <-
       full_join(
-        lst_out.raw[[le_id]] |>
+        vct_out.raw[[le_id]] |>
           mutate(datetime = as.POSIXct(datetime, tz = my_tz)),
-        lst_out.oak.pre[[le_id]] |>
+        vct_out.oak.pre[[le_id]] |>
           mutate(datetime = as.POSIXct(datetime, tz = my_tz)),
         by = join_by(id, datetime)
       ) |>
       full_join(
-        lst_out.cut[[le_id]],
+        vct_out.cut[[le_id]],
         by = join_by(id, datetime)
       ) |>
       left_join(
@@ -204,27 +204,27 @@ merge_output <- function(lst_out.raw,
   )
 
 }
-merge_output_config <- function(lst_out.raw,
-                                lst_out.oak.pre,
-                                lst_out.cut,
+merge_output_config <- function(vct_out.raw,
+                                vct_out.oak.pre,
+                                vct_out.cut,
                                 lst_ox,
                                 dir_merged,
                                 my_tz) {
 
-  lst_out.raw[sapply(lst_out.raw, is.null)] <- NULL
-  lst_out.oak.pre[sapply(lst_out.oak.pre, is.null)] <- NULL
-  lst_out.cut[sapply(lst_out.cut, is.null)] <- NULL
+  vct_out.raw[sapply(vct_out.raw, is.null)] <- NULL
+  vct_out.oak.pre[sapply(vct_out.oak.pre, is.null)] <- NULL
+  vct_out.cut[sapply(vct_out.cut, is.null)] <- NULL
 
   # Merge ----
   df <-
     full_join(
-      rbindlist(lst_out.raw) |>
+      rbindlist(vct_out.raw) |>
         mutate(datetime = as.POSIXct(datetime, tz = my_tz)),
-      rbindlist(lst_out.cut),
+      rbindlist(vct_out.cut),
       by = join_by(id, datetime)
     ) |>
     left_join(
-      rbindlist(lst_out.oak.pre) |>
+      rbindlist(vct_out.oak.pre) |>
         mutate(datetime = as.POSIXct(datetime, tz = my_tz)),
       by = join_by(id, datetime)
     ) |>

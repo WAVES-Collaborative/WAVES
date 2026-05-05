@@ -132,9 +132,7 @@ apply_methods_cutpoints <- function(fpa_basic,
   # Check if file was already created from a previous run of the pipeline.
   fpa_write <- file.path(dir_write, paste0(fnm_sans_ext, ".parquet"))
 
-  if (file.exists(fpa_write)) {return(
-      arrow::read_parquet(fpa_write)
-  )}
+  if (file.exists(fpa_write)) return(fpa_write)
 
   df_cutpoint <-
     M$metashort |>
@@ -293,6 +291,6 @@ apply_methods_cutpoints <- function(fpa_basic,
 
   # Return ----
   arrow::write_parquet(df_cutpoint, sink = fpa_write)
-  return(df_cutpoint)
+  return(fpa_write)
 
 }
