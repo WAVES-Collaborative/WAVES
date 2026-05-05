@@ -764,8 +764,8 @@ apply_methods_raw <- function(fpa_read,
 #' @param fpa_read
 #' @param vct_fpa_basic
 #' @param dir_write
-#' @param my_tz
-#' @param ... config_miniconda goes here to make it a dependency of this function.
+#' @param df_start_tz
+#' @param lst_miniconda
 #'
 #' @returns
 #' @export

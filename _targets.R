@@ -320,7 +320,7 @@ tar_plan(
       fpa_read      = vct_cal,
       vct_fpa_basic = vct_basic,
       dir_write     = dir_out.oak.pre,
-      my_tz         = my_tz,
+      df_start_tz   = df_start_tz,
       lst_miniconda = lst_miniconda
     ),
     pattern   = map(vct_cal),
