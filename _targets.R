@@ -265,7 +265,6 @@ tar_plan(
       vct_ox_input = vct_ox_input,
       fdr_write    = file.path(getwd(), dir_walmsley),
       fdr_log      = dir_logs,
-      my_tz        = my_tz,
       log_prefix   = "main_",
       lst_miniconda = lst_miniconda
     ),

@@ -135,7 +135,6 @@ apply_ox_stepcount <- function(vct_ox_input,
     )
   } else {
     # The `system2` command uses a shell within MacOS and Linux.
-    # TODO Ask Dan for testing this.
     # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_stepcount ; stepcount "data/0_CONFIG/RAW/WAVES_10004_RAW.gt3x" -o ~/WAVES/data/stepcount
     system2(
       command = "source",
@@ -165,7 +164,6 @@ apply_ox_walmsley <- function(vct_ox_input,
                               fdr_write,
                               fdr_log,
                               log_prefix = "",
-                              my_tz,
                               lst_miniconda) {
 
   chk_windows <- grepl(
@@ -219,17 +217,13 @@ apply_ox_walmsley <- function(vct_ox_input,
         "activate WHO_WAVES_accelerometer & ",
         paste0(
           'accProcess ', vct_ox_input, ' -o "', fdr_write, '"',
-          " --timeZone ", my_tz,
+          " --timeZone UTC",
           collapse = " & "
         ) |>
           # file paths to windows style.
           gsub(x = _,
                pattern = "/",
-               replacement = "\\\\") |>
-          # The above also changes the timezone, change it back
-          gsub(x = _,
-               pattern = sub(my_tz, pattern = "/", replacement = "\\\\\\\\"),
-               replacement = my_tz),
+               replacement = "\\\\"),
         collapse = ""
       ),
       stdout = file.path(fdr_log, paste0(log_prefix, "walmsley_out.txt")),
@@ -238,8 +232,7 @@ apply_ox_walmsley <- function(vct_ox_input,
 
   } else {
     # The `system2` command uses a shell within MacOS and Linux.
-    # TODO Ask Dan for testing this.
-    # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_accelerometer ; accProcess "data/0_CONFIG/RAW/WAVES_10004_RAW.gt3x" -o ~/WAVES/data/walmsley --timeZone America/Chicago
+    # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_accelerometer ; accProcess "data/0_CONFIG/RAW/WAVES_10004_RAW.gt3x" -o ~/WAVES/data/walmsley --timeZone UTC
     system2(
       command = "source",
       args = paste(
@@ -247,7 +240,7 @@ apply_ox_walmsley <- function(vct_ox_input,
         "conda activate WHO_WAVES_accelerometer",
         paste0(
           'accProcess ', vct_ox_input, ' -o "', fdr_write, '"',
-          " --timeZone ", my_tz,
+          " --timeZone UTC",
           collapse = " ; "
         ),
         sep = " ; "
@@ -333,7 +326,6 @@ apply_ox_actinet <- function(vct_ox_input,
 
   } else {
     # The `system2` command uses a shell within MacOS and Linux.
-    # TODO Ask Dan for testing this.
     # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_actinet ; actinet "data/0_CONFIG/RAW/WAVES_10004_RAW.gt3x" -o ~/WAVES/data/actinet
     system2(
       command = "source",
