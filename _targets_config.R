@@ -406,7 +406,7 @@ tar_plan(
       vct_fpa_basic = vct_basic,
       dir_models    = dir_models,
       dir_write     = dir_out.raw,
-      my_tz         = my_tz,
+      df_start_tz   = df_start_tz,
       lst_miniconda = lst_miniconda
     ),
     pattern   = map(vct_cal),
