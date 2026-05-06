@@ -40,9 +40,40 @@ The proposed flow diagram outlines the process for how the validation data and d
     1.  From [this link](https://posit.co/download/rstudio-desktop/), click on the "DOWNLOAD RSTUDIO DESKTOP FOR WINDOWS/MACOS"
     2.  A version from 2023 onwards should be okay.
 
-3.  Install RTools
+3.  Install compilation tools (platform-specific)
+
+    **Windows:**
 
     1.  From [this link](https://cran.r-project.org/bin/windows/Rtools/), download the RTools version specific to the R version being used (i.e. Rtools 4.4 for R v4.4.1, RTools 4.5 for R v4.5.2)
+
+    **macOS:**
+
+    Several R packages need to be compiled from source. Install the following dependencies via [Homebrew](https://brew.sh/):
+
+    ```
+    brew install cmake gcc gettext
+    ```
+
+    Then create `~/.R/Makevars` so R can find the installed libraries:
+
+    ```
+    mkdir -p ~/.R
+    cat > ~/.R/Makevars << 'EOF'
+    CPPFLAGS += -I/opt/homebrew/opt/gettext/include
+    LDFLAGS += -L/opt/homebrew/opt/gettext/lib -lintl -L/opt/homebrew/opt/gcc/lib/gcc/current
+    FLIBS = -L/opt/homebrew/opt/gcc/lib/gcc/current -lgfortran -lquadmath
+    FC = /opt/homebrew/bin/gfortran
+    F77 = /opt/homebrew/bin/gfortran
+    EOF
+    ```
+
+    Additionally, the `arrow` R package requires setting an environment variable before running `renv::restore()`:
+
+    ```
+    export LIBARROW_BINARY=true
+    ```
+
+    This tells the package to download a pre-built Arrow C++ library instead of compiling against the system version.
 
 4.  Download WAVES repository.
 
@@ -173,6 +204,22 @@ The proposed flow diagram outlines the process for how the validation data and d
     ![](media/Screenshot%202026-01-17%20132513.png)
 
     -   Change the `n_workers` object to 1, which will remove parallel processing.
+
+-   **Resetting conda environments:** If the config pipeline errors at `lst_miniconda` or the `summary_miniconda.html` report shows environments highlighted red, removing the problematic environment and re-running the config pipeline will recreate it from scratch. Run the following in your system terminal (not the R console), replacing the environment name as needed:
+
+    ```
+    conda env remove -n WHO_WAVES_oak_pre -y
+    ```
+
+    Available environment names: `WHO_WAVES_stepcount`, `WHO_WAVES_accelerometer`, `WHO_WAVES_actinet`, `WHO_WAVES_oak_pre`, `WHO_WAVES_oak_1.0`
+
+    To remove all WAVES environments at once:
+
+    ```
+    conda env list | grep WHO_WAVES | awk '{print $1}' | xargs -I {} conda env remove -n {} -y
+    ```
+
+    After removal, re-run the config pipeline (`tar_make()`) and it will recreate the missing environments.
 
 ## Posting an Issue on GitHub
 
