@@ -74,7 +74,7 @@ read_acc_raw <- function(fpa_read,
   isLastBlock       <- FALSE
   iteration         <- 1
   cols_desired      <- c(
-   "time", "x", "y", "z"
+    "x", "y", "z"
   )
   lst_qc <- list()
 
@@ -140,6 +140,16 @@ read_acc_raw <- function(fpa_read,
     if ("PreviousLastValue" %in% names(accread$P)) { # output when reading ad-hoc csv
       PreviousLastValue <- accread$P$PreviousLastValue
       PreviousLastTime  <- accread$P$PreviousLastTime
+    }
+
+    if (le_type == "ACTIGRAPH - CSV") {
+
+      # add time column
+      accread$P$data$time <- seq(
+        from       = 1,
+        length.out = nrow(accread$P$data),
+        by = 1/I$sf
+      )
     }
 
     ## idle-sleep mode ----
