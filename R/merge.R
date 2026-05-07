@@ -1,31 +1,3 @@
-merge_output_config <- function(vct_out.raw,
-                                vct_out.oak.pre,
-                                vct_out.cut,
-                                vct_ox,
-                                dir_merged,
-                                my_tz) {
-
-  vct_out.raw[sapply(vct_out.raw, is.null)] <- NULL
-  vct_out.oak.pre[sapply(vct_out.oak.pre, is.null)] <- NULL
-  vct_out.cut[sapply(vct_out.cut, is.null)] <- NULL
-
-  # Merge ----
-  df <-
-    full_join(
-      rbindlist(vct_out.raw) |>
-        mutate(datetime = as.POSIXct(datetime, tz = my_tz)),
-      rbindlist(vct_out.cut),
-      by = join_by(id, datetime)
-    ) |>
-    left_join(
-      rbindlist(vct_out.oak.pre) |>
-        mutate(datetime = as.POSIXct(datetime, tz = my_tz)),
-      by = join_by(id, datetime)
-    ) |>
-    left_join(
-      rbindlist(vct_ox),
-      by = join_by(id, datetime)
-    ) |>
 merge_wrangler <- function(df) {
   df |>
     mutate(
@@ -169,5 +141,27 @@ merge_output <- function(vct_out.raw,
 
 }
 merge_output_config <- function(vct_out.raw,
+                                vct_out.oak.pre,
+                                vct_out.cut,
+                                vct_ox) {
+
+  full_join(
+    lapply(vct_out.raw, read_parquet) |>
+      rbindlist() |>
+      mutate(datetime = as.POSIXct(datetime, tz = "UTC")),
+    lapply(vct_out.oak.pre, read_parquet) |>
+      rbindlist() |>
+      mutate(datetime = as.POSIXct(datetime, tz = "UTC")),
+    by = join_by(id, datetime)
+  ) |>
+    full_join(
+      lapply(vct_out.cut, read_parquet) |>  rbindlist(),
+      by = join_by(id, datetime)
+    ) |>
+    full_join(
+      lapply(vct_ox, read_parquet) |>  rbindlist(),
+      by = join_by(id, datetime)
+    ) |>
+    merge_wrangler()
 
 }

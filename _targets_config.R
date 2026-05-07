@@ -439,17 +439,14 @@ tar_plan(
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                                   MERGE                                ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  tar_target(
-    name    = fpa_merged,
+  tar_parquet(
+    name    = df_pipe,
     command = merge_output_config(
       vct_out.raw     = vct_out.raw,
       vct_out.oak.pre = vct_out.oak.pre,
       vct_out.cut     = vct_out.cut,
-      vct_ox          = vct_ox,
-      dir_merged      = dir_merged,
-      my_tz           = my_tz
-    ),
-    format = "file"
+      vct_ox          = vct_ox
+    )
   ),
   tar_render(
     name = pipeline_summary,

@@ -140,10 +140,9 @@ make_table_agr.cor <- function(mtx_yours,
   return(tbl_agr)
 
 }
-summarize_metrics_config <- function(fpa_merged) {
+summarize_metrics_config <- function(df_pipe) {
 
   load("data/0_CONFIG/MERGED/WAVES_ALL_TEST.RData")
-  df_pipe <- read_parquet(fpa_merged)
 
   # total ----
   df_sed <-
