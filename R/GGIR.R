@@ -136,6 +136,8 @@ find_timezone_by_offset <- function(offset_hours,
     stop("offset_hours must be a single numeric value.")
   }
 
+  if (offset_hours == 0) return("UTC")
+
   # Get all available time zones
   tz_list <- OlsonNames()
 
@@ -229,19 +231,14 @@ get_start_tz_df <- function(vct_fpa_basic,
 
     } else if (I$monn == "actigraph" && I$dformn == "csv") {
 
+      # Timezone information not saved in csv header.
       le_start_dttm <-
-        I$header["Start Date", "value"] |>
-        strptime(format = "%Y-%m-%d %H:%M:%OS",
+        paste0(I$header["Start Date", "value"] |> stri_trim(side = "left"),
+               I$header["Start Time", "value"]) |>
+        strptime(format = "%m/%d/%Y %H:%M:%OS",
                  tz     = "UTC")
-      le_offset <-
-        I$header["TimeZone", "value"] |>
-        as.character() |>
-        stri_extract(
-          regex = "^[^\\:]+"
-        ) |>
-        as.numeric()
-      le_tz <-
-        find_timezone_by_offset(le_offset, le_start_dttm)
+      le_offset <- find_offset(my_tz)
+      le_tz <- my_tz
 
     }
 
