@@ -9,11 +9,8 @@ summarize_major_steps <- function(vct_raw,
                                   vct_ox_acti) {
 
   df <- tibble(
-    file =
-      basename(vct_raw),
-    file_noext =
-      file_path_sans_ext(file) |>
-      file_path_sans_ext()
+    file = basename(vct_raw),
+    file_noext = file_path_sans_ext(file)
   )
 
   vct_nm_ggir <-
