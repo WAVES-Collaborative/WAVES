@@ -550,7 +550,7 @@ apply_methods_raw <- function(fpa_read,
           # sample frequency. Don't read in last bit of Hz then.
           ind_chunk_oak <- seq(
             from = chunk_begin_oak,
-            to   = round(last(ind_chunk_oak) / I$sf, digits = 0) * I$sf
+            to   = floor(last(ind_chunk_oak) / I$sf) * I$sf
           )
           df_all$steps_oak.1.0[last(ind_steps_oak)] <- 0
           ind_steps_oak <- ind_steps_oak[-length(ind_steps_oak)]
@@ -604,7 +604,7 @@ apply_methods_raw <- function(fpa_read,
         # sample frequency. Don't read in last bit of Hz then.
         ind_chunk_oak <- seq(
           from = chunk_begin,
-          to   = round(last(ind_chunk) / I$sf, digits = 0) * I$sf
+          to   = floor(last(ind_chunk_oak) / I$sf) * I$sf
         )
         df_all$steps_oak.1.0[last(ind_steps)] <- 0
         ind_steps_oak <- ind_steps[-length(ind_steps)]
@@ -900,7 +900,7 @@ apply_oak.pre <- function(fpa_read,
           # sample frequency. Don't read in last bit of Hz then.
           ind_chunk_oak <- seq(
             from = chunk_begin_oak,
-            to   = round(last(ind_chunk_oak) / I$sf, digits = 0) * I$sf
+            to   = floor(last(ind_chunk_oak) / I$sf) * I$sf
           )
           df_all$steps_oak.pre[last(ind_steps_oak)] <- 0
           ind_steps_oak <- ind_steps_oak[-length(ind_steps_oak)]
@@ -954,7 +954,7 @@ apply_oak.pre <- function(fpa_read,
         # sample frequency. Don't read in last bit of Hz then.
         ind_chunk_oak <- seq(
           from = chunk_begin,
-          to   = round(last(ind_chunk) / I$sf, digits = 0) * I$sf
+          to   = floor(last(ind_chunk_oak) / I$sf) * I$sf
         )
         df_all$steps_oak.pre[last(ind_steps)] <- 0
         ind_steps_oak <- ind_steps[-length(ind_steps)]
