@@ -242,6 +242,7 @@ get_start_tz_df <- function(vct_fpa_basic,
 
     }
 
+    le_start_dttm <- floor_date(le_start_dttm, unit = "seconds")
     lst_start_tz[[i]] <-
       list(
         fnm,
