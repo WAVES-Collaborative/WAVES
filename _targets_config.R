@@ -91,6 +91,9 @@ fdr_ggir <- file.path(
 fdr_calibrated <- file.path(
   "data", "0_CONFIG", "RAW-CALIBRATED_QS2"
 )
+fdr_output.oxwearable <- file.path(
+  "data", "0_CONFIG", "OUTPUT-OXWEARABLE_PARQUET"
+)
 fdr_output.cutpoint <- file.path(
   "data", "0_CONFIG", "OUTPUT-CUTPOINT_PARQUET"
 )
@@ -120,6 +123,7 @@ fs::dir_create(c(
   fdr_logs,
   fdr_ggir,
   fdr_calibrated,
+  fdr_output.oxwearable,
   fdr_output.cutpoint,
   fdr_output.raw,
   fdr_output.oak.pre,
@@ -293,6 +297,7 @@ tar_plan(
   dir_models      = "models",
   dir_logs        = fdr_logs,
   dir_cal         = fdr_calibrated,
+  dir_out.ox      = fdr_output.oxwearable,
   dir_out.cut     = fdr_output.cutpoint,
   dir_out.raw     = fdr_output.raw,
   dir_out.oak.pre = fdr_output.oak.pre,
@@ -378,10 +383,16 @@ tar_plan(
     ),
     format = "file"
   ),
-  lst_ox = merge_ox(
-    vct_ox_step,
-    vct_ox_wlms,
-    vct_ox_acti
+  tar_file(
+    name    = vct_ox,
+    command = merge_ox(
+      vct_ox_step  = vct_ox_step,
+      vct_ox_wlms  = vct_ox_wlms,
+      vct_ox_acti  = vct_ox_acti,
+      dir_write    = dir_out.ox,
+      vct_raw_type = vct_raw_type,
+      df_start_tz  = df_start_tz
+    )
   ),
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                             PROCESS - CUSTOM                           ----
@@ -434,7 +445,7 @@ tar_plan(
       vct_out.raw     = vct_out.raw,
       vct_out.oak.pre = vct_out.oak.pre,
       vct_out.cut     = vct_out.cut,
-      lst_ox          = lst_ox,
+      vct_ox          = vct_ox,
       dir_merged      = dir_merged,
       my_tz           = my_tz
     ),

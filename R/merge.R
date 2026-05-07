@@ -1,7 +1,7 @@
 merge_output <- function(vct_out.raw,
                          vct_out.oak.pre,
                          vct_out.cut,
-                         lst_ox,
+                         vct_ox,
                          dir_merged,
                          my_tz) {
 
@@ -19,13 +19,13 @@ merge_output <- function(vct_out.raw,
     vct_out.cut, \(.x) .x$id[1]
   )
   vct_id_ox <- sapply(
-    lst_ox, \(.x) .x$id[1]
+    vct_ox, \(.x) .x$id[1]
   )
 
   names(vct_out.raw) <- vct_id_out.raw
   names(vct_out.oak.pre) <- vct_id_out.oak.pre
   names(vct_out.cut) <- vct_id_out.cut
-  names(lst_ox) <- vct_id_ox
+  names(vct_ox) <- vct_id_ox
 
   vct_id_all <-
     union(vct_id_out.raw, vct_id_out.oak.pre) |>
@@ -53,7 +53,7 @@ merge_output <- function(vct_out.raw,
     dttm_raw <- vct_out.raw[[le_id]]$datetime[1]
     dttm_oak.pre <- vct_out.oak.pre[[le_id]]$datetime[1]
     dttm_cut <- vct_out.cut[[le_id]]$datetime[1]
-    dttm_ox <- lst_ox[[le_id]]$datetime[1]
+    dttm_ox <- vct_ox[[le_id]]$datetime[1]
 
     # From union, get the earliest datetime so merge will go smoothly.
     dttm_earliest <-
@@ -107,7 +107,7 @@ merge_output <- function(vct_out.raw,
         intensity_bakrania.mad.average = "9999"
       )
     } else if (chk_ox) {
-      lst_ox[[le_id]] <- tibble(
+      vct_ox[[le_id]] <- tibble(
         id = le_id,
         datetime = dttm_earliest,
         intensity_wamsley = "9999",
@@ -128,7 +128,7 @@ merge_output <- function(vct_out.raw,
         by = join_by(id, datetime)
       ) |>
       left_join(
-        lst_ox[[le_id]],
+        vct_ox[[le_id]],
         by = join_by(id, datetime)
       ) |>
       mutate(
@@ -207,7 +207,7 @@ merge_output <- function(vct_out.raw,
 merge_output_config <- function(vct_out.raw,
                                 vct_out.oak.pre,
                                 vct_out.cut,
-                                lst_ox,
+                                vct_ox,
                                 dir_merged,
                                 my_tz) {
 
@@ -229,7 +229,7 @@ merge_output_config <- function(vct_out.raw,
       by = join_by(id, datetime)
     ) |>
     left_join(
-      rbindlist(lst_ox),
+      rbindlist(vct_ox),
       by = join_by(id, datetime)
     ) |>
     mutate(

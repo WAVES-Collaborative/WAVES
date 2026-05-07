@@ -743,12 +743,19 @@ config_raw_type <- function(vct_raw) {
     }
   }
 
-  # Rename "GENEACTIVE" to "GENEACTIV".
-  vct_type <- sub(
-    x = vct_type,
-    pattern = "GENEACTIVE",
-    replacement = "GENEACTIV"
-  )
+  vct_type <-
+    # Rename "GENEACTIVE" to "GENEACTIV".
+    sub(
+      x = vct_type,
+      pattern = "GENEACTIVE",
+      replacement = "GENEACTIV"
+    ) |>
+    # name with filename sans extension.
+    setNames(
+      vct_raw |>
+        basename() |>
+        file_path_sans_ext()
+    )
 
   return(vct_type)
 
