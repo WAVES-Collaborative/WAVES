@@ -149,16 +149,16 @@ merge_output_config <- function(vct_out.raw,
     lapply(vct_out.raw, read_parquet) |>
       rbindlist() |>
       mutate(datetime = as.POSIXct(datetime, tz = "UTC")),
-    lapply(vct_out.oak.pre, read_parquet) |>
-      rbindlist() |>
-      mutate(datetime = as.POSIXct(datetime, tz = "UTC")),
+    lapply(vct_out.cut, read_parquet) |>  rbindlist(),
     by = join_by(id, datetime)
   ) |>
-    full_join(
-      lapply(vct_out.cut, read_parquet) |>  rbindlist(),
+    left_join(
+      lapply(vct_out.oak.pre, read_parquet) |>
+        rbindlist() |>
+        mutate(datetime = as.POSIXct(datetime, tz = "UTC")),
       by = join_by(id, datetime)
     ) |>
-    full_join(
+    left_join(
       lapply(vct_ox, read_parquet) |>  rbindlist(),
       by = join_by(id, datetime)
     ) |>
