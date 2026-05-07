@@ -343,14 +343,14 @@ tar_plan(
   ##                                   MERGE                                ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   tar_target(
-    name    = fpa_merged,
+    name    = vct_merge,
     command = merge_output(
       vct_out.raw     = vct_out.raw,
       vct_out.oak.pre = vct_out.oak.pre,
       vct_out.cut     = vct_out.cut,
       vct_ox          = vct_ox,
       dir_merged      = dir_merged,
-      my_tz           = my_tz
+      df_start_tz     = df_start_tz
     ),
     format = "file"
   ),

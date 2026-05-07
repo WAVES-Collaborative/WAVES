@@ -22,7 +22,7 @@ tar_load(lst_out.oak.pre)
 tar_load(vct_ox_step)
 tar_load(vct_ox_wlms)
 tar_load(vct_ox_acti)
-tar_load(fpa_merged)
+tar_load(vct_merge)
 
 len_raw <- length(vct_raw)
 df_out <- summarize_major_steps(

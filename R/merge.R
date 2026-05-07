@@ -1,209 +1,3 @@
-merge_output <- function(vct_out.raw,
-                         vct_out.oak.pre,
-                         vct_out.cut,
-                         vct_ox,
-                         dir_merged,
-                         my_tz) {
-
-  vct_out.raw[sapply(vct_out.raw, is.null)] <- NULL
-  vct_out.oak.pre[sapply(vct_out.oak.pre, is.null)] <- NULL
-  vct_out.cut[sapply(vct_out.cut, is.null)] <- NULL
-
-  vct_id_out.raw <- sapply(
-    vct_out.raw, \(.x) .x$id[1]
-  )
-  vct_id_out.oak.pre <- sapply(
-    vct_out.oak.pre, \(.x) .x$id[1]
-  )
-  vct_id_out.cut <- sapply(
-    vct_out.cut, \(.x) .x$id[1]
-  )
-  vct_id_ox <- sapply(
-    vct_ox, \(.x) .x$id[1]
-  )
-
-  names(vct_out.raw) <- vct_id_out.raw
-  names(vct_out.oak.pre) <- vct_id_out.oak.pre
-  names(vct_out.cut) <- vct_id_out.cut
-  names(vct_ox) <- vct_id_ox
-
-  vct_id_all <-
-    union(vct_id_out.raw, vct_id_out.oak.pre) |>
-    union(vct_id_out.cut) |>
-    union(vct_id_ox)
-  vct_fpa_write <- file.path(
-    dir_merged, paste0(vct_id_all, ".parquet")
-  )
-  names(vct_fpa_write) <- vct_id_all
-
-  # Merge ----
-  for (i in seq_along(vct_id_all)) {
-
-    le_id <- vct_id_all[i]
-    fpa_write <- vct_fpa_write[le_id]
-
-    # Check if file was already created from a previous run of the pipeline.
-    if (file.exists(fpa_write)) next()
-
-    # Determine which lists have the ID. If a list does not have a given ID,
-    # then return an empty data.frame so it still merged.
-    # First, get the earliest datetime from one of the lists that do have the ID.
-    # Note: If one of the below `dttm_` objects are null, the `union` function
-    # will return a numeric.
-    dttm_raw <- vct_out.raw[[le_id]]$datetime[1]
-    dttm_oak.pre <- vct_out.oak.pre[[le_id]]$datetime[1]
-    dttm_cut <- vct_out.cut[[le_id]]$datetime[1]
-    dttm_ox <- vct_ox[[le_id]]$datetime[1]
-
-    # From union, get the earliest datetime so merge will go smoothly.
-    dttm_earliest <-
-      union(dttm_raw, dttm_oak.pre) |>
-      union(dttm_cut) |>
-      union(dttm_ox) |>
-      as.POSIXct(tz = my_tz) |>
-      sort() |>
-      vctrs::vec_slice(1)
-    chk_raw <- !le_id %in% vct_id_out.raw
-    chk_oak.pre <- !le_id %in% vct_id_out.oak.pre
-    chk_cut <- !le_id %in% vct_id_out.cut
-    chk_ox <- !le_id %in% vct_id_ox
-
-    if (chk_raw) {
-      vct_out.raw[[le_id]] <- tibble(
-        id = le_id,
-        datetime = dttm_earliest,
-        intensity_montoye.rf  = "9999",
-        intensity_montoye.nn  = "9999",
-        intensity_montoye.dt  = "9999",
-        intensity_montoye.svm = "9999",
-        class_trost = "9999",
-        class_ellis = "9999",
-        steps_oak.1.0            = 9999,
-        steps_sdt                = 9999L,
-        steps_verisense.original = 9999L,
-        steps_verisense.revised  = 9999L
-      )
-    } else if (chk_oak.pre) {
-      vct_out.oak.pre[[le_id]] <- tibble(
-        id = le_id,
-        datetime = dttm_earliest,
-        steps_oak.pre = 9999
-      )
-    }else if (chk_cut) {
-      vct_out.cut[[le_id]] <- tibble(
-        id = le_id,
-        datetime = dttm_earliest,
-        intensity_bakrania.enmo.simple = "9999",
-        intensity_bakrania.enmo.average = "9999",
-        intensity_hildebrand = "9999",
-        intensity_mielke = "9999",
-        intensity_white.enmo.lin = "9999",
-        intensity_white.enmo.pol = "9999",
-        intensity_esliger = "9999",
-        intensity_fraysee = "9999",
-        intensity_white.hpfvm.lin = "9999",
-        intensity_white.hpfvm.pol = "9999",
-        intensity_bakrania.mad.simple = "9999",
-        intensity_bakrania.mad.average = "9999"
-      )
-    } else if (chk_ox) {
-      vct_ox[[le_id]] <- tibble(
-        id = le_id,
-        datetime = dttm_earliest,
-        intensity_wamsley = "9999",
-        intensity_actinet = "9999",
-        steps_stepcount = 9999
-      )
-    }
-    df <-
-      full_join(
-        vct_out.raw[[le_id]] |>
-          mutate(datetime = as.POSIXct(datetime, tz = my_tz)),
-        vct_out.oak.pre[[le_id]] |>
-          mutate(datetime = as.POSIXct(datetime, tz = my_tz)),
-        by = join_by(id, datetime)
-      ) |>
-      full_join(
-        vct_out.cut[[le_id]],
-        by = join_by(id, datetime)
-      ) |>
-      left_join(
-        vct_ox[[le_id]],
-        by = join_by(id, datetime)
-      ) |>
-      mutate(
-        across(
-          .cols = starts_with("intensity_montoye"),
-          .fns = ~factor(
-            .x,
-            levels = c("SED", "LPA", "MPA", "VPA", "9999"),
-            labels = c("sedentary", "light", "mvpa", "mvpa", "9999")
-          )
-        ),
-        intensity_trost = factor(
-          class_trost,
-          levels = c("1",
-                     "2",
-                     "stand_still",
-                     "3",
-                     "4",
-                     "mpa",
-                     "6",
-                     "7",
-                     "9999"),
-          labels = c("sedentary", # 1 sedentary
-                     "light",     # 2 stationary
-                     "light",     #   stand_still
-                     "light",     # 3 walking (non mvpa after applying 100mg right?)
-                     "mvpa",      # 4 run
-                     "mvpa",      #   mpa
-                     "sleep",     # 6 JM is assuming this
-                     "nonwear",   # 7 JM is assuming this
-                     "9999")
-        ),
-        intensity_ellis = factor(
-          class_ellis,
-          levels = c("Sedentary",
-                     "Vehicle",
-                     "StandingMoving",
-                     "StandingStill",
-                     "Walking",
-                     "Biking",
-                     "6",
-                     "7",
-                     "9999"),
-          labels = c("sedentary",
-                     "sedentary",
-                     "light",
-                     "light",
-                     "light",
-                     "mvpa",
-                     "sleep",
-                     "nonwear",
-                     "9999")
-        )
-      ) |>
-      select(id, datetime,
-             starts_with("intensity"),
-             starts_with("steps"),
-             starts_with("class")) |>
-      # Make all intensity variables have the same levels
-      mutate(across(
-        .cols = starts_with("intensity"),
-        .fns = ~factor(.x, levels = c("sedentary", "light", "mvpa", "sleep", "nonwear", "9999"))
-      ))
-
-    # Write ----
-    arrow::write_parquet(df, fpa_write)
-
-  }
-
-  list.files(
-    path = dir_merged,
-    full.names = TRUE
-  )
-
-}
 merge_output_config <- function(vct_out.raw,
                                 vct_out.oak.pre,
                                 vct_out.cut,
@@ -232,13 +26,15 @@ merge_output_config <- function(vct_out.raw,
       rbindlist(vct_ox),
       by = join_by(id, datetime)
     ) |>
+merge_wrangler <- function(df) {
+  df |>
     mutate(
       across(
         .cols = starts_with("intensity_montoye"),
         .fns = ~factor(
           .x,
-          levels = c("SED", "LPA", "MPA", "VPA", "9999"),
-          labels = c("sedentary", "light", "mvpa", "mvpa", "9999")
+          levels = c("SED", "LPA", "MPA", "VPA"),
+          labels = c("sedentary", "light", "mvpa", "mvpa")
         )
       ),
       intensity_trost = factor(
@@ -250,8 +46,7 @@ merge_output_config <- function(vct_out.raw,
                    "4",
                    "mpa",
                    "6",
-                   "7",
-                   "9999"),
+                   "7"),
         labels = c("sedentary", # 1 sedentary
                    "light",     # 2 stationary
                    "light",     #   stand_still
@@ -259,8 +54,7 @@ merge_output_config <- function(vct_out.raw,
                    "mvpa",      # 4 run
                    "mvpa",      #   mpa
                    "sleep",     # 6 JM is assuming this
-                   "nonwear",   # 7 JM is assuming this
-                   "9999")
+                   "nonwear")   # 7 JM is assuming this
       ),
       intensity_ellis = factor(
         class_ellis,
@@ -271,8 +65,7 @@ merge_output_config <- function(vct_out.raw,
                    "Walking",
                    "Biking",
                    "6",
-                   "7",
-                   "9999"),
+                   "7"),
         labels = c("sedentary",
                    "sedentary",
                    "light",
@@ -280,8 +73,7 @@ merge_output_config <- function(vct_out.raw,
                    "light",
                    "mvpa",
                    "sleep",
-                   "nonwear",
-                   "9999")
+                   "nonwear")
       )
     ) |>
     select(id, datetime,
@@ -291,13 +83,91 @@ merge_output_config <- function(vct_out.raw,
     # Make all intensity variables have the same levels
     mutate(across(
       .cols = starts_with("intensity"),
-      .fns = ~factor(.x, levels = c("sedentary", "light", "mvpa", "sleep", "nonwear", "9999"))
+      .fns = ~factor(.x, levels = c("sedentary", "light", "mvpa", "sleep", "nonwear"))
     ))
+}
+merge_output <- function(vct_out.raw,
+                         vct_out.oak.pre,
+                         vct_out.cut,
+                         vct_ox,
+                         dir_merged,
+                         df_start_tz) {
 
-  # Return ----
-  fnm_write <- "WAVES_ALL_CONFIG.parquet"
-  fpa_write <- file.path(dir_merged, fnm_write)
-  arrow::write_parquet(df, fpa_write)
-  return(fpa_write)
+  # Read ----
+  # Name vectors with filenames.
+  lst_out <-
+    lapply(
+      list(vct_out.raw, vct_out.oak.pre, vct_out.cut, vct_ox),
+      FUN = \(x) setNames(x, basename(x) |> file_path_sans_ext())
+    ) |>
+    setNames(c("raw", "oak.pre", "cut", "ox"))
+  # Only merge files that have gone through all steps.
+  vct_fnm <- Reduce(
+    intersect,
+    x = lapply(
+      lst_out,
+      FUN = names
+    )
+  )
+  vct_fpa_write <-
+    file.path(
+      dir_merged, paste0(vct_fnm, ".parquet")
+    ) |>
+    setNames(vct_fnm)
+  vct_complete <- vector("logical", length = length(vct_fnm))
+
+  # Merge ----
+  for (i in seq_along(vct_fnm)) {
+
+    le_fnm <- vct_fnm[i]
+    fpa_write <- vct_fpa_write[i]
+    lst_start_tz <-
+      df_start_tz |>
+      dplyr::filter(fnm == le_fnm) |>
+      as.list()
+
+    # Check if file was already created from a previous run of the pipeline.
+    if (file.exists(fpa_write)) {
+      vct_complete[i] <- TRUE
+      next
+    }
+
+    # read & merge
+    full_join(
+      read_parquet(lst_out$raw[le_fnm]) |> mutate(datetime = as.POSIXct(datetime, tz = "UTC")),
+      read_parquet(lst_out$oak.pre[le_fnm]) |> mutate(datetime = as.POSIXct(datetime, tz = "UTC")),
+      by = join_by(id, datetime)
+    ) |>
+      full_join(
+        read_parquet(lst_out$cut[le_fnm]),
+        by = join_by(id, datetime)
+      ) |>
+      left_join(
+        read_parquet(lst_out$ox[le_fnm]),
+        by = join_by(id, datetime)
+      ) |>
+      # wrangle
+      merge_wrangler() |>
+      # add date column and time column in timezone data was collected.
+      mutate(
+        date =
+          with_tz(datetime, tzone = lst_start_tz$tz) |>
+          date(),
+        time =
+          with_tz(datetime, tzone = lst_start_tz$tz) |>
+          format("%H:%M:%S%z"),
+        .after = datetime
+      ) |>
+      # write
+      write_parquet(sink = fpa_write)
+
+    vct_complete[i] <- TRUE
+
+  }
+
+  return(vct_fpa_write[vct_complete])
+
+}
+merge_output_config <- function(vct_out.raw,
 
 }
