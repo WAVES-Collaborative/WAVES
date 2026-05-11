@@ -48,13 +48,13 @@ The proposed flow diagram outlines the process for how the validation data and d
 
     **macOS:**
 
-    Several R packages need to be compiled from source. Install the following dependencies via [Homebrew](https://brew.sh/):
+    Several R packages need to be compiled from source. Install the following dependencies via [Homebrew](https://brew.sh/) by running the following command within the system shell (Terminal):
 
     ```
     brew install cmake gcc gettext
     ```
 
-    Then create `~/.R/Makevars` so R can find the installed libraries:
+    Then create `~/.R/Makevars` so R can find the installed libraries by running the following code within the system shell (Terminal):
 
     ```
     mkdir -p ~/.R
@@ -67,7 +67,7 @@ The proposed flow diagram outlines the process for how the validation data and d
     EOF
     ```
 
-    Additionally, the `arrow` R package requires setting an environment variable before running `renv::restore()`:
+    Additionally, the `arrow` R package requires setting an environment variable before running `renv::restore()`. Run the following within the system shell (Terminal):
 
     ```
     export LIBARROW_BINARY=true
@@ -205,18 +205,15 @@ The proposed flow diagram outlines the process for how the validation data and d
 
     -   Change the `n_workers` object to 1, which will remove parallel processing.
 
--   **Resetting conda environments:** If the config pipeline errors at `lst_miniconda` or the `summary_miniconda.html` report shows environments highlighted red, removing the problematic environment and re-running the config pipeline will recreate it from scratch. Run the following in your system terminal (not the R console), replacing the environment name as needed:
+-   **Resetting conda environments:** Once the WAVES repository has been installed, major version changes to the pipeline may result in prior conda environment installations to be outdated. Unfortunately, re-running the configuration pipeline by itself may not be sufficient, which will require removing the existing environments entirely before rerunning the configuration pipeline. To do so, first run the code within the INPUT section of `_targets_config.R`. Then, run the following code within the R console:
 
     ```
-    conda env remove -n WHO_WAVES_oak_pre -y
-    ```
-
-    Available environment names: `WHO_WAVES_stepcount`, `WHO_WAVES_accelerometer`, `WHO_WAVES_actinet`, `WHO_WAVES_oak_pre`, `WHO_WAVES_oak_1.0`
-
-    To remove all WAVES environments at once:
-
-    ```
-    conda env list | grep WHO_WAVES | awk '{print $1}' | xargs -I {} conda env remove -n {} -y
+    library(reticulate)
+    conda_remove("WHO_WAVES_stepcount")
+    conda_remove("WHO_WAVES_accelerometer")
+    conda_remove("WHO_WAVES_actinet")
+    conda_remove("WHO_WAVES_oak_1.0")
+    conda_remove("WHO_WAVES_oak_pre")
     ```
 
     After removal, re-run the config pipeline (`tar_make()`) and it will recreate the missing environments.
