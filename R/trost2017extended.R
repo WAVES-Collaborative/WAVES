@@ -177,22 +177,16 @@ trost2017.extended <- function(raw,
       width = 5 * Fs,
       FUN = mean
     )
-    s.t2 <-
-      start.time + 5 * (0:(length(s.anglez) - 1))
-    class(s.t2) = c('POSIXt','POSIXct')
-    #s.t2<-.POSIXct(s.t2,tz='UTC')
-    #s.t2<-.POSIXct(s.t2,tz=Sys.timezone())
-    #class(s.t2) = c('POSIXt','POSIXct')
-    s.time2 <-
-      strptime(s.t2, "%Y-%m-%d %H:%M:%OS")
-    s.time2[is.na(s.time2)] <-
-      strptime(s.t2[is.na(s.time2)], "%Y-%m-%d")
-    s.date <-
-      format(s.time2, "%Y-%m-%d")
-    s.t2 <-
-      format(s.time2, "%H:%M:%OS")
-    anglez <-
-      data.frame(s.t2, s.date, s.anglez)
+    s.t2 <- seq.POSIXt(
+      from = as.POSIXct(start.time, tz = "UTC"),
+      to   = as.POSIXct(start.time, tz = "UTC") + 5 * (length(s.anglez) - 1),
+      by   = 5
+    )
+    anglez <- data.frame(
+      s.date = format(s.t2, "%Y-%m-%d"),
+      s.t2   = format(s.t2, "%H:%M:%OS"),
+      s.anglez
+    )
   }
 
   # While loop ----
@@ -358,18 +352,17 @@ trost2017.extended <- function(raw,
   # Loop Cleanup ----
   cut = which(hold[, 1] == 9999)
   hold =hold[-cut, ]
-  time <-
-    start.time + win*(0:(nrow(hold)-1))#################### FIX WINDOW SIZE AND OVERLAP ACCORDINGLY
-  class(time) = c('POSIXt','POSIXct')############################### THESE TWO LINES ARE IMPORTANT TO CONVERT NUMERIC STRING TO DATE/TIME
-  #time<-.POSIXct(time,tz='UTC')
-  #class(time) = c('POSIXt','POSIXct')
-  cat("completed timestamp")
-  time2<- strptime(time,"%Y-%m-%d %H:%M:%OS")
-  time2[is.na(time2)] = strptime(time[is.na(time2)],"%Y-%m-%d")
-  date<- format(time2, "%Y-%m-%d")
-  time3<- paste0(" ",format(time, "%H:%M:%OS"))
-  #if(length(time3)<nrow(hold)){hold<-hold[1:length(time3),]} 2020/11/19 Not needed with new timestamp approach
-  raw<- data.frame(subject=ID,date=date,time=time3,hold)
+  time <- seq.POSIXt(
+    from = as.POSIXct(start.time, tz = "UTC"),
+    to   = as.POSIXct(start.time, tz = "UTC") + win * (nrow(hold) - 1),
+    by   = win
+  )
+  raw <- data.frame(
+    subject = ID,
+    date = format(time, "%Y-%m-%d"),
+    time = paste0(" ",format(time, "%H:%M:%OS")),
+    hold
+  )
 
   # Predict ----
   ###########################scoring file
@@ -545,7 +538,7 @@ trost2017.extended <- function(raw,
 
     }} else {
       raw$sleep<-0
-      time<-strptim.0e(raw$time, "%H:%M:%S")
+      time<-strptime(raw$time, "%H:%M:%S")
       time<-format(time, "%H:%M:%S")
       raw$time<-time
     }

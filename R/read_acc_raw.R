@@ -1,8 +1,7 @@
 read_acc_raw <- function(fpa_read,
                          le_type,
                          vct_fpa_basic,
-                         dir_cal,
-                         my_tz) {
+                         dir_cal) {
 
   if (is.null(fpa_read)) return(NULL)
 
@@ -17,7 +16,7 @@ read_acc_raw <- function(fpa_read,
   chk_gen <- le_type %in% c(
     "GENEACTIV - CSV w/ HEADER",
     "ADHOC",
-    "UKNOWN"
+    "UNKNOWN"
   )
 
   if (chk_gen) {
@@ -31,56 +30,95 @@ read_acc_raw <- function(fpa_read,
     paste0(fnm_sans_ext, ".qs2")
   )
 
-  if (file.exists(fpa_write)) {return(
-      fpa_write
-  )}
+  if (file.exists(fpa_write)) return(fpa_write)
 
   ## GGIR Basic ----
-  grep(
+  fpa_basic_match <- grep(
     x       = vct_fpa_basic,
     pattern = stringr::str_escape(fnm_sans_ext),
     value   = TRUE
-  ) |>
-    load()
+  )
+
+  if (length(fpa_basic_match) == 0) {
+    warning(
+      sprintf(
+        "Skipping calibration for '%s' because no matching GGIR basic file was found.",
+        basename(fpa_read)
+      ),
+      call. = FALSE
+    )
+    return(NULL)
+  }
+
+  load(fpa_basic_match[1])
   # Don't need output from `g.getmeta`
   rm(M); gc()
 
-  ## Inspect/Params ----
-  # I <-
-  #   GGIR::g.inspectfile(fpa_read)
-  # Extract parameters for reading raw in chunks
-  params_rawdata <-
-    GGIR::extract_params(params2check = "rawdata")[["params_rawdata"]]
-  params_nw.clip.block <- GGIR::get_nw_clip_block_params(
-    monc           = I$monc,
-    dformat        = I$dformc,
-    sf             = I$sf,
-    params_rawdata = params_rawdata
-  )
+  if (is.null(I$sf)) {
+    warning(
+      sprintf(
+        "Skipping calibration for '%s' because file is corrupt.",
+        basename(fpa_read)
+      ),
+      call. = FALSE
+    )
+    return(NULL)
+  }
 
-  ## While loop ----
-  isLastBlock <-
-    FALSE
-  blocknumber <-
-    1
-  iteration <-
-    1
-  PreviousLastValue <-
-    c(0, 0, 1)
-  PreviousLastTime <-
-    NULL
-  PreviousEndPage <-
-    NULL
-  cols_desired <- c(
+  ## chk_cal ----
+  chk_cal <-
+    C$cal.error.end < C$cal.error.start
+  if (is.null(C$cal.error.end)) chk_cal <- FALSE
+
+  ## Params ----
+  isLastBlock       <- FALSE
+  iteration         <- 1
+  cols_desired      <- c(
     "x", "y", "z"
   )
+  lst_qc <- list()
+
+  # g.readaccfile parameters, supply value for every argument except for filequality
+  # which is used in other parts of GGIR but not here.
+  blocknumber       <- 1
+  PreviousEndPage   <- NULL
+  PreviousLastValue <- c(0, 0, 1)
+  PreviousLastTime  <- NULL
+  header            <- NULL
+
+  # Default raw data parameters.
+  params_rawdata <-
+    GGIR::extract_params(params2check = "rawdata")[["params_rawdata"]]
+
+  # Although we don't extract the time column from accread$P, we will still
+  # set desiredtz to "UTC" just in case.
+  params_general <-
+    GGIR::extract_params(params2check = "general")[["params_general"]]
+  params_general$desiredtz <- "UTC"
+
+  # Default cleaning parameters. Just need "nonwear_approach" from this list, which
+  # is the 2023 method
+  # nonwear_approach <- "2023"
+  # GGIR::extract_params(params2check = "cleaning")[["params_cleaning"]]
+
+  # Default nonwear clip block parameters.
+  params_nw.clip.block <- GGIR::get_nw_clip_block_params(
+    monc               = I$monc,
+    dformat            = I$dformc,
+    deviceSerialNumber = g.extractheadervars(I)$deviceSerialNumber,
+    sf                 = I$sf,
+    params_rawdata     = params_rawdata
+  )
+  # ws3 = params_general[["windowsizes"]][1]; ws2 = params_general[["windowsizes"]][2]; ws = params_general[["windowsizes"]][3]
+
+  ## While loop ----
   cat("\nReading data chunk:\n")
 
   while (isLastBlock == FALSE) {
 
     cat(blocknumber, " ")
-    # 1 - read chunk
-    data <- GGIR::g.readaccfile(
+    ### 1 - read chunk ----
+    accread <- GGIR::g.readaccfile(
       filename          = fpa_read,
       blocksize         = params_nw.clip.block$blocksize,
       blocknumber       = blocknumber,
@@ -89,138 +127,165 @@ read_acc_raw <- function(fpa_read,
       PreviousEndPage   = PreviousEndPage,
       inspectfileobject = I,
       PreviousLastValue = PreviousLastValue,
-      PreviousLastTime  = PreviousLastTime
-    )$P$data
-    # data <-
-    #   accread$P$data
-    blocknumber <-
-      blocknumber + 1
-    # PreviousLastTime = accread$PreviousLastTime; PreviousEndPage = accread$PreviousEndPage
-    # isLastBlock = accread$isLastBlock; S = accread$S
-    # remaining_epochs = accread$remaining_epochs; nHoursRead = accread$nHoursRead
-    # rm(accread); gc()
-    gc()
+      PreviousLastTime  = PreviousLastTime,
+      params_rawdata    = params_rawdata,
+      params_general    = params_general
+    )
+
+    if (is.null(accread$P)) break # empty block
+
+    isLastBlock     <- accread$isLastBlock
+    PreviousEndPage <- accread$endpage
+
+    if ("PreviousLastValue" %in% names(accread$P)) { # output when reading ad-hoc csv
+      PreviousLastValue <- accread$P$PreviousLastValue
+      PreviousLastTime  <- accread$P$PreviousLastTime
+    }
+
+    if (le_type == "ACTIGRAPH - CSV") {
+
+      # add time column
+      accread$P$data$time <- seq(
+        from       = 1,
+        length.out = nrow(accread$P$data),
+        by = 1/I$sf
+      )
+    }
+
+    ## idle-sleep mode ----
+    # https://github.com/wadpac/GGIR/blob/167a0159c99ec78192e93b70164e8d50502ee42b/R/g.getmeta.R#L220
+    if (le_type %in% c("ACTIGRAPH - GT3X", "ACTIGRAPH - CSV")) {
+
+      lst_impute <- g.imputeTimegaps(
+        accread$P$data,
+        sf                = I$sf,
+        k                 = 0.25,
+        impute            = TRUE,
+        PreviousLastValue = PreviousLastValue,
+        PreviousLastTime  = PreviousLastTime,
+        epochsize         = params_general$windowsizes[1:2]
+      )
+      accread$P$data <- lst_impute$x
+      lst_qc[[blocknumber]] <-
+        lst_impute$QClog |>
+        mutate(blocknumber = blocknumber,
+               .before = 1)
+
+      if (blocknumber == 1) {
+
+        # get last time to check if idle-sleep mode occurs between
+        # this block and the next.
+        block_endtime <- last(accread$P$data$time)
+
+      } else {
+
+        chk_gap <- near(
+          x   = accread$P$data$time[1] - block_endtime,
+          y   = 1 / I$sf,
+          tol = 0.0001
+        )
+
+        if (chk_gap) {
+          block_endtime <- last(accread$P$data$time)
+        } else {
+          stop("Time gap between chunks")
+          # Impute gap between chunks
+          timegap_between_chunks = accread$P$data$time[1] - block_endtime
+          if (timegap_between_chunks > 3600 * i$sf) {
+            stop(paste0("Time gap observed of more than 1 hour between data ",
+                        "chunks for ", basename(datafile), " . Please contact ",
+                        "package maintainer."), call. = FALSE)
+          } else if (timegap_between_chunks > 3 / I$sf && timegap_between_chunks <= 60 * I$sf) {
+            # impute time gap of more than 3 samples and equal to or less than 1 hour
+            # normalise last value
+            S[nrow(S), c("x", "y", "z")] = S[nrow(S), c("x", "y", "z")] / sqrt(sum(S[nrow(S), c("x", "y", "z")]^2))
+            # replicate last row
+            newRows = do.call(rbind, replicate(round(timegap_between_chunks  * sf), S[nrow(S), ], simplify = FALSE))
+            # append to end
+            S = rbind(S, newRows)
+          }
+        }
+      }
+    }
+
+    ## calibrate ----
+    if (chk_cal) {accread$P$data[, c("x", "y", "z")] <- scale(
+      accread$P$data[, c("x", "y", "z")],
+      center = -C$offset,
+      scale  = 1 / C$scale
+    )}
+
+    ## mtx_data ----
+    n_data <- nrow(accread$P$data)
+
+    if (is.null(n_data)) n_data <- 0
+
     cols_temp <- grep(
-      x           = names(data),
+      x           = names(accread$P$data),
       pattern     = "temp|temperature",
       ignore.case = TRUE
     )
     cols_all <-
-      c(cols_desired, names(data)[cols_temp])
+      c(cols_desired, names(accread$P$data)[cols_temp])
 
-    if (iteration == 1) {
+    if (blocknumber == 1) {
       mtx_data <-
-        as.matrix(data[, cols_all])
-    } else if (iteration > 1 & length(data) >= 1) {
-      mtx_data <-
-        rbind(mtx_data,
-              as.matrix(data[, cols_all]))
+        as.matrix(accread$P$data[, cols_all])
+    } else if (n_data >= 1) {
+      mtx_data <-rbind(
+        mtx_data,
+        as.matrix(accread$P$data[, cols_all])
+      )
     }
 
-    n_data <-
-      nrow(data)
-
-    if (length(n_data) == 0) n_data <- 0
-
-    if (n_data < ((I$sf * 60 * 2) + 1)) isLastBlock <- TRUE
-
-    iteration <-
-      iteration + 1
+    blocknumber <- blocknumber + 1
+    rm(accread)
+    gc()
 
   }
 
-  # Impute Time Gaps ----
-  # TODO: Implement from g.getmeta, line 220
+  # Idle Sleep Mode ----
   # https://github.com/wadpac/GGIR/blob/167a0159c99ec78192e93b70164e8d50502ee42b/R/g.getmeta.R#L220
+  # if (le_type %in% c("ACTIGRAPH - GT3X", "ACTIGRAPH - CSV")) {
+  #   lst_impute <- g.imputeTimegaps(
+  #     as.data.frame(mtx_data),
+  #     sf                = I$sf,
+  #     k                 = 0.25,
+  #     impute            = TRUE,
+  #     PreviousLastValue = c(0, 0, 1),
+  #     PreviousLastTime  = NULL,
+  #     epochsize         = params_general$windowsizes[1:2]
+  #   )
+  #   mtx_data <- lst_impute$x
+  #   QClog <- lst_impute$QClog
+  # }
 
-  # Calibrate ----
-  # TODO: Have someone look over this section.
-  # The output from recalibration is different between GGIR and actimetric/sydney
-  # code. Is it because actimetric/sydney is specific to GENEActiv? Hence the
-  # GN in `calibrateGN`?
-  # For now, doing it how its done in GGIR.
-
-  # source(file.path("R", "sydney", "GN function_20191024.R"))
-  # source(file.path("R", "sydney", "center_radius.R"))
-  # C_sydney <- try(
-  #   calibrateGN(raw = mtx_data,
-  #               Fs  = I$sf),
-  #   silent = TRUE
+  # Dont think I need this for anything later in the pipeline but putting it
+  # here just in case.
+  # SWMT <- get_starttime_weekday_truncdata(
+  #   mon       = I$monc,
+  #   dformat   = I$dformc,
+  #   data      = mtx_data,
+  #   header    = accread$header,
+  #   desiredtz = params_general$desiredtz,
+  #   sf        = I$sf,
+  #   datafile  = fpa_read,
+  #   ws2       = params_general$windowsizes[2],
+  #   configtz  = params_general$configtz
   # )
-  # C_sydney$offset
-  # C$offset
-  # C_sydney$scale
-  # C$scale
 
-  ## While loop ----
-  chk_cal <-
-    C$cal.error.end < C$cal.error.start
-  if (is.null(C$cal.error.end)) chk_cal <- FALSE
-
-  if (chk_cal) {
-    # variables used to read data in 24 hr increment
-    chunk_is_last <-
-      FALSE
-    chunk_begin <-
-      1
-    chunk_end <- chunk_length <-
-      I$sf * 60 * 60 * 24
-    chunk_n <-
-      1
-    nrow_data <-
-      dim(mtx_data)[1]
-
-    while(!chunk_is_last) {
-
-      if (chunk_end >= nrow_data) {
-        # if chunk is less than 24 hrs, set to end of data and make this
-        # the last loop.
-        chunk_end <-
-          nrow_data
-        chunk_is_last <-
-          TRUE
-      }
-
-      cat(
-        "\rCalibrating hours",
-        round(chunk_begin / I$sf / 3600,
-              digits = 2),
-        "to",
-        round(chunk_end / I$sf / 3600,
-              digits = 2),
-        "out of",
-        round(nrow_data / I$sf / 3600,
-              digits = 2),
-        "\r",
-        sep = " "
-      )
-
-      ind_chunk <-
-        chunk_begin:chunk_end
-
-      # How it's done in `g.getmeta`, line 341
-      # https://github.com/wadpac/GGIR/blob/167a0159c99ec78192e93b70164e8d50502ee42b/R/g.getmeta.R#L341
-      mtx_data[ind_chunk, c("x", "y", "z")] <- scale(
-        mtx_data[ind_chunk, c("x", "y", "z")],
-        center = -C$offset,
-        scale  = 1 / C$scale
-      )
-      # mtx_data[ind_chunk, "x"] <-
-      #   C_sydney$scale[1] * (mtx_data[ind_chunk, "x"] - C_sydney$offset[1])
-      # mtx_data[ind_chunk, "y"]<-
-      #   C_sydney$scale[2] * (mtx_data[ind_chunk, "y"] - C_sydney$offset[2])
-      # mtx_data[ind_chunk, "z"]<-
-      #   C_sydney$scale[3] * (mtx_data[ind_chunk, "z"] - C_sydney$offset[3])
-
-      chunk_begin <-
-        chunk_begin + chunk_length
-      chunk_end <-
-        chunk_begin + chunk_length - 1
-      chunk_n <-
-        chunk_n + 1
-
-    }
-  }
+  # detect_nonwear that appears in M$metalong, might need it for later but
+  # putting it here for now.
+  # NWCW <- detect_nonwear_clipping(
+  #   data             = mtx_data,
+  #   windowsizes      = params_general$windowsizes,
+  #   sf               = I$sf,
+  #   clipthres        = params_nw.clip.block$clipthres,
+  #   sdcriter         = params_nw.clip.block$sdcriter,
+  #   racriter         = params_nw.clip.block$racriter,
+  #   nonwear_approach = nonwear_approach,
+  #   params_rawdata   = params_rawdata
+  # )
 
   # Write ----
   qs2::qd_save(

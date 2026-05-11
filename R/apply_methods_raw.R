@@ -263,7 +263,7 @@ apply_methods_raw <- function(fpa_read,
                               vct_fpa_basic,
                               dir_models,
                               dir_write,
-                              my_tz,
+                              df_start_tz,
                               lst_miniconda) {
 
   if (is.null(fpa_read)) return(NULL)
@@ -281,9 +281,7 @@ apply_methods_raw <- function(fpa_read,
     dir_write, paste0(fnm_sans_ext, ".parquet")
   )
 
-  if (file.exists(fpa_write)) {return(
-    arrow::read_parquet(fpa_write)
-  )}
+  if (file.exists(fpa_write)) return(fpa_write)
 
   grep(
     x       = vct_fpa_basic,
@@ -298,65 +296,10 @@ apply_methods_raw <- function(fpa_read,
   mtx_data <-
     qs2::qd_read(fpa_read)
 
-  # start of recording ----
-  if (I$dformn == "gt3x") {
-    rec_start_junk <-
-      data.frame(I$header["Start Date", "value"])
-    names(rec_start_junk)<-
-      "start"
-    rec_start_junk$start <-
-      as.POSIXct(as.character(rec_start_junk$start),
-                 format = "%Y-%m-%d %H:%M:%S")
-    rec_start_junk <-
-      rec_start_junk$start
-    rec_start_dttm <- strptime(
-      rec_start_junk,
-      format = "%Y-%m-%d %H:%M:%OS",
-      tz     = my_tz
-    )
-  } else if (I$dformn == "cwa") {
-    rec_start_junk <-
-      data.frame((I$header[[1]][3]))
-    rec_start_junk <-
-      rec_start_junk$start
-    rec_start_dttm <- strptime(
-      rec_start_junk,
-      format = "%Y-%m-%d %H:%M:%OS",
-      tz     = my_tz
-    )
-  } else if (I$dformn == "bin"){
-    rec_start_junk <-
-      data.frame((I$header[[1]][8]))
-    rec_start_junk <-
-      rec_start_junk[1,1]
-    rec_start_dttm <- strptime(
-      rec_start_junk,
-      format = "%Y-%m-%d %H:%M:%OS",
-      tz     = my_tz
-    )
-  } else if (I$monn == "actigraph" && I$dformn == "csv") {
-    rec_start_junk <- paste(
-      gsub(x           = I$header["Start Date", "value"],
-           pattern     = "^\\s+|\\s+$",
-           replacement = ""),
-      I$header["Start Time", "value"] # has a leading whitespace
-    )
-    # TODO: Don't know if raw csv's exported from ActiLife in non-US computers
-    # will export in m/d/Y format.
-    rec_start_dttm <- strptime(
-      rec_start_junk,
-      format = "%m/%d/%Y %H:%M:%OS",
-      tz     = my_tz
-    )
-  }
-
-  rec_start_dttm <-
-    floor_date(rec_start_dttm, unit = "seconds")
-
-  # In seconds from 1970-01-01.
-  rec_start_sec <-
-    as.numeric(rec_start_dttm)
-  rm(rec_start_junk); gc()
+  lst_start_tz <-
+    df_start_tz |>
+    dplyr::filter(fnm == fnm_sans_ext) |>
+    as.list()
 
   # Apply ----
   ## while loop ----
@@ -377,13 +320,13 @@ apply_methods_raw <- function(fpa_read,
   chunk_begin      <- 1
   chunk_end        <- chunk_length <- I$sf * 60 * 60 * 24
   chunk_n          <- 1
-  chunk_start_dttm <- rec_start_dttm
-  chunk_start_sec  <- rec_start_sec
+  chunk_start_dttm <- lst_start_tz$start_dttm
+  chunk_start_sec  <- lst_start_tz$start_secs
   df_all <- tibble(
     id = fnm_sans_ext,
     datetime = seq.POSIXt(
-      from = rec_start_dttm,
-      to   = rec_start_dttm + ceiling(nrow_data / I$sf) - 1,
+      from = lst_start_tz$start_dttm,
+      to   = lst_start_tz$start_dttm + ceiling(nrow_data / I$sf) - 1,
       by   = "1 sec"
     ),
     intensity_montoye.rf  = NA_character_,
@@ -607,7 +550,7 @@ apply_methods_raw <- function(fpa_read,
           # sample frequency. Don't read in last bit of Hz then.
           ind_chunk_oak <- seq(
             from = chunk_begin_oak,
-            to   = round(last(ind_chunk_oak) / I$sf, digits = 0) * I$sf
+            to   = floor(last(ind_chunk_oak) / I$sf) * I$sf
           )
           df_all$steps_oak.1.0[last(ind_steps_oak)] <- 0
           ind_steps_oak <- ind_steps_oak[-length(ind_steps_oak)]
@@ -661,7 +604,7 @@ apply_methods_raw <- function(fpa_read,
         # sample frequency. Don't read in last bit of Hz then.
         ind_chunk_oak <- seq(
           from = chunk_begin,
-          to   = round(last(ind_chunk) / I$sf, digits = 0) * I$sf
+          to   = floor(last(ind_chunk_oak) / I$sf) * I$sf
         )
         df_all$steps_oak.1.0[last(ind_steps)] <- 0
         ind_steps_oak <- ind_steps[-length(ind_steps)]
@@ -718,7 +661,7 @@ apply_methods_raw <- function(fpa_read,
     chunk_n,
     chunk_start_dttm,
     chunk_start_sec,
-    #
+    # montoye
     ind_montoye,
     df_montoye,
     n_window,
@@ -727,20 +670,23 @@ apply_methods_raw <- function(fpa_read,
     bsu_neural_network,
     bsu_decision_tree,
     bsu_support_vector_machine,
-    #
+    # SDT
+    ind_steps,
+    # Verisense
+    vm,
+    le_steps,
+    # Oak
     chunk_is_last_oak,
     chunk_begin_oak,
     chunk_length_oak,
     chunk_end_oak,
     chunk_n_oak,
-    adept_start_dttm,
-    adept_start_sec,
+    oak_start_dttm,
+    oak_start_sec,
     ind_chunk_oak,
     ind_steps_oak,
-    #
-    ind_steps,
-    vm_bout,
-    le_steps
+    chk_decimal,
+    vm_bout
   ) |>
     suppressWarnings()
   gc()
@@ -754,13 +700,11 @@ apply_methods_raw <- function(fpa_read,
     win        = 10,
     sleep      = TRUE,
     Classifier = "Trost Adult Wrist RF",
-    start.time = rec_start_sec
-    # output      = output,
-    # folder_name = folder_name
+    start.time = lst_start_tz$start_secs
   )
   ind_trost <- which(
     df_all$datetime %in%
-      ymd_hms(paste(df_trost$date, df_trost$time), tz = my_tz)
+      ymd_hms(paste(df_trost$date, df_trost$time), tz = "UTC")
   )
   df_all$class_trost[ind_trost] <-
     df_trost$class
@@ -776,11 +720,11 @@ apply_methods_raw <- function(fpa_read,
     win        = 60,
     Classifier = "Ellis Wrist RF",
     sleep      = TRUE,
-    start.time = rec_start_sec
+    start.time = lst_start_tz$start_secs
   )
   ind_ellis <- which(
     df_all$datetime %in%
-      ymd_hms(paste(df_ellis$date, df_ellis$time), tz = my_tz)
+      ymd_hms(paste(df_ellis$date, df_ellis$time), tz = "UTC")
   )
   df_all$class_ellis[ind_ellis] <-
     df_ellis$class
@@ -803,11 +747,8 @@ apply_methods_raw <- function(fpa_read,
   df_all |>
     mutate(datetime = as.numeric(datetime)) |>
     arrow::write_parquet(sink = fpa_write)
-  # df_all$datetime[1] |>
-  #   as.numeric() |>
-  #   as.POSIXct(tz = my_tz)
 
-  return(df_all)
+  return(fpa_write)
 
 }
 
@@ -823,8 +764,8 @@ apply_methods_raw <- function(fpa_read,
 #' @param fpa_read
 #' @param vct_fpa_basic
 #' @param dir_write
-#' @param my_tz
-#' @param ... config_miniconda goes here to make it a dependency of this function.
+#' @param df_start_tz
+#' @param lst_miniconda
 #'
 #' @returns
 #' @export
@@ -833,7 +774,7 @@ apply_methods_raw <- function(fpa_read,
 apply_oak.pre <- function(fpa_read,
                           vct_fpa_basic,
                           dir_write,
-                          my_tz,
+                          df_start_tz,
                           lst_miniconda) {
 
   if (is.null(fpa_read)) return(NULL)
@@ -851,9 +792,7 @@ apply_oak.pre <- function(fpa_read,
     dir_write, paste0(fnm_sans_ext, ".parquet")
   )
 
-  if (file.exists(fpa_write)) {return(
-    arrow::read_parquet(fpa_write)
-  )}
+  if (file.exists(fpa_write)) return(fpa_write)
 
   grep(
     x       = vct_fpa_basic,
@@ -868,65 +807,10 @@ apply_oak.pre <- function(fpa_read,
   mtx_data <-
     qs2::qd_read(fpa_read)
 
-  # start of recording ----
-  if (I$dformn == "gt3x") {
-    rec_start_junk <-
-      data.frame(I$header["Start Date", "value"])
-    names(rec_start_junk)<-
-      "start"
-    rec_start_junk$start <-
-      as.POSIXct(as.character(rec_start_junk$start),
-                 format = "%Y-%m-%d %H:%M:%S")
-    rec_start_junk <-
-      rec_start_junk$start
-    rec_start_dttm <- strptime(
-      rec_start_junk,
-      format = "%Y-%m-%d %H:%M:%OS",
-      tz     = my_tz
-    )
-  } else if (I$dformn == "cwa") {
-    rec_start_junk <-
-      data.frame((I$header[[1]][3]))
-    rec_start_junk <-
-      rec_start_junk$start
-    rec_start_dttm <- strptime(
-      rec_start_junk,
-      format = "%Y-%m-%d %H:%M:%OS",
-      tz     = my_tz
-    )
-  } else if (I$dformn == "bin"){
-    rec_start_junk <-
-      data.frame((I$header[[1]][8]))
-    rec_start_junk <-
-      rec_start_junk[1,1]
-    rec_start_dttm <- strptime(
-      rec_start_junk,
-      format = "%Y-%m-%d %H:%M:%OS",
-      tz     = my_tz
-    )
-  } else if (I$monn == "actigraph" && I$dformn == "csv") {
-    rec_start_junk <- paste(
-      gsub(x           = I$header["Start Date", "value"],
-           pattern     = "^\\s+|\\s+$",
-           replacement = ""),
-      I$header["Start Time", "value"] # has a leading whitespace
-    )
-    # TODO: Don't know if raw csv's exported from ActiLife in non-US computers
-    # will export in m/d/Y format.
-    rec_start_dttm <- strptime(
-      rec_start_junk,
-      format = "%m/%d/%Y %H:%M:%OS",
-      tz     = my_tz
-    )
-  }
-
-  rec_start_dttm <-
-    floor_date(rec_start_dttm, unit = "seconds")
-
-  # In seconds from 1970-01-01.
-  rec_start_sec <-
-    as.numeric(rec_start_dttm)
-  rm(rec_start_junk); gc()
+  lst_start_tz <-
+    df_start_tz |>
+    dplyr::filter(fnm == fnm_sans_ext) |>
+    as.list()
 
   # Apply ----
   ## while loop ----
@@ -944,13 +828,13 @@ apply_oak.pre <- function(fpa_read,
   chunk_begin      <- 1
   chunk_end        <- chunk_length <- I$sf * 60 * 60 * 24
   chunk_n          <- 1
-  chunk_start_dttm <- rec_start_dttm
-  chunk_start_sec  <- rec_start_sec
+  chunk_start_dttm <- lst_start_tz$start_dttm
+  chunk_start_sec  <- lst_start_tz$start_secs
   df_all <- tibble(
     id = fnm_sans_ext,
     datetime = seq.POSIXt(
-      from = rec_start_dttm,
-      to   = rec_start_dttm + ceiling(nrow_data / I$sf) - 1,
+      from = lst_start_tz$start_dttm,
+      to   = lst_start_tz$start_dttm + ceiling(nrow_data / I$sf) - 1,
       by   = "1 sec"
     ),
     steps_oak.pre            = NA
@@ -1016,7 +900,7 @@ apply_oak.pre <- function(fpa_read,
           # sample frequency. Don't read in last bit of Hz then.
           ind_chunk_oak <- seq(
             from = chunk_begin_oak,
-            to   = round(last(ind_chunk_oak) / I$sf, digits = 0) * I$sf
+            to   = floor(last(ind_chunk_oak) / I$sf) * I$sf
           )
           df_all$steps_oak.pre[last(ind_steps_oak)] <- 0
           ind_steps_oak <- ind_steps_oak[-length(ind_steps_oak)]
@@ -1070,7 +954,7 @@ apply_oak.pre <- function(fpa_read,
         # sample frequency. Don't read in last bit of Hz then.
         ind_chunk_oak <- seq(
           from = chunk_begin,
-          to   = round(last(ind_chunk) / I$sf, digits = 0) * I$sf
+          to   = floor(last(ind_chunk_oak) / I$sf) * I$sf
         )
         df_all$steps_oak.pre[last(ind_steps)] <- 0
         ind_steps_oak <- ind_steps[-length(ind_steps)]
@@ -1146,16 +1030,12 @@ apply_oak.pre <- function(fpa_read,
   gc()
 
   # Return ----
-
   # For some reason, arrow doesn't like the POSIXCT format for datetime. Save
   # as numeric and check back later to see when they fix this.
   df_all |>
     mutate(datetime = as.numeric(datetime)) |>
     arrow::write_parquet(sink = fpa_write)
-  # df_all$datetime[1] |>
-  #   as.numeric() |>
-  #   as.POSIXct(tz = my_tz)
 
-  return(df_all)
+  return(fpa_write)
 
 }

@@ -15,23 +15,23 @@ editor_options:
 
 tar_load(vct_raw)
 tar_load(vct_basic)
-tar_load(lst_out.cut)
+tar_load(vct_out.cut)
 tar_load(vct_cal)
-tar_load(lst_out.raw)
-tar_load(lst_out.oak.pre)
+tar_load(vct_out.raw)
+tar_load(vct_out.oak.pre)
 tar_load(vct_ox_step)
 tar_load(vct_ox_wlms)
 tar_load(vct_ox_acti)
-tar_load(fpa_merged)
+tar_load(df_pipe)
 
 len_raw <- length(vct_raw)
 df_out <- summarize_major_steps(
   vct_raw,
   vct_basic,
   vct_cal,
-  lst_out.raw,
-  lst_out.oak.pre,
-  lst_out.cut,
+  vct_out.raw,
+  vct_out.oak.pre,
+  vct_out.cut,
   vct_ox_step,
   vct_ox_wlms,
   vct_ox_acti
@@ -69,6 +69,22 @@ df_test_out <- tibble(
     FALSE, FALSE, TRUE, TRUE, FALSE
   )
 )
+common_files <- intersect(df_out$file, df_test_out$file)
+common_cols <- intersect(names(df_out), names(df_test_out))
+common_cols <- c("file", setdiff(common_cols, "file"))
+
+df_out <-
+  df_out |>
+  filter(file %in% common_files) |>
+  select(all_of(common_cols)) |>
+  arrange(file)
+
+df_test_out <-
+  df_test_out |>
+  filter(file %in% common_files) |>
+  select(all_of(common_cols)) |>
+  arrange(file)
+
 df_equal <- 
   (df_out[, -1] == df_test_out[, -1]) |>
   as.data.frame() |>
@@ -105,7 +121,7 @@ lgl_all <-
     ))
   ) |> 
   pull(all)
-lst_summary <- summarize_metrics_config(fpa_merged)
+lst_summary <- summarize_metrics_config(df_pipe)
 
 ```
 

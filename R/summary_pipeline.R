@@ -1,23 +1,16 @@
 summarize_major_steps <- function(vct_raw,
                                   vct_basic,
                                   vct_cal,
-                                  lst_out.raw,
-                                  lst_out.oak.pre,
-                                  lst_out.cut,
+                                  vct_out.raw,
+                                  vct_out.oak.pre,
+                                  vct_out.cut,
                                   vct_ox_step,
                                   vct_ox_wlms,
                                   vct_ox_acti) {
 
-  lst_out.raw[sapply(lst_out.raw, is.null)] <- NULL
-  lst_out.oak.pre[sapply(lst_out.oak.pre, is.null)] <- NULL
-  lst_out.cut[sapply(lst_out.cut, is.null)] <- NULL
-
   df <- tibble(
-    file =
-      basename(vct_raw),
-    file_noext =
-      file_path_sans_ext(file) |>
-      file_path_sans_ext()
+    file = basename(vct_raw),
+    file_noext = file_path_sans_ext(file)
   )
 
   vct_nm_ggir <-
@@ -27,16 +20,15 @@ summarize_major_steps <- function(vct_raw,
          replacement = "")
   vct_nm_cal <-
     basename(vct_cal) |>
-    file_path_sans_ext() |>
     file_path_sans_ext()
   vct_nm_raw <-
-    sapply(lst_out.raw, \(.x) .x$id[1]) |>
+    basename(vct_out.raw) |>
     file_path_sans_ext()
   vct_nm_oak.pre <-
-    sapply(lst_out.oak.pre, \(.x) .x$id[1]) |>
+    basename(vct_out.oak.pre) |>
     file_path_sans_ext()
   vct_nm_cut <-
-    sapply(lst_out.cut, \(.x) .x$id[1]) |>
+    basename(vct_out.cut) |>
     file_path_sans_ext()
   vct_nm_stp <-
     basename(vct_ox_step) |>
@@ -140,10 +132,9 @@ make_table_agr.cor <- function(mtx_yours,
   return(tbl_agr)
 
 }
-summarize_metrics_config <- function(fpa_merged) {
+summarize_metrics_config <- function(df_pipe) {
 
   load("data/0_CONFIG/MERGED/WAVES_ALL_TEST.RData")
-  df_pipe <- read_parquet(fpa_merged)
 
   # total ----
   df_sed <-
@@ -731,63 +722,91 @@ summarize_metrics_config <- function(fpa_merged) {
   ))
 
 }
-summarize_metrics_main <- function(fpa_merged) {
+summarize_metrics_main <- function(vct_merge) {
 
-  df_pipe <- read_parquet(fpa_merged)
+  lst_sed  <- vector(mode = "list", length(vct_merge))
+  lst_mvpa <- vector(mode = "list", length(vct_merge))
+  lst_step <- vector(mode = "list", length(vct_merge))
 
-  # total ----
-  df_sed <-
-    df_pipe |>
-    select(id, starts_with("intensity")) |>
-    rename_with(.cols = !id,
-                .fn = ~sub(x = .x, pattern = "intensity_", replacement = "")) |>
-    summarise(across(
-      .cols = everything(),
-      .fns = ~sum(.x == "sedentary", na.rm = TRUE) / 60
-    ), .by = id)
-  df_sed <- df_sed[
-    , c(names(df_sed)[1], sort(names(df_sed[-1])))
-  ]
+  for (i in seq_along(vct_merge)) {
+
+    df_pipe <- read_parquet(vct_merge[i])
+
+    df_sed <-
+      df_pipe |>
+      select(id, starts_with("intensity")) |>
+      rename_with(.cols = !id,
+                  .fn = ~sub(x = .x, pattern = "intensity_", replacement = "")) |>
+      summarise(id = id[1], across(
+        .cols = !id,
+        .fns = ~sum(.x == "sedentary", na.rm = TRUE) / 60
+      ))
+    lst_sed[[i]] <- df_sed[
+      , c(names(df_sed)[1], sort(names(df_sed[-1])))
+    ]
+    df_mvpa <-
+      df_pipe |>
+      select(id, starts_with("intensity")) |>
+      rename_with(.cols = !id,
+                  .fn = ~sub(x = .x, pattern = "intensity_", replacement = "")) |>
+      select(id, !starts_with("bakrania")) |>
+      summarise(id = id[1], across(
+        .cols = !id,
+        .fns = ~sum(.x == "mvpa", na.rm = TRUE) / 60
+      ))
+    lst_mvpa[[i]] <- df_mvpa[
+      , c(names(df_mvpa)[1], sort(names(df_mvpa[-1])))
+    ]
+    df_step <-
+      df_pipe |>
+      select(id, starts_with("steps")) |>
+      rename_with(.cols = !id,
+                  .fn = ~sub(x = .x, pattern = "steps_", replacement = "")) |>
+      summarise(id = id[1], across(
+        .cols = !id,
+        .fns = ~sum(.x, na.rm = TRUE)
+      ))
+    lst_step[[i]] <- df_step[
+      , c(names(df_step)[1], sort(names(df_step[-1])))
+    ]
+
+  }
+
   tbl_sed <-
-    df_sed |>
+    rbindlist(lst_sed) |>
+    mutate(across(
+      .cols = !id,
+      .fns = ~round(.x, digits = 1)
+    )) |>
     gt() |>
-      cols_label(
-        "actinet" = "Actinet",
-        "bakrania.enmo.average" = "Bakrania (ENMO Average)",
-        "bakrania.enmo.simple" = "Bakrania (ENMO Simple)",
-        "bakrania.mad.average" = "Bakrania (MAD Average)",
-        "bakrania.mad.simple" = "Bakrania (MAD Simple)",
-        "ellis" = "Ellis",
-        "esliger" = "Esliger",
-        "fraysee" = "Fraysee",
-        "hildebrand" = "Hildrebrand",
-        "mielke" = "Mielke",
-        "montoye.dt" = "Montoye (DT)",
-        "montoye.nn" = "Montoye (NN)",
-        "montoye.rf" = "Montoye (RF)",
-        "montoye.svm" = "Montoye (SVM)",
-        "trost" = "Trost",
-        "walmsley" = "Walmsley",
-        "white.enmo.lin" = "White (ENMO Linear)",
-        "white.enmo.pol" = "White (ENMO Polynomial)",
-        "white.hpfvm.lin" = "White (HPFVM Linear)",
-        "white.hpfvm.pol" = "White (HPFVM Polynomial)"
-      )
-  df_mvpa <-
-    df_pipe |>
-    select(id, starts_with("intensity")) |>
-    rename_with(.cols = !id,
-                .fn = ~sub(x = .x, pattern = "intensity_", replacement = "")) |>
-    select(id, !starts_with("bakrania")) |>
-    summarise(across(
-      .cols = everything(),
-      .fns = ~sum(.x == "mvpa", na.rm = TRUE) / 60
-    ), .by = id)
-  df_mvpa <- df_mvpa[
-    , c(names(df_mvpa)[1], sort(names(df_mvpa[-1])))
-  ]
+    cols_label(
+      "actinet" = "Actinet",
+      "bakrania.enmo.average" = "Bakrania (ENMO Average)",
+      "bakrania.enmo.simple" = "Bakrania (ENMO Simple)",
+      "bakrania.mad.average" = "Bakrania (MAD Average)",
+      "bakrania.mad.simple" = "Bakrania (MAD Simple)",
+      "ellis" = "Ellis",
+      "esliger" = "Esliger",
+      "fraysee" = "Fraysee",
+      "hildebrand" = "Hildrebrand",
+      "mielke" = "Mielke",
+      "montoye.dt" = "Montoye (DT)",
+      "montoye.nn" = "Montoye (NN)",
+      "montoye.rf" = "Montoye (RF)",
+      "montoye.svm" = "Montoye (SVM)",
+      "trost" = "Trost",
+      "walmsley" = "Walmsley",
+      "white.enmo.lin" = "White (ENMO Linear)",
+      "white.enmo.pol" = "White (ENMO Polynomial)",
+      "white.hpfvm.lin" = "White (HPFVM Linear)",
+      "white.hpfvm.pol" = "White (HPFVM Polynomial)"
+    )
   tbl_mvpa <-
-    df_mvpa |>
+    rbindlist(lst_mvpa) |>
+    mutate(across(
+      .cols = !id,
+      .fns = ~round(.x, digits = 1)
+    )) |>
     gt() |>
     cols_label(
       "actinet" = "Actinet",
@@ -807,22 +826,12 @@ summarize_metrics_main <- function(fpa_merged) {
       "white.hpfvm.lin" = "White (HPFVM Linear)",
       "white.hpfvm.pol" = "White (HPFVM Polynomial)"
     )
-  df_step <-
-    df_pipe |>
-    select(id, starts_with("steps")) |>
-    rename_with(.cols = !id,
-                .fn = ~sub(x = .x, pattern = "steps_", replacement = "")) |>
-    summarise(across(
-      .cols = everything(),
-      .fns = ~sum(.x, na.rm = TRUE)
-    ), .by = id)
-  df_step <- df_step[
-    , c(names(df_step)[1], sort(names(df_step[-1])))
-  ]
-
-   ## step ----
   tbl_step <-
-    df_step |>
+    rbindlist(lst_step) |>
+    mutate(across(
+      .cols = !id,
+      .fns = ~round(.x, digits = 0)
+    )) |>
     gt() |>
     cols_label(
       "oak.1.0" = "Oak 1.0",

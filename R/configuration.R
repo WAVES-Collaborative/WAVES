@@ -734,26 +734,42 @@ config_raw_type <- function(vct_raw) {
 
       # If GGIR determines its an ad-hoc csv, assume that it will be
       # GENEActiv csv file without header
+      header_value <- tryCatch(I$header[1, 1], error = \(e) NA_character_)
+      sf_value <- tryCatch(I$sf, error = \(e) NA_real_)
       chk_adhoc_csv <-
-        I$header[1, 1] == "file does not have header" &&
-        I$sf == 0
+        identical(header_value, "file does not have header") &&
+        identical(sf_value, 0)
 
       if (chk_adhoc_csv) {
         vct_type[i] <- "ADHOC"
       } else {
-        vct_type[i] <-
-          paste0(I$monn, " - ", I$dformn) |>
-          toupper()
+        monn <- tryCatch(I$monn, error = \(e) NA_character_)
+        dformn <- tryCatch(I$dformn, error = \(e) NA_character_)
+
+        if (anyNA(c(monn, dformn))) {
+          vct_type[i] <- "UNKNOWN"
+        } else {
+          vct_type[i] <-
+            paste0(monn, " - ", dformn) |>
+            toupper()
+        }
       }
     }
   }
 
-  # Rename "GENEACTIVE" to "GENEACTIV".
-  vct_type <- sub(
-    x = vct_type,
-    pattern = "GENEACTIVE",
-    replacement = "GENEACTIV"
-  )
+  vct_type <-
+    # Rename "GENEACTIVE" to "GENEACTIV".
+    sub(
+      x = vct_type,
+      pattern = "GENEACTIVE",
+      replacement = "GENEACTIV"
+    ) |>
+    # name with filename sans extension.
+    setNames(
+      vct_raw |>
+        basename() |>
+        file_path_sans_ext()
+    )
 
   return(vct_type)
 

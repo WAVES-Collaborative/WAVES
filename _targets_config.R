@@ -91,6 +91,9 @@ fdr_ggir <- file.path(
 fdr_calibrated <- file.path(
   "data", "0_CONFIG", "RAW-CALIBRATED_QS2"
 )
+fdr_output.oxwearable <- file.path(
+  "data", "0_CONFIG", "OUTPUT-OXWEARABLE_PARQUET"
+)
 fdr_output.cutpoint <- file.path(
   "data", "0_CONFIG", "OUTPUT-CUTPOINT_PARQUET"
 )
@@ -120,6 +123,7 @@ fs::dir_create(c(
   fdr_logs,
   fdr_ggir,
   fdr_calibrated,
+  fdr_output.oxwearable,
   fdr_output.cutpoint,
   fdr_output.raw,
   fdr_output.oak.pre,
@@ -293,6 +297,7 @@ tar_plan(
   dir_models      = "models",
   dir_logs        = fdr_logs,
   dir_cal         = fdr_calibrated,
+  dir_out.ox      = fdr_output.oxwearable,
   dir_out.cut     = fdr_output.cutpoint,
   dir_out.raw     = fdr_output.raw,
   dir_out.oak.pre = fdr_output.oak.pre,
@@ -323,15 +328,19 @@ tar_plan(
     command = wrapper_GGIR_config(vct_raw,
                                   vct_raw_type)
   ),
-  tar_qs(
-    name      = lst_out.cut,
+  tar_parquet(
+    name    = df_start_tz,
+    command = get_start_tz_df(vct_basic,
+                              my_tz)
+  ),
+  tar_file(
+    name      = vct_out.cut,
     command   = apply_methods_cutpoints(
       fpa_basic = vct_basic,
-      dir_write = dir_out.cut,
-      my_tz     = my_tz
+      dir_write = dir_out.cut
     ),
     pattern   = map(vct_basic),
-    iteration = "list"
+    iteration = "vector"
   ),
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                           PROCESS - OXWEARABLES                        ----
@@ -358,7 +367,6 @@ tar_plan(
       vct_ox_input = vct_ox_input,
       fdr_write    = file.path(getwd(), dir_walmsley),
       fdr_log      = dir_logs,
-      my_tz        = my_tz,
       log_prefix   = "config_",
       lst_miniconda = lst_miniconda
     ),
@@ -375,69 +383,70 @@ tar_plan(
     ),
     format = "file"
   ),
-  lst_ox = merge_ox(
-    vct_ox_step,
-    vct_ox_wlms,
-    vct_ox_acti,
-    my_tz
+  tar_file(
+    name    = vct_ox,
+    command = merge_ox(
+      vct_ox_step  = vct_ox_step,
+      vct_ox_wlms  = vct_ox_wlms,
+      vct_ox_acti  = vct_ox_acti,
+      dir_write    = dir_out.ox,
+      vct_raw_type = vct_raw_type,
+      df_start_tz  = df_start_tz
+    )
   ),
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                             PROCESS - CUSTOM                           ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  tar_qs(
+  tar_file(
     name      = vct_cal,
     command   = read_acc_raw(
       fpa_read      = vct_raw,
       le_type       = vct_raw_type,
       vct_fpa_basic = vct_basic,
-      dir_cal       = dir_cal,
-      my_tz         = my_tz
+      dir_cal       = dir_cal
     ),
     pattern   = map(vct_raw, vct_raw_type),
     iteration = "vector"
   ),
-  tar_qs(
-    name      = lst_out.raw,
+  tar_file(
+    name      = vct_out.raw,
     command   = apply_methods_raw(
       fpa_read      = vct_cal,
       vct_fpa_basic = vct_basic,
       dir_models    = dir_models,
       dir_write     = dir_out.raw,
-      my_tz         = my_tz,
+      df_start_tz   = df_start_tz,
       lst_miniconda = lst_miniconda
     ),
     pattern   = map(vct_cal),
-    iteration = "list",
+    iteration = "vector",
     error = "null"
   ),
-  tar_qs(
-    name      = lst_out.oak.pre,
+  tar_file(
+    name      = vct_out.oak.pre,
     command   = apply_oak.pre(
       fpa_read      = vct_cal,
       vct_fpa_basic = vct_basic,
       dir_write     = dir_out.oak.pre,
-      my_tz         = my_tz,
+      df_start_tz   = df_start_tz,
       lst_miniconda = lst_miniconda
     ),
     pattern   = map(vct_cal),
-    iteration = "list",
+    iteration = "vector",
     error = "null",
     deployment = "main" # in order to avoid error of loading two conda environments within the same R session
   ),
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                                   MERGE                                ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  tar_target(
-    name    = fpa_merged,
+  tar_parquet(
+    name    = df_pipe,
     command = merge_output_config(
-      lst_out.raw     = lst_out.raw,
-      lst_out.oak.pre = lst_out.oak.pre,
-      lst_out.cut     = lst_out.cut,
-      lst_ox          = lst_ox,
-      dir_merged      = dir_merged,
-      my_tz           = my_tz
-    ),
-    format = "file"
+      vct_out.raw     = vct_out.raw,
+      vct_out.oak.pre = vct_out.oak.pre,
+      vct_out.cut     = vct_out.cut,
+      vct_ox          = vct_ox
+    )
   ),
   tar_render(
     name = pipeline_summary,

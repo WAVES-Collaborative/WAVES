@@ -93,19 +93,32 @@
 #'
 #' @param fpa_basic
 #' @param dir_write
-#' @param my_tz
 #'
 #' @returns
 #' @export
 #'
 #' @examples
 apply_methods_cutpoints <- function(fpa_basic,
-                                    dir_write,
-                                    my_tz) {
+                                    dir_write) {
 
   if (is.null(fpa_basic)) return(NULL)
 
   load(fpa_basic)
+
+  if (!exists("M", inherits = FALSE) ||
+      is.null(M) ||
+      is.null(M$metashort) ||
+      nrow(M$metashort) == 0) {
+    warning(
+      sprintf(
+        "Skipping cutpoint output for '%s' because GGIR metadata is missing metashort data.",
+        basename(fpa_basic)
+      ),
+      call. = FALSE
+    )
+    return(NULL)
+  }
+
   fnm_sans_ext <-
     fpa_basic |>
     basename() |>
@@ -114,23 +127,19 @@ apply_methods_cutpoints <- function(fpa_basic,
     sub(x = _,
         pattern = "meta_",
         replacement = "")
-  brand <- case_when(
-    I$monn != c("actigraph") ~ "other",
-    .default = I$monn
-  )
+  brand <- if (identical(I$monn, "actigraph")) "actigraph" else "other"
 
   # Check if file was already created from a previous run of the pipeline.
   fpa_write <- file.path(dir_write, paste0(fnm_sans_ext, ".parquet"))
 
-  if (file.exists(fpa_write)) {return(
-      arrow::read_parquet(fpa_write)
-  )}
+  if (file.exists(fpa_write)) return(fpa_write)
 
   df_cutpoint <-
     M$metashort |>
     mutate(
-      datetime = ymd_hms(timestamp,
-                         tz = my_tz),
+      # GGIR goes to the next quarter of an hour for safety. Regardless, keep
+      # in UTC time until merging.
+      datetime = ymd_hms(timestamp, tz = "UTC"),
       # To millig
       ENMO = ENMO * 1000,
       ENMOa = ENMOa * 1000,
@@ -282,6 +291,6 @@ apply_methods_cutpoints <- function(fpa_basic,
 
   # Return ----
   arrow::write_parquet(df_cutpoint, sink = fpa_write)
-  return(df_cutpoint)
+  return(fpa_write)
 
 }

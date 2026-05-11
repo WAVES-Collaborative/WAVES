@@ -135,7 +135,6 @@ apply_ox_stepcount <- function(vct_ox_input,
     )
   } else {
     # The `system2` command uses a shell within MacOS and Linux.
-    # TODO Ask Dan for testing this.
     # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_stepcount ; stepcount "data/0_CONFIG/RAW/WAVES_10004_RAW.gt3x" -o ~/WAVES/data/stepcount
     system2(
       command = "source",
@@ -165,7 +164,6 @@ apply_ox_walmsley <- function(vct_ox_input,
                               fdr_write,
                               fdr_log,
                               log_prefix = "",
-                              my_tz,
                               lst_miniconda) {
 
   chk_windows <- grepl(
@@ -219,17 +217,13 @@ apply_ox_walmsley <- function(vct_ox_input,
         "activate WHO_WAVES_accelerometer & ",
         paste0(
           'accProcess ', vct_ox_input, ' -o "', fdr_write, '"',
-          " --timeZone ", my_tz,
+          " --timeZone UTC",
           collapse = " & "
         ) |>
           # file paths to windows style.
           gsub(x = _,
                pattern = "/",
-               replacement = "\\\\") |>
-          # The above also changes the timezone, change it back
-          gsub(x = _,
-               pattern = sub(my_tz, pattern = "/", replacement = "\\\\\\\\"),
-               replacement = my_tz),
+               replacement = "\\\\"),
         collapse = ""
       ),
       stdout = file.path(fdr_log, paste0(log_prefix, "walmsley_out.txt")),
@@ -238,8 +232,7 @@ apply_ox_walmsley <- function(vct_ox_input,
 
   } else {
     # The `system2` command uses a shell within MacOS and Linux.
-    # TODO Ask Dan for testing this.
-    # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_accelerometer ; accProcess "data/0_CONFIG/RAW/WAVES_10004_RAW.gt3x" -o ~/WAVES/data/walmsley --timeZone America/Chicago
+    # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_accelerometer ; accProcess "data/0_CONFIG/RAW/WAVES_10004_RAW.gt3x" -o ~/WAVES/data/walmsley --timeZone UTC
     system2(
       command = "source",
       args = paste(
@@ -247,7 +240,7 @@ apply_ox_walmsley <- function(vct_ox_input,
         "conda activate WHO_WAVES_accelerometer",
         paste0(
           'accProcess ', vct_ox_input, ' -o "', fdr_write, '"',
-          " --timeZone ", my_tz,
+          " --timeZone UTC",
           collapse = " ; "
         ),
         sep = " ; "
@@ -333,7 +326,6 @@ apply_ox_actinet <- function(vct_ox_input,
 
   } else {
     # The `system2` command uses a shell within MacOS and Linux.
-    # TODO Ask Dan for testing this.
     # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_actinet ; actinet "data/0_CONFIG/RAW/WAVES_10004_RAW.gt3x" -o ~/WAVES/data/actinet
     system2(
       command = "source",
@@ -362,7 +354,9 @@ apply_ox_actinet <- function(vct_ox_input,
 merge_ox <- function(vct_ox_step,
                      vct_ox_wlms,
                      vct_ox_acti,
-                     my_tz) {
+                     dir_write,
+                     vct_raw_type,
+                     df_start_tz) {
 
   # Only merge files that have gone through all three algorithms.
   vct_fnm <-
@@ -376,110 +370,151 @@ merge_ox <- function(vct_ox_step,
       }
     ) |>
     unique()
-  lst_all <-
-    vector(mode = "list", length = length(vct_fnm)) |>
-    setNames(nm = vct_fnm)
+  vct_fpa_write <- file.path(
+    dir_write, paste0(vct_fnm, ".parquet")
+  )
+  vct_complete <- vector("logical", length = length(vct_fnm))
 
   for (i in seq_along(vct_fnm)) {
 
-    le_fnm <-
-      vct_fnm[i]
+    le_fnm    <- vct_fnm[i]
+    fpa_write <- vct_fpa_write[i]
+    le_type   <- vct_raw_type[le_fnm]
 
+    if (file.exists(fpa_write)) {
+      vct_complete[i] <- TRUE
+      next
+    }
+
+    # walmsley ----
+    df_wlms <-
+      fread(
+        grep(x = vct_ox_wlms,
+             pattern = stringr::str_escape(le_fnm),
+             value = TRUE),
+        sep = ","
+      ) |>
+      mutate(
+        # If the file was .gt3x, then the time, when read by accProcess, will
+        # be treated as local time and then changed to UTC. This does not
+        # happen for .bin and .cwa files.
+        datetime =
+          if (le_type %in% c("ACTIGRAPH - GT3X", "ACTIGRAPH - CSV")) {
+            seq.POSIXt(
+              from =
+                (ymd_hms(time)[1] |>
+                   floor_date(unit = "seconds")) +
+                df_start_tz |>
+                dplyr::filter(fnm == le_fnm) |>
+                pull(offset) * 60 * 60,
+              length.out = n(),
+              by = "30 sec"
+            )
+          } else {
+            ymd_hms(time, tz = "UTC", quiet = TRUE) |>
+              floor_date(unit = "seconds")
+          },
+        intensity = case_when(
+          sedentary == 1 ~ "sedentary",
+          light == 1     ~ "light",
+          `moderate-vigorous` == 1 ~ "mvpa",
+          sleep == 1 ~ "sleep",
+          .default = NA
+        ),
+        .keep = "none"
+      ) |>
+      # second-by-second
+      reframe(
+        datetime = seq.POSIXt(
+          from = datetime[1],
+          to = last(datetime) + 29,
+          by = "1 sec"
+        ),
+        intensity_walmsley = rep(intensity, each = 30)
+      )
+
+    # actinet ----
+    df_acti <-
+      fread(
+        grep(x = vct_ox_acti,
+             pattern = stringr::str_escape(le_fnm),
+             value = TRUE),
+        sep = ","
+      ) |>
+      mutate(
+        # time column when read with fread() function is automatically UTC
+        # and actinet already exports in UTC.
+        datetime = floor_date(time, unit = "seconds"),
+        intensity = case_when(
+          # actinet will be NA for epochs that had idle-sleep mode on. Just
+          # make them sedentary as we will use nonwear/sleep from other methods.
+          is.na(acc) ~ "sedentary",
+          sedentary == 1 ~ "sedentary",
+          light == 1     ~ "light",
+          `moderate-vigorous` == 1 ~ "mvpa",
+          sleep == 1 ~ "sleep",
+          .default = NA
+        ),
+        .keep = "none"
+      ) |>
+      reframe(
+        datetime = seq.POSIXt(
+          from = datetime[1],
+          to = last(datetime) + 29,
+          by = "1 sec"
+        ),
+        intensity_actinet = rep(intensity, each = 30)
+      )
+
+    # stepcount ----
+    df_step <-
+      fread(
+        grep(x = vct_ox_step,
+             pattern = stringr::str_escape(le_fnm),
+             value = TRUE),
+        sep = ","
+      ) |>
+      mutate(
+        # time column when read with fread() function is automatically UTC
+        # and stepcount already exports in UTC. Contains fractional seconds
+        # though so floor it to the nearest second
+        datetime =
+          floor_date(time, unit = "seconds")
+      ) |>
+      summarise(
+        steps_stepcount = as.integer(n()),
+        .by = datetime
+      )
+
+    # return ----
     # Full join walmsley and actinet output (should always be a complete match,
     # as in there is no difference with performing a inner join), then left join
     # with stepcount output (since stepcount output is not complete time series).
     # Ok, I lied about walmsley and actinet always being a complete match.
-    # Actinet will sometimes always(?) have one epoch longer than walmsley. BUT
+    # Actinet will sometimes (always?) have one epoch longer than walmsley. BUT
     # in the grand scheme of things, the very last bit of data will not be used.
     # So just use a full join initially and when merged with all the other data
     # it will be fixed.
-    lst_all[[le_fnm]] <-
-      full_join(
-        # walmsley
-        fread(
-          grep(x = vct_ox_wlms,
-               pattern = stringr::str_escape(le_fnm),
-               value = TRUE),
-          sep = ","
-        ) |>
-          mutate(
-            datetime =
-              ymd_hms(time, tz = my_tz, quiet = TRUE) |>
-              floor_date(unit = "seconds"),
-            intensity = case_when(
-              sedentary == 1 ~ "sedentary",
-              light == 1     ~ "light",
-              `moderate-vigorous` == 1 ~ "mvpa",
-              sleep == 1 ~ "sleep",
-              .default = NA
-            ),
-            .keep = "none"
-          ) |>
-          reframe(
-            datetime = seq.POSIXt(
-              from = datetime[1],
-              to = last(datetime) + 29,
-              by = "1 sec"
-            ),
-            intensity_walmsley = rep(intensity, each = 30)
-          ),
-        # actinet
-        fread(
-          grep(x = vct_ox_acti,
-               pattern = stringr::str_escape(le_fnm),
-               value = TRUE),
-          sep = ","
-        ) |>
-          mutate(
-            datetime =
-              floor_date(time, unit = "seconds") |>
-              force_tz(tzone  = my_tz),
-            intensity = case_when(
-              sedentary == 1 ~ "sedentary",
-              light == 1     ~ "light",
-              `moderate-vigorous` == 1 ~ "mvpa",
-              sleep == 1 ~ "sleep",
-              .default = NA
-            ),
-            .keep = "none"
-          ) |>
-          reframe(
-            datetime = seq.POSIXt(
-              from = datetime[1],
-              to = last(datetime) + 29,
-              by = "1 sec"
-            ),
-            intensity_actinet = rep(intensity, each = 30)
-          ),
-        by = join_by(datetime)
-      ) |>
+    full_join(
+      df_wlms,
+      df_acti,
+      by = join_by(datetime)
+    ) |>
       left_join(
-        # stepcount
-        fread(
-          grep(x = vct_ox_step,
-               pattern = stringr::str_escape(le_fnm),
-               value = TRUE),
-          sep = ","
-        ) |>
-          mutate(
-            # Floor it to the nearest second
-            datetime =
-              floor_date(time, unit = "seconds") |>
-              force_tz(tzone  = my_tz)
-          ) |>
-          summarise(
-            steps_stepcount = as.integer(n()),
-            .by = datetime
-          ),
+        df_step,
         by = join_by(datetime)
       ) |>
       mutate(
         id = le_fnm,
         steps_stepcount = replace_na(steps_stepcount, replace = 0L),
         .before = 1
-      )
+      ) |>
+      arrow::write_parquet(sink = fpa_write)
+
+    vct_complete[i] <- TRUE
+
   }
 
-  return(lst_all)
+  return(vct_fpa_write[vct_complete])
 
 }
