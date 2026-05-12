@@ -207,6 +207,14 @@ config_miniconda <- function(df_pkgs_stepcount,
     if (chk_successful) {
 
       msg_acc_env <- "Successfuly created"
+      # Install heavy deps via conda first (ARM64 binaries available across
+      # platforms). Without this, pip tries to build pandas/numpy from source on
+      # macOS ARM64 and fails due to setuptools 80+ dropping pkg_resources.
+      conda_install(
+        envname  = "WHO_WAVES_accelerometer",
+        packages = c("numpy=1.21", "pandas=1.3", "scipy=1.7"),
+        channel  = "conda-forge"
+      )
       conda_install(
         envname  = "WHO_WAVES_accelerometer",
         packages = "accelerometer==7.3.0",
@@ -244,7 +252,13 @@ config_miniconda <- function(df_pkgs_stepcount,
       msg_acc_pkg <- "Modules already installed."
     } else {
 
-      # Install modules and check one more time afterwards.
+      # Install heavy deps via conda first (ARM64 binaries), then pip for
+      # accelerometer itself.
+      conda_install(
+        envname  = "WHO_WAVES_accelerometer",
+        packages = c("numpy=1.21", "pandas=1.3", "scipy=1.7"),
+        channel  = "conda-forge"
+      )
       conda_install(
         envname  = "WHO_WAVES_accelerometer",
         packages = "accelerometer==7.3.0",

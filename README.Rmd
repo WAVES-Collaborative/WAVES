@@ -40,9 +40,40 @@ The proposed flow diagram outlines the process for how the validation data and d
     1.  From [this link](https://posit.co/download/rstudio-desktop/), click on the "DOWNLOAD RSTUDIO DESKTOP FOR WINDOWS/MACOS"
     2.  A version from 2023 onwards should be okay.
 
-3.  Install RTools
+3.  Install compilation tools (platform-specific)
+
+    **Windows:**
 
     1.  From [this link](https://cran.r-project.org/bin/windows/Rtools/), download the RTools version specific to the R version being used (i.e. Rtools 4.4 for R v4.4.1, RTools 4.5 for R v4.5.2)
+
+    **macOS:**
+
+    Several R packages need to be compiled from source. Install the following dependencies via [Homebrew](https://brew.sh/) by running the following command within the system shell (Terminal):
+
+    ```
+    brew install cmake gcc gettext
+    ```
+
+    Then create `~/.R/Makevars` so R can find the installed libraries by running the following code within the system shell (Terminal):
+
+    ```
+    mkdir -p ~/.R
+    cat > ~/.R/Makevars << 'EOF'
+    CPPFLAGS += -I/opt/homebrew/opt/gettext/include
+    LDFLAGS += -L/opt/homebrew/opt/gettext/lib -lintl -L/opt/homebrew/opt/gcc/lib/gcc/current
+    FLIBS = -L/opt/homebrew/opt/gcc/lib/gcc/current -lgfortran -lquadmath
+    FC = /opt/homebrew/bin/gfortran
+    F77 = /opt/homebrew/bin/gfortran
+    EOF
+    ```
+
+    Additionally, the `arrow` R package requires setting an environment variable before running `renv::restore()`. Run the following within the system shell (Terminal):
+
+    ```
+    export LIBARROW_BINARY=true
+    ```
+
+    This tells the package to download a pre-built Arrow C++ library instead of compiling against the system version.
 
 4.  Download WAVES repository.
 
@@ -173,6 +204,19 @@ The proposed flow diagram outlines the process for how the validation data and d
     ![](media/Screenshot%202026-01-17%20132513.png)
 
     -   Change the `n_workers` object to 1, which will remove parallel processing.
+
+-   **Resetting conda environments:** Once the WAVES repository has been installed, major version changes to the pipeline may result in prior conda environment installations to be outdated. Unfortunately, re-running the configuration pipeline by itself may not be sufficient, which will require removing the existing environments entirely before rerunning the configuration pipeline. To do so, first run the code within the INPUT section of `_targets_config.R`. Then, run the following code within the R console:
+
+    ```
+    library(reticulate)
+    conda_remove("WHO_WAVES_stepcount")
+    conda_remove("WHO_WAVES_accelerometer")
+    conda_remove("WHO_WAVES_actinet")
+    conda_remove("WHO_WAVES_oak_1.0")
+    conda_remove("WHO_WAVES_oak_pre")
+    ```
+
+    After removal, re-run the config pipeline (`tar_make()`) and it will recreate the missing environments.
 
 ## Posting an Issue on GitHub
 

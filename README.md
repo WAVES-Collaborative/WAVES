@@ -39,12 +39,43 @@ potentially available validation data.
         click on the “DOWNLOAD RSTUDIO DESKTOP FOR WINDOWS/MACOS”
     2.  A version from 2023 onwards should be okay.
 
-3.  Install RTools
+3.  Install compilation tools (platform-specific)
+
+    **Windows:**
 
     1.  From [this
         link](https://cran.r-project.org/bin/windows/Rtools/), download
         the RTools version specific to the R version being used
         (i.e. Rtools 4.4 for R v4.4.1, RTools 4.5 for R v4.5.2)
+
+    **macOS:**
+
+    Several R packages need to be compiled from source. Install the
+    following dependencies via [Homebrew](https://brew.sh/) by running
+    the following command within the system shell (Terminal):
+
+        brew install cmake gcc gettext
+
+    Then create `~/.R/Makevars` so R can find the installed libraries by
+    running the following code within the system shell (Terminal):
+
+        mkdir -p ~/.R
+        cat > ~/.R/Makevars << 'EOF'
+        CPPFLAGS += -I/opt/homebrew/opt/gettext/include
+        LDFLAGS += -L/opt/homebrew/opt/gettext/lib -lintl -L/opt/homebrew/opt/gcc/lib/gcc/current
+        FLIBS = -L/opt/homebrew/opt/gcc/lib/gcc/current -lgfortran -lquadmath
+        FC = /opt/homebrew/bin/gfortran
+        F77 = /opt/homebrew/bin/gfortran
+        EOF
+
+    Additionally, the `arrow` R package requires setting an environment
+    variable before running `renv::restore()`. Run the following within
+    the system shell (Terminal):
+
+        export LIBARROW_BINARY=true
+
+    This tells the package to download a pre-built Arrow C++ library
+    instead of compiling against the system version.
 
 4.  Download WAVES repository.
 
@@ -272,6 +303,25 @@ potentially available validation data.
   - Change the `n_workers` object to 1, which will remove parallel
     processing.
 
+- **Resetting conda environments:** Once the WAVES repository has been
+  installed, major version changes to the pipeline may result in prior
+  conda environment installations to be outdated. Unfortunately,
+  re-running the configuration pipeline by itself may not be sufficient,
+  which will require removing the existing environments entirely before
+  rerunning the configuration pipeline. To do so, first run the code
+  within the INPUT section of `_targets_config.R`. Then, run the
+  following code within the R console:
+
+      library(reticulate)
+      conda_remove("WHO_WAVES_stepcount")
+      conda_remove("WHO_WAVES_accelerometer")
+      conda_remove("WHO_WAVES_actinet")
+      conda_remove("WHO_WAVES_oak_1.0")
+      conda_remove("WHO_WAVES_oak_pre")
+
+  After removal, re-run the config pipeline (`tar_make()`) and it will
+  recreate the missing environments.
+
 ## Posting an Issue on GitHub
 
 After navigating to the Issues tab of WAVES, please use the following
@@ -393,9 +443,9 @@ please also attach the “summary_miniconda.html” report.
 
 <span class="csl-left-margin">1.
 </span><span class="csl-right-inline">Bakrania K, Yates T, Rowlands AV,
-et al. [Intensity Thresholds on Raw Acceleration Data: Euclidean Norm
-Minus One (ENMO) and Mean Amplitude Deviation (MAD)
-Approaches](https://doi.org/10.1371/journal.pone.0164045). *PLOS ONE*
+et al. [Intensity thresholds on raw acceleration data: Euclidean norm
+minus one (ENMO) and mean amplitude deviation (MAD)
+approaches](https://doi.org/10.1371/journal.pone.0164045). *PLOS ONE*
 2016; 11: e0164045.</span>
 
 </div>
@@ -512,9 +562,9 @@ behavior metrics from wearable sensor data*. Zenodo. Epub ahead of print
 
 <span class="csl-left-margin">12.
 </span><span class="csl-right-inline">White T, Westgate K, Wareham NJ,
-et al. [Estimation of Physical Activity Energy Expenditure during
-Free-Living from Wrist Accelerometry in UK
-Adults](https://doi.org/10.1371/journal.pone.0167472). *PLOS ONE* 2016;
+et al. [Estimation of physical activity energy expenditure during
+free-living from wrist accelerometry in UK
+adults](https://doi.org/10.1371/journal.pone.0167472). *PLOS ONE* 2016;
 11: e0167472.</span>
 
 </div>
@@ -566,8 +616,8 @@ accelerometers*. Zenodo. Epub ahead of print 15 January 2026. DOI:
 
 <span class="csl-left-margin">17.
 </span><span class="csl-right-inline">Ducharme SW, Lim J, Busa MA, et
-al. A Transparent Method for Step Detection Using an Acceleration
-Threshold. Epub ahead of print 25 October 2021. DOI:
+al. A transparent method for step detection using an acceleration
+threshold. Epub ahead of print 25 October 2021. DOI:
 [10.1123/jmpb.2021-0011](https://doi.org/10.1123/jmpb.2021-0011).</span>
 
 </div>
@@ -586,9 +636,9 @@ Journal* 2017; 17: 3453–3460.</span>
 
 <span class="csl-left-margin">19.
 </span><span class="csl-right-inline">Maylor BD, Edwardson CL, Dempsey
-PC, et al. Stepping towards More Intuitive Physical Activity Metrics
-with Wrist-Worn Accelerometry: Validity of an Open-Source Step-Count
-Algorithm. *Sensors*; 22. Epub ahead of print 18 December 2022. DOI:
+PC, et al. Stepping towards more intuitive physical activity metrics
+with wrist-worn accelerometry: Validity of an open-source step-count
+algorithm. *Sensors*; 22. Epub ahead of print 18 December 2022. DOI:
 [10.3390/s22249984](https://doi.org/10.3390/s22249984).</span>
 
 </div>
