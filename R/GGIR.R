@@ -29,9 +29,33 @@ wrapper_GGIR <- function(vct_raw,
     ))
   }
 
+  # Make regex that collates vct_raw and escapes regex characters.
+  le_regex <-
+    vct_raw |>
+    basename() |>
+    stringr::str_escape() |>
+    paste0(collapse = "|")
+
+  # Check if files were already created from a previous run of the pipeline.
+  vct_basic <- list.files(
+    file.path("data", "GGIR", "output_WAVES", "meta", "basic"),
+    pattern = le_regex,
+    full.names = TRUE
+  )
+  vct_incomplete <- vct_raw[
+    !basename(vct_raw) %in%
+      (vct_basic |>
+         basename() |>
+         gsub(x = _,
+              pattern = "meta_|\\.RData",
+              replacement = ""))
+  ]
+
+  if (length(vct_incomplete) == 0) return(vct_basic)
+
   GGIR::GGIR(
     mode       = c(1, 2, 3, 4),
-    datadir    = vct_raw,
+    datadir    = vct_incomplete,
     outputdir  = "data/GGIR",
     studyname  = "WAVES",
     # fo         = 1,
@@ -41,11 +65,6 @@ wrapper_GGIR <- function(vct_raw,
   )
 
   # Make regex that collates vct_raw and escapes regex characters.
-  le_regex <-
-    vct_raw |>
-    basename() |>
-    stringr::str_escape() |>
-    paste0(collapse = "|")
   list.files(
     file.path("data", "GGIR", "output_WAVES", "meta", "basic"),
     pattern = le_regex,
