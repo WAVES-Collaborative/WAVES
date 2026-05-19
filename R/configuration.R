@@ -1,67 +1,141 @@
-get_tbl_pkgs <- function(df_pkgs_WAVES,
-                         conda_env) {
+get_tbl_module <- function(df_module_WAVES,
+                           conda_env) {
 
   le_primary_module <-
     sub(x = conda_env,
         pattern = "WHO_WAVES_",
         replacement = "")
-  le_primary_module <- ifelse(
-    grepl(x = le_primary_module, pattern = "oak"),
-    yes = "forest",
-    no  = le_primary_module
+  le_primary_module <- case_match(
+    le_primary_module,
+    "oak_1.0" ~ "beiwe-forest",
+    "oak_pre" ~ "forest-analysis",
+    .default = le_primary_module
   )
 
-  df_pkgs_installed <-
-    left_join(
-      df_pkgs_WAVES,
-      py_list_packages(conda_env) |>
+  df_module_installed <-
+    full_join(
+      df_module_WAVES,
+      reticulate:::conda_list_packages(conda_env) |>
         mutate(
-          Package = package,
+          Module = package,
           `Version Installed` = version,
           .keep = "none"
         ),
-      by = join_by(Package)
+      by = join_by(Module)
     ) |>
-    select(Package, starts_with("Version"), Channel = channel) |>
+    select(Module, starts_with("Version"), Channel) |>
+    mutate(
+      Module =
+        factor(Module) |>
+        relevel(ref = le_primary_module)
+    ) |>
+    arrange(Module) |>
     mutate(
       clr = case_when(
         # The below packages don't matter for version/date.
-        Package %in% c("ca-certificates", "certifi") ~ "#FFFFFF",
-        # Package appears in WAVES install but not your install.
+        Module %in% c("ca-certificates", "certifi") ~ "#FFFFFF",
+        # Module appears in WAVES install but not your install.
         is.na(`Version Installed`)                   ~ "#ea9999",
-        # Package appear in your install but not WAVES install.
+        # Module appear in your install but not WAVES install.
         is.na(`Version WAVES`)                       ~ "#ea9999",
-        # Package version for "primary module is different version.
-        Package == le_primary_module &
+        # Module version for "primary module is different version.
+        Module == le_primary_module &
           (`Version WAVES` != `Version Installed`)   ~ "#ea9999",
-        # Package version for other modules do not match.
+        # Module version for other modules do not match.
         `Version WAVES` != `Version Installed`       ~ "#FAFA8E",
         .default                                     = "#D9F1D5"
       )
     )
-  tbl_pkgs <-
-    df_pkgs_installed |>
+  tbl_module <-
+    df_module_installed |>
     select(-clr) |>
-    gt()
+    gt() |>
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = cells_body(rows = 1)
+    )
 
-  for (i in seq_len(nrow(df_pkgs_installed))) {
-    tbl_pkgs <-
-      tbl_pkgs |>
+  for (i in seq_len(nrow(df_module_installed))) {
+    tbl_module <-
+      tbl_module |>
       tab_style(
-        style = cell_fill(color = df_pkgs_installed$clr[i]),
+        style = cell_fill(color = df_module_installed$clr[i]),
         locations = cells_body(columns = starts_with("Version"),
                                rows    = i)
       )
   }
 
-  tbl_pkgs
+  tbl_module
 
 }
-config_miniconda <- function(df_pkgs_stepcount,
-                             df_pkgs_walmsley,
-                             df_pkgs_actinet,
-                             df_pkgs_oak_1.0,
-                             df_pkgs_oak_pre) {
+get_msg_module <- function(tbl_module) {
+  vct_color <- sapply(
+    tbl_module$`_styles`$styles,
+    FUN = \(x) x$cell_fill$color
+  )
+  chk_module_installed <- any(
+    vct_color == "#EA9999"
+  )
+  chk_module_versions <- any(
+    vct_color == "#FAFA8E"
+  )
+  case_when(
+    chk_module_installed ~ 'Modules installation unsuccessful. Please refer to "Posting an Issue on GitHub" section of README to share issue with WAVES team.',
+    chk_module_versions  ~ "Modules installation successful, but versions do not completely match WAVES configuration. This should not affect the pipeline, but is noted for thoroughness.",
+    .default             = "Modules installation successful."
+  )
+}
+# Code for getting module WAVES version
+# reticulate:::conda_list_packages("WHO_WAVES_stepcount") |>
+#   mutate(
+#     Module = package,
+#     `Version WAVES` = version,
+#     requirement,
+#     Channel = channel,
+#     .keep = "none"
+#   ) |>
+#   fwrite(file = file.path("data", "0_CONFIG", "RAW", "df_modules_stepcount.csv"))
+# reticulate:::conda_list_packages("WHO_WAVES_accelerometer") |>
+#   mutate(
+#     Module = package,
+#     `Version WAVES` = version,
+#     requirement,
+#     Channel = channel,
+#     .keep = "none"
+#   ) |>
+#   fwrite(file = file.path("data", "0_CONFIG", "RAW", "df_modules_walmsley.csv"))
+# reticulate:::conda_list_packages("WHO_WAVES_actinet") |>
+#   mutate(
+#     Module = package,
+#     `Version WAVES` = version,
+#     requirement,
+#     Channel = channel,
+#     .keep = "none"
+#   ) |>
+#   fwrite(file = file.path("data", "0_CONFIG", "RAW", "df_modules_actinet.csv"))
+# reticulate:::conda_list_packages("WHO_WAVES_oak_1.0") |>
+#   mutate(
+#     Module = package,
+#     `Version WAVES` = version,
+#     requirement,
+#     Channel = channel,
+#     .keep = "none"
+#   ) |>
+#   fwrite(file = file.path("data", "0_CONFIG", "RAW", "df_modules_oak1.0.csv"))
+# reticulate:::conda_list_packages("WHO_WAVES_oak_pre") |>
+#   mutate(
+#     Module = package,
+#     `Version WAVES` = version,
+#     requirement,
+#     Channel = channel,
+#     .keep = "none"
+#   ) |>
+#   fwrite(file = file.path("data", "0_CONFIG", "RAW", "df_modules_oakpre.csv"))
+config_miniconda <- function(df_module_stepcount,
+                             df_module_walmsley,
+                             df_module_actinet,
+                             df_module_oak_1.0,
+                             df_module_oak_pre) {
 
   chk_windows <- grepl(
     x = Sys.getenv(c("OS", "R_PLATFORM")),
@@ -69,6 +143,7 @@ config_miniconda <- function(df_pkgs_stepcount,
     ignore.case = TRUE
   ) |>
     any()
+  suffix_python <- if (reticulate:::is_windows()) "python.exe" else "bin/python"
 
   # conda ----
   chk_conda <-
@@ -85,7 +160,7 @@ config_miniconda <- function(df_pkgs_stepcount,
       miniconda_path(), '"'
     )} else {
       stop(
-        'Unsuccessful installation. If the environment variable "RETICULATE_MINICONDA_PATH" was changed, please make sure the directory exisits. If it was not changed, Share report with WHO_WAVES team.',
+        'Unsuccessful conda installation. If the environment variable "RETICULATE_MINICONDA_PATH" was changed, please make sure the directory exists. If it was not changed, please refer to "Posting an Issue on GitHub" section of README to share issue with WAVES team.',
         call. = FALSE
       )
     }
@@ -93,7 +168,7 @@ config_miniconda <- function(df_pkgs_stepcount,
     "Already installed. Found at ", '"', miniconda_path(), '"'
   )}
 
-  # setup environment ----
+  # setup ----
   # The "condaenv_exists()" function looks to see if there is an environment
   # with the supplied name in all conda installations, even if you specify
   # a specific conda binary with argument `conda`. Therefore just list
@@ -101,536 +176,126 @@ config_miniconda <- function(df_pkgs_stepcount,
   # entire WAVES project is still in pre-release, this can get messy really
   # quick if a user re-runs the pipeline while changing where conda is being
   # installed or the WAVES team makes changes to this function.
-  vct_env <- list.files(
+  vct_env_all <- list.files(
     file.path(miniconda_path(), "envs")
   )
-  chk_stepcount <- !"WHO_WAVES_stepcount" %in% vct_env
-  chk_accelerometer <- !"WHO_WAVES_accelerometer" %in% vct_env
-  chk_actinet <- !"WHO_WAVES_actinet" %in% vct_env
-  chk_oak_1.0 <- !"WHO_WAVES_oak_1.0" %in% vct_env
-  chk_oak_pre <- !"WHO_WAVES_oak_pre" %in% vct_env
+  vct_env <- c(
+    "WHO_WAVES_stepcount",
+    "WHO_WAVES_accelerometer",
+    "WHO_WAVES_actinet",
+    "WHO_WAVES_oak_1.0",
+    "WHO_WAVES_oak_pre"
+  )
+  lst_module_creation <-
+    list("openjdk",
+         # For WAVES_accelerometer, install heavy deps via conda first (ARM64
+         # binaries available across platforms). Without this, pip tries to
+         # build pandas/numpy from source on macOS ARM64 and fails due to
+         # setuptools 80+ dropping pkg_resources.
+         c("openjdk", "numpy==1.21", "pandas==1.3", "scipy==1.7"),
+         "openjdk",
+         "timezonefinder==8.1.0",
+         NULL) |>
+    setNames(vct_env)
+  vct_python_version <-
+    c(3.9,
+      3.9,
+      3.9,
+      3.12,
+      3.11) |>
+    setNames(vct_env)
+  vct_module_primary <-
+    c(
+      "stepcount==3.17.0",
+      "accelerometer==7.3.0",
+      "actinet==0.4.2",
+      "git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d",
+      "git+https://github.com/onnela-lab/forest@45fb41038bd46c25d9e6a4442aa74fa03b501317"
+    ) |>
+    setNames(vct_env)
+  lst_df_module <-
+    list(df_module_stepcount,
+         df_module_walmsley,
+         df_module_actinet,
+         df_module_oak_1.0,
+         df_module_oak_pre) |>
+    setNames(vct_env)
+  vct_msg_env <- vct_msg_module <-
+    vector("character", length = 5) |>
+    setNames(vct_env)
+  lst_tbl_module <-
+    vector("list", length = 5) |>
+    setNames(vct_env)
 
-  # stepcount ----
-  if (chk_stepcount) {
+  for (i in seq_along(vct_env)) {
 
-    conda_create(
-      envname = "WHO_WAVES_stepcount",
-      packages = "openjdk",
-      forge = FALSE,
-      python_version = 3.9,
-      pip = TRUE
-    )
-    chk_successful <-
-      list.files(
-        file.path(miniconda_path(), "envs")
-      ) |> grepl(x = _,
-                 pattern = "WHO_WAVES_stepcount") |>
-      any()
+    le_env <- vct_env[i]
+    chk_env <- !le_env %in% vct_env_all
 
-    if (chk_successful) {
+    if (chk_env) {
 
-      msg_step_env <- "Successfuly created"
-      conda_install(
-        envname  = "WHO_WAVES_stepcount",
-        packages = "stepcount==3.17.0",
-        forge    = FALSE,
-        pip      = TRUE
+      ## env create ----
+      conda_create(
+        envname        = le_env,
+        packages       = lst_module_creation[[le_env]],
+        python_version = vct_python_version[le_env]
       )
-      tbl_pkgs_stepcount <- get_tbl_pkgs(
-        df_pkgs_stepcount,
-        conda_env = "WHO_WAVES_stepcount"
-      )
-      msg_step_pkg <- ifelse(
-        all(tbl_pkgs_stepcount$`_data`$`Version WAVES` == tbl_pkgs_stepcount$`_data`$`Version Installed`),
-        yes = "Modules successfully installed.",
-        no  = "Modules installated do not completely match WAVES configuration. Please see the table below for module versions that do not match or are completely missing."
-      )
-
-    } else {
-      msg_step_env <- "Not created. Share report with WHO_WAVES team."
-      msg_step_pkg <- "Environment not created, no packages installed."
-    }
-
-  } else {
-
-    msg_step_env <- "Already exists."
-
-    # Check packages are installed.
-    tbl_pkgs_stepcount <- get_tbl_pkgs(
-      df_pkgs_stepcount,
-      conda_env = "WHO_WAVES_stepcount"
-    )
-    chk_package <-
-      all(tbl_pkgs_stepcount$`_data`$`Version WAVES` == tbl_pkgs_stepcount$`_data`$`Version Installed`)
-
-    if (chk_package) {
-      msg_step_pkg <- "Modules already installed."
-    } else {
-
-      # Install modules and check one more time afterwards.
-      conda_install(
-        envname  = "WHO_WAVES_stepcount",
-        packages = "stepcount==3.17.0",
-        forge    = FALSE,
-        pip      = TRUE
-      )
-      tbl_pkgs_stepcount <- get_tbl_pkgs(
-        df_pkgs_stepcount,
-        conda_env = "WHO_WAVES_stepcount"
-      )
-      msg_step_pkg <- ifelse(
-        all(tbl_pkgs_stepcount$`_data`$`Version WAVES` == tbl_pkgs_stepcount$`_data`$`Version Installed`),
-        yes = "Modules successfully installed.",
-        no  = "Modules installated do not completely match WAVES configuration. Please see the table below for module versions that do not match or are completely missing."
+      chk_successful <- dir.exists(
+        file.path(miniconda_path(), "envs", le_env)
       )
 
-    }
-  }
+      if (chk_successful) {
 
-  # accelerometer ----
-  if (chk_accelerometer) {
-
-    conda_create(
-      envname = "WHO_WAVES_accelerometer",
-      packages = "openjdk",
-      forge = FALSE,
-      python_version = 3.9,
-      pip = TRUE
-    )
-    chk_successful <-
-      list.files(
-        file.path(miniconda_path(), "envs")
-      ) |> grepl(x = _,
-                 pattern = "WHO_WAVES_accelerometer") |>
-      any()
-
-    if (chk_successful) {
-
-      msg_acc_env <- "Successfuly created"
-      # Install heavy deps via conda first (ARM64 binaries available across
-      # platforms). Without this, pip tries to build pandas/numpy from source on
-      # macOS ARM64 and fails due to setuptools 80+ dropping pkg_resources.
-      conda_install(
-        envname  = "WHO_WAVES_accelerometer",
-        packages = c("numpy=1.21", "pandas=1.3", "scipy=1.7"),
-        channel  = "conda-forge"
-      )
-      conda_install(
-        envname  = "WHO_WAVES_accelerometer",
-        packages = "accelerometer==7.3.0",
-        forge    = FALSE,
-        pip      = TRUE
-      )
-      tbl_pkgs_walmsley <- get_tbl_pkgs(
-        df_pkgs_walmsley,
-        conda_env = "WHO_WAVES_accelerometer"
-      )
-      msg_acc_pkg <- ifelse(
-        all(tbl_pkgs_walmsley$`_data`$`Version WAVES` == tbl_pkgs_walmsley$`_data`$`Version Installed`),
-        yes = "Modules successfully installed.",
-        no  = "Modules installated do not completely match WAVES configuration. Please see the table below for module versions that do not match or are completely missing."
-      )
-
-    } else {
-      msg_acc_env <- "Not created. Share report with WHO_WAVES team."
-      msg_acc_pkg <- "Environment not created, no packages installed."
-    }
-
-  } else {
-
-    msg_acc_env <- "Already exists."
-
-    # Check packages are installed.
-    tbl_pkgs_walmsley <- get_tbl_pkgs(
-      df_pkgs_walmsley,
-      conda_env = "WHO_WAVES_accelerometer"
-    )
-    chk_package <-
-      all(tbl_pkgs_walmsley$`_data`$`Version WAVES` == tbl_pkgs_walmsley$`_data`$`Version Installed`)
-
-    if (chk_package) {
-      msg_acc_pkg <- "Modules already installed."
-    } else {
-
-      # Install heavy deps via conda first (ARM64 binaries), then pip for
-      # accelerometer itself.
-      conda_install(
-        envname  = "WHO_WAVES_accelerometer",
-        packages = c("numpy=1.21", "pandas=1.3", "scipy=1.7"),
-        channel  = "conda-forge"
-      )
-      conda_install(
-        envname  = "WHO_WAVES_accelerometer",
-        packages = "accelerometer==7.3.0",
-        forge    = FALSE,
-        pip      = TRUE
-      )
-      tbl_pkgs_walmsley <- get_tbl_pkgs(
-        df_pkgs_walmsley,
-        conda_env = "WHO_WAVES_accelerometer"
-      )
-      msg_acc_pkg <- ifelse(
-        all(tbl_pkgs_walmsley$`_data`$`Version WAVES` == tbl_pkgs_walmsley$`_data`$`Version Installed`),
-        yes = "Modules successfully installed.",
-        no  = "Modules installated do not completely match WAVES configuration. Please see the table below for module versions that do not match or are completely missing."
-      )
-
-    }
-  }
-
-  # actinet ----
-  if (chk_actinet) {
-
-    conda_create(
-      envname = "WHO_WAVES_actinet",
-      packages = "openjdk",
-      forge = FALSE,
-      python_version = 3.9,
-      pip = TRUE
-    )
-    chk_successful <-
-      list.files(
-        file.path(miniconda_path(), "envs")
-      ) |> grepl(x = _,
-                 pattern = "WHO_WAVES_actinet") |>
-      any()
-
-    if (chk_successful) {
-
-      msg_acti_env <- "Successfuly created"
-      conda_install(
-        envname  = "WHO_WAVES_actinet",
-        packages = "actinet==0.4.2",
-        forge    = FALSE,
-        pip      = TRUE
-      )
-      tbl_pkgs_actinet <- get_tbl_pkgs(
-        df_pkgs_actinet,
-        conda_env = "WHO_WAVES_actinet"
-      )
-      msg_acti_pkg <- ifelse(
-        all(tbl_pkgs_actinet$`_data`$`Version WAVES` == tbl_pkgs_actinet$`_data`$`Version Installed`),
-        yes = "Modules successfully installed.",
-        no  = "Modules installated do not completely match WAVES configuration. Please see the table below for module versions that do not match or are completely missing."
-      )
-
-    } else {
-      msg_acti_env <- "Not created. Share report with WHO_WAVES team."
-      msg_acti_pkg <- "Environment not created, no packages installed."
-    }
-
-  } else {
-
-    msg_acti_env <- "Already exists."
-
-    # Check packages are installed.
-    tbl_pkgs_actinet <- get_tbl_pkgs(
-      df_pkgs_actinet,
-      conda_env = "WHO_WAVES_actinet"
-    )
-    chk_package <-
-      all(tbl_pkgs_actinet$`_data`$`Version WAVES` == tbl_pkgs_actinet$`_data`$`Version Installed`)
-
-    if (chk_package) {
-      msg_acti_pkg <- "Modules already installed."
-    } else {
-
-      # Install modules and check one more time afterwards.
-      conda_install(
-        envname  = "WHO_WAVES_actinet",
-        packages = "actinet==0.4.2",
-        forge    = FALSE,
-        pip      = TRUE
-      )
-      tbl_pkgs_actinet <- get_tbl_pkgs(
-        df_pkgs_actinet,
-        conda_env = "WHO_WAVES_actinet"
-      )
-      msg_acti_pkg <- ifelse(
-        all(tbl_pkgs_actinet$`_data`$`Version WAVES` == tbl_pkgs_actinet$`_data`$`Version Installed`),
-        yes = "Modules successfully installed.",
-        no  = "Modules installated do not completely match WAVES configuration. Please see the table below for module versions that do not match or are completely missing."
-      )
-
-    }
-  }
-
-  # oak_1.0 ----
-  if (chk_oak_1.0) {
-
-    # Install's of forest from  at least commit adada3f onwards don't work unless
-    # timezonefinder module is installed beforehand. To lazy to open an issue
-    # for it.
-    conda_create(
-      envname = "WHO_WAVES_oak_1.0",
-      # packages = "timezonefinder==8.1.0",
-      forge = FALSE,
-      python_version = 3.12,
-      pip = TRUE
-    )
-    conda_install(
-      envname  = "WHO_WAVES_oak_1.0",
-      packages = "timezonefinder==8.1.0",
-      forge    = FALSE,
-      channel  = "conda-forge"
-    )
-    chk_successful <-
-      list.files(
-        file.path(miniconda_path(), "envs")
-      ) |> grepl(x = _,
-                 pattern = "WHO_WAVES_oak_1.0") |>
-      any()
-
-    if (chk_successful) {
-
-      msg_oak_env <- "Successfuly created"
-
-      # The Forest module in the `Walking` R package from Muscheli is from
-      # Dec 13, 2024 https://github.com/onnela-lab/forest/commit/45fb41038bd46c25d9e6a4442aa74fa03b501317
-      # There has been one change since then regarding oak, where peak
-      # identification logic was changed to better reflect the algorithm in the paper.
-      # Issue: https://github.com/onnela-lab/forest/issues/290
-      # Pull Request: https://github.com/onnela-lab/forest/pull/291
-
-      # Commit: https://github.com/onnela-lab/forest/commit/adada3f1fb8d43b4d2c2a3451dbcbedcb3b52be4
-      # Therefore, download from the creation of this function, 2025-11-18.
-      # ffb36be508d6161e8fbfe70a27048e218cc9394d
-
-      if (chk_windows) {
-        system2(
-          command = file.path(miniconda_path(), "Scripts", "activate.bat"),
-          args = paste(
-            "activate WHO_WAVES_oak_1.0",
-            "pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d",
-            sep = " & "
-          )
+        vct_msg_env[le_env] <- "Successfuly created."
+        reticulate:::pip_install(
+          python   = file.path(miniconda_path(), "envs", le_env, suffix_python),
+          packages = vct_module_primary[le_env],
+          envname  = le_env
         )
+        lst_tbl_module[[le_env]] <- get_tbl_module(
+          df_module_WAVES = lst_df_module[[le_env]],
+          conda_env       = le_env
+        )
+        vct_msg_module[le_env] <- get_msg_module(lst_tbl_module[[le_env]])
+
       } else {
-        # TODO CHECK
-        # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_oak_1.0 ; pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d
-        system2(
-          command = "source",
-          args = paste(
-            paste0('"', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
-            "conda activate WHO_WAVES_oak_1.0",
-            "pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d",
-            sep = " ; "
-          )
-        )
-        # system2(
-        #   command = paste0('source "', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
-        #   args = paste(
-        #     "conda activate WHO_WAVES_oak_1.0",
-        #     "pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d",
-        #     sep = " ; "
-        #   )
-        # )
+        vct_msg_env[le_env] <-
+          'Not created. Please refer to "Posting an Issue on GitHub" section of README to share issue with WAVES team.'
+        vct_msg_module[le_env] <-
+          "No modules installed."
       }
 
-      tbl_pkgs_oak_1.0 <- get_tbl_pkgs(
-        df_pkgs_oak_1.0,
-        conda_env = "WHO_WAVES_oak_1.0"
-      )
-      msg_oak_pkg <- ifelse(
-        all(tbl_pkgs_oak_1.0$`_data`$`Version WAVES` == tbl_pkgs_oak_1.0$`_data`$`Version Installed`),
-        yes = "Modules successfully installed.",
-        no  = "Modules installated do not completely match WAVES configuration. Please see the table below for module versions that do not match or are completely missing."
-      )
-
-    } else {
-      msg_oak_env <- "Not created. Share report with WHO_WAVES team."
-      msg_oak_pkg <- "Environment not created, no packages installed."
-    }
-
-  } else {
-
-    msg_oak_env <- "Already exists."
-
-    # Check packages are installed.
-    tbl_pkgs_oak_1.0 <- get_tbl_pkgs(
-      df_pkgs_oak_1.0,
-      conda_env = "WHO_WAVES_oak_1.0"
-    )
-    chk_package <-
-      all(tbl_pkgs_oak_1.0$`_data`$`Version WAVES` == tbl_pkgs_oak_1.0$`_data`$`Version Installed`)
-
-    if (chk_package) {
-      msg_oak_pkg <- "Modules already installed."
     } else {
 
-      # Install modules and check one more time afterwards.
-      if (chk_windows) {
-        system2(
-          command = file.path(miniconda_path(), "Scripts", "activate.bat"),
-          args = paste(
-            "activate WHO_WAVES_oak_1.0",
-            "pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d",
-            sep = " & "
-          )
+      ## env exists ----
+      vct_msg_env[le_env] <- "Already exists."
+
+      # Check packages are installed.
+      lst_tbl_module[[le_env]] <- get_tbl_module(
+        lst_df_module[[le_env]],
+        conda_env = le_env
+      )
+      vct_msg_module[le_env] <- get_msg_module(lst_tbl_module[[le_env]])
+      chk_package <-
+        vct_msg_module[le_env] == 'Modules installation unsuccessful. Please refer to "Posting an Issue on GitHub" section of README to share issue with WAVES team.'
+
+      if (chk_package) {
+
+        # Install modules and check one more time afterwards.
+        reticulate:::pip_install(
+          python   = file.path(miniconda_path(), "envs", le_env, suffix_python),
+          packages = vct_module_primary[le_env],
+          envname  = le_env
         )
+        lst_tbl_module[[le_env]] <- get_tbl_module(
+          df_module_WAVES = lst_df_module[[le_env]],
+          conda_env       = le_env
+        )
+        vct_msg_module[le_env] <- get_msg_module(lst_tbl_module[[le_env]])
+
       } else {
-        # TODO CHECK
-        # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_oak_1.0 ; pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d
-        system2(
-          command = "source",
-          args = paste(
-            paste0('"', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
-            "conda activate WHO_WAVES_oak_1.0",
-            "pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d",
-            sep = " ; "
-          )
-        )
-        # system2(
-        #   command = paste0('source "', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
-        #   args = paste(
-        #     "conda activate WHO_WAVES_oak_1.0",
-        #     "pip install git+https://github.com/onnela-lab/forest@ffb36be508d6161e8fbfe70a27048e218cc9394d",
-        #     sep = " ; "
-        #   )
-        # )
+        vct_msg_module[le_env] <- "Modules already installed. Versions for some modules may or may not match WAVES configuration, check below. Version differences should not affect pipeline, but is noted for thoroughness."
       }
-
-      tbl_pkgs_oak_1.0 <- get_tbl_pkgs(
-        df_pkgs_oak_1.0,
-        conda_env = "WHO_WAVES_oak_1.0"
-      )
-      msg_oak_pkg <- ifelse(
-        all(tbl_pkgs_oak_1.0$`_data`$`Version WAVES` == tbl_pkgs_oak_1.0$`_data`$`Version Installed`),
-        yes = "Modules successfully installed.",
-        no  = "Modules installated do not completely match WAVES configuration. Please see the table below for module versions that do not match or are completely missing."
-      )
-
-    }
-  }
-
-  # oak_pre-release ----
-  if (chk_oak_pre) {
-
-    # Install's of forest from  at least commit adada3f onwards don't work unless
-    # timezonefinder module is installed beforehand. To lazy to open an issue
-    # for it.
-    conda_create(
-      envname = "WHO_WAVES_oak_pre",
-      forge = FALSE,
-      python_version = 3.11, # match version in walking R package
-      pip = TRUE
-    )
-    chk_successful <-
-      list.files(
-        file.path(miniconda_path(), "envs")
-      ) |> grepl(x = _,
-                 pattern = "WHO_WAVES_oak_pre") |>
-      any()
-
-    if (chk_successful) {
-
-      msg_oak_pre_env <- "Successfuly created"
-
-      # The Forest module in the `Walking` R package from Muscheli is from
-      # Dec 13, 2024 https://github.com/onnela-lab/forest/commit/45fb41038bd46c25d9e6a4442aa74fa03b501317
-      if (chk_windows) {
-        system2(
-          command = file.path(miniconda_path(), "Scripts", "activate.bat"),
-          args = paste(
-            "activate WHO_WAVES_oak_pre",
-            "pip install git+https://github.com/onnela-lab/forest@45fb41038bd46c25d9e6a4442aa74fa03b501317",
-            sep = " & "
-          )
-        )
-      } else {
-        # TODO CHECK
-        # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_oak_pre ; pip install git+https://github.com/onnela-lab/forest@45fb41038bd46c25d9e6a4442aa74fa03b501317
-        system2(
-          command = "source",
-          args = paste(
-            paste0('"', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
-            "conda activate WHO_WAVES_oak_pre",
-            "pip install git+https://github.com/onnela-lab/forest@45fb41038bd46c25d9e6a4442aa74fa03b501317",
-            sep = " ; "
-          )
-        )
-        # system2(
-        #   command = paste0('source "', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
-        #   args = paste(
-        #     "conda activate WHO_WAVES_oak_pre",
-        #     "pip install git+https://github.com/onnela-lab/forest@45fb41038bd46c25d9e6a4442aa74fa03b501317",
-        #     sep = " ; "
-        #   )
-        # )
-      }
-
-      tbl_pkgs_oak_pre <- get_tbl_pkgs(
-        df_pkgs_oak_pre,
-        conda_env = "WHO_WAVES_oak_pre"
-      )
-      msg_oak_pre_pkg <- ifelse(
-        all(tbl_pkgs_oak_pre$`_data`$`Version WAVES` == tbl_pkgs_oak_pre$`_data`$`Version Installed`),
-        yes = "Modules successfully installed.",
-        no  = "Modules installated do not completely match WAVES configuration. Please see the table below for module versions that do not match or are completely missing."
-      )
-
-    } else {
-      msg_oak_pre_env <- "Not created. Share report with WHO_WAVES team."
-      msg_oak_pre_pkg <- "Environment not created, no packages installed."
-    }
-
-  } else {
-
-    msg_oak_pre_env <- "Already exists."
-
-    # Check packages are installed.
-    tbl_pkgs_oak_pre <- get_tbl_pkgs(
-      df_pkgs_oak_pre,
-      conda_env = "WHO_WAVES_oak_pre"
-    )
-    chk_package <-
-      all(tbl_pkgs_oak_pre$`_data`$`Version WAVES` == tbl_pkgs_oak_pre$`_data`$`Version Installed`)
-
-    if (chk_package) {
-      msg_oak_pre_pkg <- "Modules already installed."
-    } else {
-
-      # Install modules and check one more time afterwards.
-      if (chk_windows) {
-        system2(
-          command = file.path(miniconda_path(), "Scripts", "activate.bat"),
-          args = paste(
-            "activate WHO_WAVES_oak_pre",
-            "pip install git+https://github.com/onnela-lab/forest@45fb41038bd46c25d9e6a4442aa74fa03b501317",
-            sep = " & "
-          )
-        )
-      } else {
-        # TODO CHECK
-        # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_oak_pre ; pip install git+https://github.com/onnela-lab/forest@45fb41038bd46c25d9e6a4442aa74fa03b501317
-        system2(
-          command = "source",
-          args = paste(
-            paste0('"', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
-            "conda activate WHO_WAVES_oak_pre",
-            "pip install git+https://github.com/onnela-lab/forest@45fb41038bd46c25d9e6a4442aa74fa03b501317",
-            sep = " ; "
-          )
-        )
-        # system2(
-        #   command = paste0('source "', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
-        #   args = paste(
-        #     "conda activate WHO_WAVES_oak_pre",
-        #     "pip install git+https://github.com/onnela-lab/forest@45fb41038bd46c25d9e6a4442aa74fa03b501317",
-        #     sep = " ; "
-        #   )
-        # )
-      }
-
-      tbl_pkgs_oak_pre <- get_tbl_pkgs(
-        df_pkgs_oak_pre,
-        conda_env = "WHO_WAVES_oak_pre"
-      )
-      msg_oak_pre_pkg <- ifelse(
-        all(tbl_pkgs_oak_pre$`_data`$`Version WAVES` == tbl_pkgs_oak_pre$`_data`$`Version Installed`),
-        yes = "Modules successfully installed.",
-        no  = "Modules installated do not completely match WAVES configuration. Please see the table below for module versions that do not match or are completely missing."
-      )
 
     }
   }
@@ -654,39 +319,39 @@ config_miniconda <- function(df_pkgs_stepcount,
     Message = c(
       msg_conda,
       conda_version(),
-      msg_step_env,
-      msg_step_pkg,
-      msg_acc_env,
-      msg_acc_pkg,
-      msg_acti_env,
-      msg_acti_pkg,
-      msg_oak_env,
-      msg_oak_pkg,
-      msg_oak_pre_env,
-      msg_oak_pre_pkg
+      vct_msg_env["WHO_WAVES_stepcount"],
+      vct_msg_module["WHO_WAVES_stepcount"],
+      vct_msg_env["WHO_WAVES_accelerometer"],
+      vct_msg_module["WHO_WAVES_accelerometer"],
+      vct_msg_env["WHO_WAVES_actinet"],
+      vct_msg_module["WHO_WAVES_actinet"],
+      vct_msg_env["WHO_WAVES_oak_1.0"],
+      vct_msg_module["WHO_WAVES_oak_1.0"],
+      vct_msg_env["WHO_WAVES_oak_pre"],
+      vct_msg_module["WHO_WAVES_oak_pre"]
     )
   )
   rownames(df_msg) <- c(
     "miniconda_install",
     "miniconda_version",
     "step_env",
-    "step_pkg",
+    "step_module",
     "wlms_env",
-    "wlms_pkg",
+    "wlms_module",
     "acti_env",
-    "acti_pkg",
+    "acti_module",
     "oak_1.0_env",
-    "oak_1.0_pkg",
+    "oak_1.0_module",
     "oak_pre_env",
-    "oak_pre_pkg"
+    "oak_pre_module"
   )
   return(list(
     df_msg   = df_msg,
-    tbl_step = tbl_pkgs_stepcount,
-    tbl_wlms = tbl_pkgs_walmsley,
-    tbl_acti = tbl_pkgs_actinet,
-    tbl_oak1 = tbl_pkgs_oak_1.0,
-    tbl_oakp = tbl_pkgs_oak_pre
+    tbl_step = lst_tbl_module[["WHO_WAVES_stepcount"]],
+    tbl_wlms = lst_tbl_module[["WHO_WAVES_accelerometer"]],
+    tbl_acti = lst_tbl_module[["WHO_WAVES_actinet"]],
+    tbl_oak1 = lst_tbl_module[["WHO_WAVES_oak_1.0"]],
+    tbl_oakp = lst_tbl_module[["WHO_WAVES_oak_pre"]]
   ))
 
 }

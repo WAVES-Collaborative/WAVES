@@ -37,10 +37,6 @@ vct_raw_fpa <- file.path(
 ####                                                                         %%%%
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Sys.setenv(
-  RETICULATE_CONDA = file.path(Sys.getenv("RETICULATE_MINICONDA_PATH"), "bin", "conda")
-)
-
 # Load packages required to define the pipeline:
 source("packages.R") |>
   suppressMessages() |>
@@ -216,58 +212,58 @@ tar_plan(
   ##                             MINICONDA SETUP                            ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   tar_file_read(
-    name    = df_pkgs_stepcount,
-    command = file.path("data", "0_CONFIG", "RAW", "df_pkgs_stepcount.csv"),
+    name    = df_module_stepcount,
+    command = file.path("data", "0_CONFIG", "RAW", "df_modules_stepcount.csv"),
     read    = fread(!!.x, sep = ","),
     format  = "parquet"
   ),
   tar_file_read(
-    name    = df_pkgs_walmsley,
-    command = file.path("data", "0_CONFIG", "RAW", "df_pkgs_walmsley.csv"),
+    name    = df_module_walmsley,
+    command = file.path("data", "0_CONFIG", "RAW", "df_modules_walmsley.csv"),
     read    =
       fread(!!.x, sep = ",") |>
       mutate(
         `Version WAVES` = case_when(
-          Package %in% c("packaging", "symlink-exe-runtime") ~ paste0(`Version WAVES`, ".0"),
+          Module %in% c("packaging", "symlink-exe-runtime") ~ paste0(`Version WAVES`, ".0"),
           .default = `Version WAVES`
         )
       ),
     format  = "parquet"
   ),
   tar_file_read(
-    name    = df_pkgs_actinet,
-    command = file.path("data", "0_CONFIG", "RAW", "df_pkgs_actinet.csv"),
+    name    = df_module_actinet,
+    command = file.path("data", "0_CONFIG", "RAW", "df_modules_actinet.csv"),
     read    =
       fread(!!.x, sep = ",") |>
       mutate(
         `Version WAVES` = case_when(
-          Package %in% c("packaging", "symlink-exe-runtime") ~ paste0(`Version WAVES`, ".0"),
+          Module %in% c("packaging", "symlink-exe-runtime") ~ paste0(`Version WAVES`, ".0"),
           .default = `Version WAVES`
         )
       ),
     format  = "parquet"
   ),
   tar_file_read(
-    name    = df_pkgs_oak_1.0,
-    command = file.path("data", "0_CONFIG", "RAW", "df_pkgs_oak1.0.csv"),
+    name    = df_module_oak_1.0,
+    command = file.path("data", "0_CONFIG", "RAW", "df_modules_oak1.0.csv"),
     read    =
       fread(!!.x, sep = ",") |>
       mutate(
         `Version WAVES` = case_when(
-          Package %in% c("packaging", "symlink-exe-runtime") ~ paste0(`Version WAVES`, ".0"),
+          Module %in% c("packaging", "symlink-exe-runtime") ~ paste0(`Version WAVES`, ".0"),
           .default = `Version WAVES`
         )
       ),
     format  = "parquet"
   ),
   tar_file_read(
-    name    = df_pkgs_oak_pre,
-    command = file.path("data", "0_CONFIG", "RAW", "df_pkgs_oakpre.csv"),
+    name    = df_module_oak_pre,
+    command = file.path("data", "0_CONFIG", "RAW", "df_modules_oakpre.csv"),
     read    =
       fread(!!.x, sep = ",") |>
       mutate(
         `Version WAVES` = case_when(
-          Package %in% c("packaging", "symlink-exe-runtime") ~ paste0(`Version WAVES`, ".0"),
+          Module %in% c("packaging", "symlink-exe-runtime") ~ paste0(`Version WAVES`, ".0"),
           .default = `Version WAVES`
         )
       ),
@@ -276,11 +272,11 @@ tar_plan(
   tar_qs(
     name = lst_miniconda,
     command = config_miniconda(
-      df_pkgs_stepcount,
-      df_pkgs_walmsley,
-      df_pkgs_actinet,
-      df_pkgs_oak_1.0,
-      df_pkgs_oak_pre
+      df_module_stepcount,
+      df_module_walmsley,
+      df_module_actinet,
+      df_module_oak_1.0,
+      df_module_oak_pre
     ),
     cue = tar_cue(mode = "always")
   ),

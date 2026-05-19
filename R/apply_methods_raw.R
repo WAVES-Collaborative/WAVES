@@ -311,7 +311,11 @@ apply_methods_raw <- function(fpa_read,
   load(file.path(dir_models, "montoye2018.RData"))
 
   # Oak 1.0
-  use_condaenv("WHO_WAVES_oak_1.0")
+  suffix_python <- if (reticulate:::is_windows()) "python.exe" else "bin/python"
+  use_python(
+    file.path(miniconda_path(), "envs", "WHO_WAVES_oak_1.0", suffix_python),
+    required = TRUE
+  )
   forest <- import("forest")
   np <- import("numpy")
 
@@ -819,7 +823,11 @@ apply_oak.pre <- function(fpa_read,
     dim(mtx_data)[1]
 
   # Oak Pre-release
-  use_condaenv("WHO_WAVES_oak_pre")
+  suffix_python <- if (reticulate:::is_windows()) "python.exe" else "bin/python"
+  use_python(
+    file.path(miniconda_path(), "envs", "WHO_WAVES_oak_pre", suffix_python),
+    required = TRUE
+  )
   forest <- import("forest")
   np <- import("numpy")
 

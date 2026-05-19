@@ -14,7 +14,7 @@ overwrite,FALSE,params_general
 acc.metric,ENMO,params_general
 maxNcores,c(),params_general
 print.filename,FALSE,params_general
-do.parallel,TRUE,params_general
+do.parallel,FALSE,params_general
 windowsizes,"c(5,900,3600)",params_general
 desiredtz,UTC,params_general
 configtz,c(),params_general
