@@ -249,38 +249,41 @@ tar_plan(
     vct_raw_type,
     vct_basic
   ),
-  tar_target(
+  tar_file(
     name    = vct_ox_step,
     command = apply_ox_stepcount(
-      vct_ox_input = vct_ox_input,
-      fdr_write    = file.path(getwd(), dir_stepcount),
-      fdr_log      = dir_logs,
-      log_prefix   = "main_",
+      ox_input      = vct_ox_input,
+      fdr_write     = file.path(getwd(), dir_stepcount),
+      fdr_log       = dir_logs,
+      log_prefix    = "main_",
       lst_miniconda = lst_miniconda
     ),
-    format = "file"
+    pattern   = map(vct_ox_input),
+    iteration = "vector"
   ),
-  tar_target(
+  tar_file(
     name    = vct_ox_wlms,
     command = apply_ox_walmsley(
-      vct_ox_input = vct_ox_input,
-      fdr_write    = file.path(getwd(), dir_walmsley),
-      fdr_log      = dir_logs,
-      log_prefix   = "main_",
+      ox_input      = vct_ox_input,
+      fdr_write     = file.path(getwd(), dir_walmsley),
+      fdr_log       = dir_logs,
+      log_prefix    = "main_",
       lst_miniconda = lst_miniconda
     ),
-    format = "file"
+    pattern   = map(vct_ox_input),
+    iteration = "vector"
   ),
-  tar_target(
+  tar_file(
     name    = vct_ox_acti,
     command = apply_ox_actinet(
-      vct_ox_input = vct_ox_input,
-      fdr_write    = file.path(getwd(), dir_actinet),
-      fdr_log      = dir_logs,
-      log_prefix   = "main_",
+      ox_input      = vct_ox_input,
+      fdr_write     = file.path(getwd(), dir_actinet),
+      fdr_log       = dir_logs,
+      log_prefix    = "main_",
       lst_miniconda = lst_miniconda
     ),
-    format = "file"
+    pattern   = map(vct_ox_input),
+    iteration = "vector"
   ),
   tar_file(
     name    = vct_ox,
