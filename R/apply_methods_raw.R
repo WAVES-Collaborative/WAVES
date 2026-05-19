@@ -311,6 +311,19 @@ apply_methods_raw <- function(fpa_read,
   load(file.path(dir_models, "montoye2018.RData"))
 
   # Oak 1.0
+  # The oak algorithm uses frequency components from a continuous wavelet transformation
+  # using the synchrosqueezing method. This method is implemented in Python through
+  # ssqueezepy.ssq_cwt()
+  #   https://github.com/onnela-lab/forest/blob/9bdeee682b19a7206aadbe4d8abe65a626f2319b/src/forest/oak/base.py#L176
+  # which in turn uses the numba module to run fast fourier transformations in
+  # parallel.
+  #   Helper function in ssq_cwt(): https://github.com/OverLordGoldDragon/ssqueezepy/blob/adf76ac1930321a6e06d5fa5762dc5549316cf91/ssqueezepy/_ssq_cwt.py#L205
+  #   phase_cwt(): https://github.com/OverLordGoldDragon/ssqueezepy/blob/adf76ac1930321a6e06d5fa5762dc5549316cf91/ssqueezepy/_ssq_cwt.py#L420
+  #   which imports phase_cwt_cpu from algos: https://github.com/OverLordGoldDragon/ssqueezepy/blob/adf76ac1930321a6e06d5fa5762dc5549316cf91/ssqueezepy/algos.py#L706
+  #   which uses @jit(parallel = TRUE) from numba on L731
+  # By default, this uses all the cores available on the computer/HPC, which we
+  # don't want. So turn off parallel processing for ssqueezepy.
+  Sys.setenv(SSQ_PARALLEL = 0)
   suffix_python <- if (reticulate:::is_windows()) "python.exe" else "bin/python"
   use_python(
     file.path(miniconda_path(), "envs", "WHO_WAVES_oak_1.0", suffix_python),
@@ -511,7 +524,7 @@ apply_methods_raw <- function(fpa_read,
     df_all$steps_verisense.revised[ind_veri] <- le_steps
 
     ### Steps: oak ----
-    # Split into max 6 hours to try and prevent overloading memory.
+    # Split into max 1 hour to try and prevent overloading memory.
 
     # time (t_bout) has to be in double format AND contain fractional seconds.
     # The below won't work if your vector just repeats the time value throughout
@@ -520,108 +533,49 @@ apply_methods_raw <- function(fpa_read,
     # Incorrect: 1512410340 1512410340 1512410340 1512410340 1512410340
     message("Oak...")
 
-    if (round(length(ind_chunk) / I$sf / 3600, digits = 2) > 6) {
+    #### oak chunks ----
+    chunk_is_last_oak <- FALSE
+    chunk_begin_oak   <- chunk_begin
+    chunk_length_oak  <- I$sf * 60 * 60 * 1
+    chunk_end_oak     <- chunk_begin_oak + chunk_length_oak - 1
+    chunk_n_oak       <- 1
+    oak_start_dttm    <- chunk_start_dttm
+    oak_start_sec     <- chunk_start_sec
 
-      #### oak chunks ----
-      chunk_is_last_oak <- FALSE
-      chunk_begin_oak   <- chunk_begin
-      chunk_length_oak  <- I$sf * 60 * 60 * 6
-      chunk_end_oak     <- chunk_begin_oak + chunk_length_oak - 1
-      chunk_n_oak       <- 1
-      oak_start_dttm    <- chunk_start_dttm
-      oak_start_sec     <- chunk_start_sec
-
-      while (!chunk_is_last_oak) {
-        if (chunk_end_oak >= chunk_end) {
-          chunk_end_oak <- chunk_end
-          chunk_is_last_oak <- TRUE
-        }
-        ind_chunk_oak <-
-          chunk_begin_oak:chunk_end_oak
-        ind_steps_oak <- seq(
-          from = ceiling(chunk_begin_oak / I$sf),
-          to   = ceiling(chunk_end_oak / I$sf),
-          by   = 1
-        )
-
-        chk_decimal <-
-          last(ind_chunk_oak) / I$sf !=
-          round(last(ind_chunk_oak) / I$sf, digits = 0)
-
-        if (chunk_is_last_oak & chk_decimal) {
-
-          # Oak doesn't like it when the last bit isn't easily divisible by the
-          # sample frequency. Don't read in last bit of Hz then.
-          ind_chunk_oak <- seq(
-            from = chunk_begin_oak,
-            to   = floor(last(ind_chunk_oak) / I$sf) * I$sf
-          )
-          df_all$steps_oak.1.0[last(ind_steps_oak)] <- 0
-          ind_steps_oak <- ind_steps_oak[-length(ind_steps_oak)]
-
-        }
-
-        vm_bout <- forest$oak$base$preprocess_bout(
-          t_bout = np$array(
-            seq(
-              from = oak_start_sec,
-              by = 1 / I$sf,
-              length.out = length(ind_chunk_oak)
-            ),
-            dtype = "float64"
-          ),
-          x_bout = np$array(mtx_data[ind_chunk_oak, "x"], dtype = "float64"),
-          y_bout = np$array(mtx_data[ind_chunk_oak, "y"], dtype = "float64"),
-          z_bout = np$array(mtx_data[ind_chunk_oak, "z"], dtype = "float64"),
-          fs     = as.integer(I$sf)
-        )
-
-        # defaults except for fs
-        # https://github.com/onnela-lab/forest/blob/develop/docs/source/oak.md#default-tuning-parameters-for-walking-recognition-and-step-counting
-        df_all$steps_oak.1.0[ind_steps_oak] <- forest$oak$base$find_walking(
-          vm_bout = vm_bout[[2]],
-          fs = as.integer(I$sf),
-          min_amp = 0.3,
-          step_freq = c(1.4, 2.3),
-          alpha = 0.6,
-          beta = 2.5,
-          min_t = 3L,
-          delta = 20L
-        )
-
-        chunk_begin_oak <- chunk_begin_oak + chunk_length_oak
-        chunk_end_oak   <- chunk_begin_oak + chunk_length_oak - 1
-        chunk_n_oak     <- chunk_n_oak + 1
-        oak_start_dttm  <- oak_start_dttm + floor(chunk_begin_oak / I$sf)
-        oak_start_sec   <- as.numeric(oak_start_dttm)
+    while (!chunk_is_last_oak) {
+      if (chunk_end_oak >= chunk_end) {
+        chunk_end_oak <- chunk_end
+        chunk_is_last_oak <- TRUE
       }
-    } else {
+      ind_chunk_oak <-
+        chunk_begin_oak:chunk_end_oak
+      ind_steps_oak <- seq(
+        from = ceiling(chunk_begin_oak / I$sf),
+        to   = ceiling(chunk_end_oak / I$sf),
+        by   = 1
+      )
 
-      #### no chunks ----
       chk_decimal <-
-        last(ind_chunk) / I$sf !=
-        round(last(ind_chunk) / I$sf, digits = 0)
+        chunk_end_oak / I$sf !=
+        round(chunk_end_oak / I$sf, digits = 0)
 
-      if (chk_decimal) {
+      if (chunk_is_last_oak & chk_decimal) {
 
         # Oak doesn't like it when the last bit isn't easily divisible by the
         # sample frequency. Don't read in last bit of Hz then.
         ind_chunk_oak <- seq(
-          from = chunk_begin,
-          to   = floor(last(ind_chunk_oak) / I$sf) * I$sf
+          from = chunk_begin_oak,
+          to   = floor(chunk_end_oaks / I$sf) * I$sf
         )
-        df_all$steps_oak.1.0[last(ind_steps)] <- 0
-        ind_steps_oak <- ind_steps[-length(ind_steps)]
+        df_all$steps_oak.1.0[last(ind_steps_oak)] <- 0
+        ind_steps_oak <- ind_steps_oak[-length(ind_steps_oak)]
 
-      } else {
-        ind_chunk_oak <- ind_chunk
-        ind_steps_oak <- ind_steps
       }
 
       vm_bout <- forest$oak$base$preprocess_bout(
         t_bout = np$array(
           seq(
-            from = chunk_start_sec,
+            from = oak_start_sec,
             by = 1 / I$sf,
             length.out = length(ind_chunk_oak)
           ),
@@ -645,6 +599,12 @@ apply_methods_raw <- function(fpa_read,
         min_t = 3L,
         delta = 20L
       )
+
+      chunk_begin_oak <- chunk_begin_oak + chunk_length_oak
+      chunk_end_oak   <- chunk_begin_oak + chunk_length_oak - 1
+      chunk_n_oak     <- chunk_n_oak + 1
+      oak_start_dttm  <- oak_start_dttm + floor(chunk_begin_oak / I$sf)
+      oak_start_sec   <- as.numeric(oak_start_dttm)
     }
     gc()
 
@@ -823,6 +783,12 @@ apply_oak.pre <- function(fpa_read,
     dim(mtx_data)[1]
 
   # Oak Pre-release
+  # The oak algorithm uses frequency components from a continuous wavelet transformation
+  # using the synchrosqueezing method. This method is implemented in Python through
+  # ssqueezepy.ssq_cwt() which in turn uses the numba module to run fast fourier
+  # transformations in parallel. By default, this uses all the cores available
+  # on the computer/HPC, which we don't want. So turn off parallel processing for ssqueezepy.
+  Sys.setenv(SSQ_PARALLEL = 0)
   suffix_python <- if (reticulate:::is_windows()) "python.exe" else "bin/python"
   use_python(
     file.path(miniconda_path(), "envs", "WHO_WAVES_oak_pre", suffix_python),
@@ -831,13 +797,6 @@ apply_oak.pre <- function(fpa_read,
   forest <- import("forest")
   np <- import("numpy")
 
-  # variables used to read data in 24 hr increment
-  chunk_is_last    <- FALSE
-  chunk_begin      <- 1
-  chunk_end        <- chunk_length <- I$sf * 60 * 60 * 24
-  chunk_n          <- 1
-  chunk_start_dttm <- lst_start_tz$start_dttm
-  chunk_start_sec  <- lst_start_tz$start_secs
   df_all <- tibble(
     id = fnm_sans_ext,
     datetime = seq.POSIXt(
@@ -848,168 +807,89 @@ apply_oak.pre <- function(fpa_read,
     steps_oak.pre            = NA
   )
 
-  while(!chunk_is_last) {
+  ### Steps: oak ----
+  # Split into max 1 hour to try and prevent overloading memory.
 
-    if (chunk_end >= nrow_data) {
-      # if chunk is less than 24 hrs, set to end of data and make this
-      # the last loop.
-      chunk_end <-  nrow_data
-      chunk_is_last <- TRUE
+  # time (t_bout) has to be in double format AND contain fractional seconds.
+  # The below won't work if your vector just repeats the time value throughout
+  # the sampling frequency.
+  # Correct: 1512410340.00 1512410340.01 1512410340.02 1512410340.03 1512410340.04
+  # Incorrect: 1512410340 1512410340 1512410340 1512410340 1512410340
+
+  #### oak chunks ----
+  chunk_is_last_oak <- FALSE
+  chunk_begin_oak   <- 1
+  chunk_length_oak  <- I$sf * 60 * 60 * 1
+  chunk_end_oak     <- chunk_begin_oak + chunk_length_oak - 1
+  chunk_n_oak       <- 1
+  oak_start_dttm    <- lst_start_tz$start_dttm
+  oak_start_sec     <- lst_start_tz$start_secs
+
+  while (!chunk_is_last_oak) {
+    if (chunk_end_oak >= nrow_data) {
+      chunk_end_oak <- nrow_data
+      chunk_is_last_oak <- TRUE
     }
-
-    ind_chunk <-
-      chunk_begin:chunk_end
-    ind_steps <- seq(
-      from = ceiling(chunk_begin / I$sf),
-      to   = ceiling(chunk_end / I$sf),
+    ind_chunk_oak <-
+      chunk_begin_oak:chunk_end_oak
+    ind_steps_oak <- seq(
+      from = ceiling(chunk_begin_oak / I$sf),
+      to   = ceiling(chunk_end_oak / I$sf),
       by   = 1
     )
 
-    ### Steps: oak ----
-    # Split into max 6 hours to try and prevent overloading memory.
+    chk_decimal <-
+      chunk_end_oak / I$sf !=
+      round(chunk_end_oak / I$sf, digits = 0)
 
-    # time (t_bout) has to be in double format AND contain fractional seconds.
-    # The below won't work if your vector just repeats the time value throughout
-    # the sampling frequency.
-    # Correct: 1512410340.00 1512410340.01 1512410340.02 1512410340.03 1512410340.04
-    # Incorrect: 1512410340 1512410340 1512410340 1512410340 1512410340
+    if (chunk_is_last_oak & chk_decimal) {
 
-    if (round(length(ind_chunk) / I$sf / 3600, digits = 2) > 6) {
-
-      #### oak chunks ----
-      chunk_is_last_oak <- FALSE
-      chunk_begin_oak   <- chunk_begin
-      chunk_length_oak  <- I$sf * 60 * 60 * 6
-      chunk_end_oak     <- chunk_begin_oak + chunk_length_oak - 1
-      chunk_n_oak       <- 1
-      oak_start_dttm    <- chunk_start_dttm
-      oak_start_sec     <- chunk_start_sec
-
-      while (!chunk_is_last_oak) {
-        if (chunk_end_oak >= chunk_end) {
-          chunk_end_oak <- chunk_end
-          chunk_is_last_oak <- TRUE
-        }
-        ind_chunk_oak <-
-          chunk_begin_oak:chunk_end_oak
-        ind_steps_oak <- seq(
-          from = ceiling(chunk_begin_oak / I$sf),
-          to   = ceiling(chunk_end_oak / I$sf),
-          by   = 1
-        )
-
-        chk_decimal <-
-          last(ind_chunk_oak) / I$sf !=
-          round(last(ind_chunk_oak) / I$sf, digits = 0)
-
-        if (chunk_is_last_oak & chk_decimal) {
-
-          # Oak doesn't like it when the last bit isn't easily divisible by the
-          # sample frequency. Don't read in last bit of Hz then.
-          ind_chunk_oak <- seq(
-            from = chunk_begin_oak,
-            to   = floor(last(ind_chunk_oak) / I$sf) * I$sf
-          )
-          df_all$steps_oak.pre[last(ind_steps_oak)] <- 0
-          ind_steps_oak <- ind_steps_oak[-length(ind_steps_oak)]
-
-        }
-
-        vm_bout <- forest$oak$base$preprocess_bout(
-          t_bout = np$array(
-            seq(
-              from = oak_start_sec,
-              by = 1 / I$sf,
-              length.out = length(ind_chunk_oak)
-            ),
-            dtype = "float64"
-          ),
-          x_bout = np$array(mtx_data[ind_chunk_oak, "x"], dtype = "float64"),
-          y_bout = np$array(mtx_data[ind_chunk_oak, "y"], dtype = "float64"),
-          z_bout = np$array(mtx_data[ind_chunk_oak, "z"], dtype = "float64"),
-          fs     = as.integer(I$sf)
-        )
-
-        # defaults except for fs
-        # https://github.com/onnela-lab/forest/blob/develop/docs/source/oak.md#default-tuning-parameters-for-walking-recognition-and-step-counting
-        df_all$steps_oak.pre[ind_steps_oak] <- forest$oak$base$find_walking(
-          vm_bout = vm_bout[[2]],
-          fs = as.integer(I$sf),
-          min_amp = 0.3,
-          step_freq = c(1.4, 2.3),
-          alpha = 0.6,
-          beta = 2.5,
-          min_t = 3L,
-          delta = 20L
-        )
-
-        chunk_begin_oak <- chunk_begin_oak + chunk_length_oak
-        chunk_end_oak   <- chunk_begin_oak + chunk_length_oak - 1
-        chunk_n_oak     <- chunk_n_oak + 1
-        oak_start_dttm  <- oak_start_dttm + floor(chunk_begin_oak / I$sf)
-        oak_start_sec   <- as.numeric(oak_start_dttm)
-      }
-    } else {
-
-      #### no chunks ----
-      chk_decimal <-
-        last(ind_chunk) / I$sf !=
-        round(last(ind_chunk) / I$sf, digits = 0)
-
-      if (chk_decimal) {
-
-        # Oak doesn't like it when the last bit isn't easily divisible by the
-        # sample frequency. Don't read in last bit of Hz then.
-        ind_chunk_oak <- seq(
-          from = chunk_begin,
-          to   = floor(last(ind_chunk_oak) / I$sf) * I$sf
-        )
-        df_all$steps_oak.pre[last(ind_steps)] <- 0
-        ind_steps_oak <- ind_steps[-length(ind_steps)]
-
-      } else {
-        ind_chunk_oak <- ind_chunk
-        ind_steps_oak <- ind_steps
-      }
-
-      vm_bout <- forest$oak$base$preprocess_bout(
-        t_bout = np$array(
-          seq(
-            from = chunk_start_sec,
-            by = 1 / I$sf,
-            length.out = length(ind_chunk_oak)
-          ),
-          dtype = "float64"
-        ),
-        x_bout = np$array(mtx_data[ind_chunk_oak, "x"], dtype = "float64"),
-        y_bout = np$array(mtx_data[ind_chunk_oak, "y"], dtype = "float64"),
-        z_bout = np$array(mtx_data[ind_chunk_oak, "z"], dtype = "float64"),
-        fs     = as.integer(I$sf)
+      # Oak doesn't like it when the last bit isn't easily divisible by the
+      # sample frequency. Don't read in last bit of Hz then.
+      ind_chunk_oak <- seq(
+        from = chunk_begin_oak,
+        to   = floor(chunk_end_oak / I$sf) * I$sf
       )
+      df_all$steps_oak.pre[last(ind_steps_oak)] <- 0
+      ind_steps_oak <- ind_steps_oak[-length(ind_steps_oak)]
 
-      # defaults except for fs
-      # https://github.com/onnela-lab/forest/blob/develop/docs/source/oak.md#default-tuning-parameters-for-walking-recognition-and-step-counting
-      df_all$steps_oak.pre[ind_steps_oak] <- forest$oak$base$find_walking(
-        vm_bout = vm_bout[[2]],
-        fs = as.integer(I$sf),
-        min_amp = 0.3,
-        step_freq = c(1.4, 2.3),
-        alpha = 0.6,
-        beta = 2.5,
-        min_t = 3L,
-        delta = 20L
-      )
     }
-    gc()
 
-    ### To restart loop ----
-    chunk_begin      <- chunk_begin + chunk_length
-    chunk_end        <- chunk_begin + chunk_length - 1
-    chunk_n          <- chunk_n + 1
-    chunk_start_dttm <- chunk_start_dttm + (chunk_length / I$sf)
-    chunk_start_sec  <- as.numeric(chunk_start_dttm)
+    vm_bout <- forest$oak$base$preprocess_bout(
+      t_bout = np$array(
+        seq(
+          from = oak_start_sec,
+          by = 1 / I$sf,
+          length.out = length(ind_chunk_oak)
+        ),
+        dtype = "float64"
+      ),
+      x_bout = np$array(mtx_data[ind_chunk_oak, "x"], dtype = "float64"),
+      y_bout = np$array(mtx_data[ind_chunk_oak, "y"], dtype = "float64"),
+      z_bout = np$array(mtx_data[ind_chunk_oak, "z"], dtype = "float64"),
+      fs     = as.integer(I$sf)
+    )
 
+    # defaults except for fs
+    # https://github.com/onnela-lab/forest/blob/develop/docs/source/oak.md#default-tuning-parameters-for-walking-recognition-and-step-counting
+    df_all$steps_oak.pre[ind_steps_oak] <- forest$oak$base$find_walking(
+      vm_bout = vm_bout[[2]],
+      fs = as.integer(I$sf),
+      min_amp = 0.3,
+      step_freq = c(1.4, 2.3),
+      alpha = 0.6,
+      beta = 2.5,
+      min_t = 3L,
+      delta = 20L
+    )
+
+    chunk_begin_oak <- chunk_begin_oak + chunk_length_oak
+    chunk_end_oak   <- chunk_begin_oak + chunk_length_oak - 1
+    chunk_n_oak     <- chunk_n_oak + 1
+    oak_start_dttm  <- oak_start_dttm + floor(chunk_begin_oak / I$sf)
+    oak_start_sec   <- as.numeric(oak_start_dttm)
   }
+  gc()
 
   rm(
     chunk_is_last,
