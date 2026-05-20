@@ -174,35 +174,61 @@ read_acc_raw <- function(fpa_read,
       if (blocknumber == 1) {
 
         # get last time to check if idle-sleep mode occurs between
-        # this block and the next.
-        block_endtime <- last(accread$P$data$time)
+        # this block and the next. Also get last row for imputation.
+        lastblock_endtime <- last(accread$P$data$time)
+        lastblock_enddata <-
+          last(accread$P$data[, c("x", "y", "z")])
 
       } else {
 
         chk_gap <- near(
-          x   = accread$P$data$time[1] - block_endtime,
+          x   = accread$P$data$time[1] - lastblock_endtime,
           y   = 1 / I$sf,
           tol = 0.0001
         )
 
         if (chk_gap) {
-          block_endtime <- last(accread$P$data$time)
+
+          lastblock_endtime <- last(accread$P$data$time)
+          lastblock_enddata <-
+            last(accread$P$data[, c("x", "y", "z")])
+
         } else {
-          stop("Time gap between chunks")
+
+          # https://github.com/wadpac/GGIR/blob/388064b707df4fcfb7f9b755c5a43a477d371092/R/g.getmeta.R#L258
           # Impute gap between chunks
-          timegap_between_chunks = accread$P$data$time[1] - block_endtime
-          if (timegap_between_chunks > 3600 * i$sf) {
+          timegap <- accread$P$data$time[1] - lastblock_endtime
+
+          if (timegap > 3600 * I$sf) {
+
             stop(paste0("Time gap observed of more than 1 hour between data ",
                         "chunks for ", basename(datafile), " . Please contact ",
                         "package maintainer."), call. = FALSE)
-          } else if (timegap_between_chunks > 3 / I$sf && timegap_between_chunks <= 60 * I$sf) {
+
+          } else if (timegap > (3 / I$sf)) {
+
             # impute time gap of more than 3 samples and equal to or less than 1 hour
             # normalise last value
-            S[nrow(S), c("x", "y", "z")] = S[nrow(S), c("x", "y", "z")] / sqrt(sum(S[nrow(S), c("x", "y", "z")]^2))
-            # replicate last row
-            newRows = do.call(rbind, replicate(round(timegap_between_chunks  * sf), S[nrow(S), ], simplify = FALSE))
-            # append to end
-            S = rbind(S, newRows)
+            lastblock_enddata <- lastblock_enddata / sqrt(sum(lastblock_enddata^2))
+
+            # get number of rows to replicate last value, should always be a whole number...right? Sometimes
+            # there is very very very small decimal left so truncate but double check
+            # round would lead to same number.
+            n_rep <- timegap  * I$sf
+
+            if (trunc(n_rep) != round(n_rep)) stop("Imputing time between chunks, time gap does not result in whole number when multiplied by sample frequency.") # n_gap <- round(timegap  * I$sf)
+
+            n_rep <- trunc(n_rep)
+            accread$P$data <- bind_rows(
+              # replicate last row and append to beginning, time column doesn't
+              # matter since its not used for calibrating or in future steps.
+              lastblock_enddata[rep(1, times = n_rep), ],
+              accread$P$data
+            )
+            lastblock_endtime <- last(accread$P$data$time)
+            lastblock_enddata <-
+              last(accread$P$data[, c("x", "y", "z")])
+
           }
         }
       }
