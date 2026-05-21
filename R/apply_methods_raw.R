@@ -394,21 +394,20 @@ apply_methods_raw <- function(fpa_read,
       names(df_montoye) |>
       toupper()
 
-    # Window size is 30 seconds.
-    n_window <- ceiling(
-      nrow(df_montoye) / (I$sf * 30)
-    )
+    # 30-sec windows; trim partial trailing window so all four classifiers
+    # produce the same number of predictions.
+    window_size <- I$sf * 30
+    n_window    <- floor(nrow(df_montoye) / window_size)
+    if (n_window == 0) next
+    df_montoye  <- df_montoye[seq_len(n_window * window_size), ]
+    df_montoye$window <- rep(seq_len(n_window), each = window_size)
+
     ind_montoye <- which(
       df_all$datetime %in% seq.POSIXt(
         from = chunk_start_dttm,
         by   = "30 secs",
         length.out = n_window
       )
-    )
-    df_montoye$window <- rep(
-      seq_len(n_window),
-      each       = I$sf * 30,
-      length.out = nrow(df_montoye)
     )
     df_features <-
       df_montoye |>
@@ -431,29 +430,31 @@ apply_methods_raw <- function(fpa_read,
         ),
         .by = window
       )
+    # Predict only on rows with complete features; NA elsewhere keeps the
+    # four classifiers row-aligned.
+    chk_complete <- complete.cases(df_features)
+    n_rows       <- nrow(df_features)
+    preds_rf  <- rep(NA_character_, n_rows)
+    preds_nn  <- rep(NA_character_, n_rows)
+    preds_dt  <- rep(NA_character_, n_rows)
+    preds_svm <- rep(NA_character_, n_rows)
+    if (any(chk_complete)) {
+      df_c <- df_features[chk_complete, ]
+      # kernlab drops NA-feature rows; the other three don't.
+      preds_rf[chk_complete]  <- as.character(predict(bsu_random_forest,          newdata = df_c))
+      preds_nn[chk_complete]  <- as.character(predict(bsu_neural_network,         newdata = df_c, type = "class"))
+      preds_dt[chk_complete]  <- as.character(predict(bsu_decision_tree,          newdata = df_c))
+      preds_svm[chk_complete] <- as.character(predict(bsu_support_vector_machine, newdata = df_c, type = "response"))
+    }
     df_all[ind_montoye, c("intensity_montoye.rf",
                           "intensity_montoye.nn",
                           "intensity_montoye.dt",
                           "intensity_montoye.svm")] <-
       tibble(
-        intensity_montoye.rf = predict(
-          bsu_random_forest,
-          newdata = df_features
-        ),
-        intensity_montoye.nn = predict(
-          bsu_neural_network,
-          newdata = df_features,
-          type    = "class"
-        ),
-        intensity_montoye.dt = predict(
-          bsu_decision_tree,
-          newdata = df_features
-        ),
-        intensity_montoye.svm = predict(
-          bsu_support_vector_machine,
-          newdata = df_features,
-          type    = "response"
-        )
+        intensity_montoye.rf  = preds_rf,
+        intensity_montoye.nn  = preds_nn,
+        intensity_montoye.dt  = preds_dt,
+        intensity_montoye.svm = preds_svm
       )
     gc()
 
