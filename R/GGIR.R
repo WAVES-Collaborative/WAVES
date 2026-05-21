@@ -202,6 +202,9 @@ get_start_tz_df <- function(vct_fpa_basic,
                             vct_raw    = NULL,
                             lst_config = NULL) {
 
+  is_custom_csv <- !is.null(lst_config) &&
+    identical(lst_config$format$type, "custom_csv")
+
   vct_fnm <-
     vct_fpa_basic |>
     basename() |>
