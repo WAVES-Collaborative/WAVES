@@ -1,9 +1,13 @@
 read_acc_raw <- function(fpa_read,
                          le_type,
                          vct_fpa_basic,
-                         dir_cal) {
+                         dir_cal,
+                         lst_config = NULL) {
 
   if (is.null(fpa_read)) return(NULL)
+
+  is_custom_csv <- !is.null(lst_config) &&
+    identical(lst_config$format$type, "custom_csv")
 
   # Read ----
   # Adapted from "readAX_jhm" Sydney group code originally in "features.R".
@@ -11,17 +15,20 @@ read_acc_raw <- function(fpa_read,
   fnm_sans_ext <-
     fpa_read |>
     basename() |>
-    tools::file_path_sans_ext()
+    tools::file_path_sans_ext() |>
+    tools::file_path_sans_ext()   # second strip for .csv.gz
 
-  chk_gen <- le_type %in% c(
-    "GENEACTIV - CSV w/ HEADER",
-    "ADHOC",
-    "UNKNOWN"
-  )
+  if (!is_custom_csv) {
+    chk_gen <- le_type %in% c(
+      "GENEACTIV - CSV w/ HEADER",
+      "ADHOC",
+      "UNKNOWN"
+    )
 
-  if (chk_gen) {
-    # Geneactiv and adhoc csv reading not implemented for now.
-    return(NULL)
+    if (chk_gen) {
+      # Adhoc csv is handled via custom_csv config. Skip otherwise.
+      return(NULL)
+    }
   }
 
   # Check if file was already created from a previous run of the pipeline.
@@ -70,204 +77,236 @@ read_acc_raw <- function(fpa_read,
     C$cal.error.end < C$cal.error.start
   if (is.null(C$cal.error.end)) chk_cal <- FALSE
 
-  ## Params ----
-  isLastBlock       <- FALSE
-  iteration         <- 1
-  cols_desired      <- c(
-    "x", "y", "z"
-  )
-  lst_qc <- list()
+  cols_desired <- c("x", "y", "z")
 
-  # g.readaccfile parameters, supply value for every argument except for filequality
-  # which is used in other parts of GGIR but not here.
-  blocknumber       <- 1
-  PreviousEndPage   <- NULL
-  PreviousLastValue <- c(0, 0, 1)
-  PreviousLastTime  <- NULL
-  header            <- NULL
+  if (is_custom_csv) {
 
-  # Default raw data parameters.
-  params_rawdata <-
-    GGIR::extract_params(params2check = "rawdata")[["params_rawdata"]]
+    ## Custom CSV path ----
+    # Reads whole file via GGIR::read.myacc.csv. TODO: chunked CSV reading
+    # for multi-GB inputs.
+    rmc_args <- build_rmc_args(lst_config$format$csv_spec,
+                               target_fn = GGIR::read.myacc.csv)
+    csv_read <- do.call(
+      GGIR::read.myacc.csv,
+      c(list(rmc.file = fpa_read, desiredtz = "UTC"), rmc_args)
+    )
+    data <- csv_read$data
 
-  # Although we don't extract the time column from accread$P, we will still
-  # set desiredtz to "UTC" just in case.
-  params_general <-
-    GGIR::extract_params(params2check = "general")[["params_general"]]
-  params_general$desiredtz <- "UTC"
+    cols_temp <- grep(
+      x = names(data),
+      pattern = "temp|temperature",
+      ignore.case = TRUE
+    )
+    cols_all <- c(cols_desired, names(data)[cols_temp])
+    mtx_data <- as.matrix(data[, cols_all])
+
+    ## calibrate ----
+    if (chk_cal) {
+      mtx_data[, c("x", "y", "z")] <- scale(
+        mtx_data[, c("x", "y", "z")],
+        center = -C$offset,
+        scale  = 1 / C$scale
+      )
+    }
+
+  } else {
+
+    ## Params ----
+    isLastBlock       <- FALSE
+    iteration         <- 1
+    lst_qc            <- list()
+
+    # g.readaccfile parameters, supply value for every argument except for filequality
+    # which is used in other parts of GGIR but not here.
+    blocknumber       <- 1
+    PreviousEndPage   <- NULL
+    PreviousLastValue <- c(0, 0, 1)
+    PreviousLastTime  <- NULL
+    header            <- NULL
+
+    # Default raw data parameters.
+    params_rawdata <-
+      GGIR::extract_params(params2check = "rawdata")[["params_rawdata"]]
+
+    # Although we don't extract the time column from accread$P, we will still
+    # set desiredtz to "UTC" just in case.
+    params_general <-
+      GGIR::extract_params(params2check = "general")[["params_general"]]
+    params_general$desiredtz <- "UTC"
 
   # Default cleaning parameters. Just need "nonwear_approach" from this list, which
   # is the 2023 method
   # nonwear_approach <- "2023"
   # GGIR::extract_params(params2check = "cleaning")[["params_cleaning"]]
 
-  # Default nonwear clip block parameters.
-  params_nw.clip.block <- GGIR::get_nw_clip_block_params(
-    monc               = I$monc,
-    dformat            = I$dformc,
-    deviceSerialNumber = g.extractheadervars(I)$deviceSerialNumber,
-    sf                 = I$sf,
-    params_rawdata     = params_rawdata
-  )
+    # Default nonwear clip block parameters.
+    params_nw.clip.block <- GGIR::get_nw_clip_block_params(
+      monc               = I$monc,
+      dformat            = I$dformc,
+      deviceSerialNumber = g.extractheadervars(I)$deviceSerialNumber,
+      sf                 = I$sf,
+      params_rawdata     = params_rawdata
+    )
   # ws3 = params_general[["windowsizes"]][1]; ws2 = params_general[["windowsizes"]][2]; ws = params_general[["windowsizes"]][3]
 
-  ## While loop ----
-  cat("\nReading data chunk:\n")
+    ## While loop ----
+    cat("\nReading data chunk:\n")
 
-  while (isLastBlock == FALSE) {
+    while (isLastBlock == FALSE) {
 
-    cat(blocknumber, " ")
-    ### 1 - read chunk ----
-    accread <- GGIR::g.readaccfile(
-      filename          = fpa_read,
-      blocksize         = params_nw.clip.block$blocksize,
-      blocknumber       = blocknumber,
-      filequality       = NULL,
-      ws                = 3600,
-      PreviousEndPage   = PreviousEndPage,
-      inspectfileobject = I,
-      PreviousLastValue = PreviousLastValue,
-      PreviousLastTime  = PreviousLastTime,
-      params_rawdata    = params_rawdata,
-      params_general    = params_general
-    )
-
-    if (is.null(accread$P)) break # empty block
-
-    isLastBlock     <- accread$isLastBlock
-    PreviousEndPage <- accread$endpage
-
-    if ("PreviousLastValue" %in% names(accread$P)) { # output when reading ad-hoc csv
-      PreviousLastValue <- accread$P$PreviousLastValue
-      PreviousLastTime  <- accread$P$PreviousLastTime
-    }
-
-    if (le_type == "ACTIGRAPH - CSV") {
-
-      # add time column
-      accread$P$data$time <- seq(
-        from       = 1,
-        length.out = nrow(accread$P$data),
-        by = 1/I$sf
-      )
-    }
-
-    ## idle-sleep mode ----
-    # https://github.com/wadpac/GGIR/blob/167a0159c99ec78192e93b70164e8d50502ee42b/R/g.getmeta.R#L220
-    if (le_type %in% c("ACTIGRAPH - GT3X", "ACTIGRAPH - CSV")) {
-
-      lst_impute <- g.imputeTimegaps(
-        accread$P$data,
-        sf                = I$sf,
-        k                 = 0.25,
-        impute            = TRUE,
+      cat(blocknumber, " ")
+      ### 1 - read chunk ----
+      accread <- GGIR::g.readaccfile(
+        filename          = fpa_read,
+        blocksize         = params_nw.clip.block$blocksize,
+        blocknumber       = blocknumber,
+        filequality       = NULL,
+        ws                = 3600,
+        PreviousEndPage   = PreviousEndPage,
+        inspectfileobject = I,
         PreviousLastValue = PreviousLastValue,
         PreviousLastTime  = PreviousLastTime,
-        epochsize         = params_general$windowsizes[1:2]
+        params_rawdata    = params_rawdata,
+        params_general    = params_general
       )
-      accread$P$data <- lst_impute$x
-      lst_qc[[blocknumber]] <-
-        lst_impute$QClog |>
-        mutate(blocknumber = blocknumber,
-               .before = 1)
 
-      if (blocknumber == 1) {
+      if (is.null(accread$P)) break # empty block
 
-        # get last time to check if idle-sleep mode occurs between
-        # this block and the next. Also get last row for imputation.
-        lastblock_endtime <- last(accread$P$data$time)
-        lastblock_enddata <-
-          last(accread$P$data[, c("x", "y", "z")])
+      isLastBlock     <- accread$isLastBlock
+      PreviousEndPage <- accread$endpage
 
-      } else {
+      if ("PreviousLastValue" %in% names(accread$P)) { # output when reading ad-hoc csv
+        PreviousLastValue <- accread$P$PreviousLastValue
+        PreviousLastTime  <- accread$P$PreviousLastTime
+      }
 
-        chk_gap <- near(
-          x   = accread$P$data$time[1] - lastblock_endtime,
-          y   = 1 / I$sf,
-          tol = 0.0001
+      if (le_type == "ACTIGRAPH - CSV") {
+
+        # add time column
+        accread$P$data$time <- seq(
+          from       = 1,
+          length.out = nrow(accread$P$data),
+          by = 1/I$sf
         )
+      }
 
-        if (chk_gap) {
+      ## idle-sleep mode ----
+      # https://github.com/wadpac/GGIR/blob/167a0159c99ec78192e93b70164e8d50502ee42b/R/g.getmeta.R#L220
+      if (le_type %in% c("ACTIGRAPH - GT3X", "ACTIGRAPH - CSV")) {
 
+        lst_impute <- g.imputeTimegaps(
+          accread$P$data,
+          sf                = I$sf,
+          k                 = 0.25,
+          impute            = TRUE,
+          PreviousLastValue = PreviousLastValue,
+          PreviousLastTime  = PreviousLastTime,
+          epochsize         = params_general$windowsizes[1:2]
+        )
+        accread$P$data <- lst_impute$x
+        lst_qc[[blocknumber]] <-
+          lst_impute$QClog |>
+          mutate(blocknumber = blocknumber,
+                 .before = 1)
+
+        if (blocknumber == 1) {
+
+          # get last time to check if idle-sleep mode occurs between
+          # this block and the next. Also get last row for imputation.
           lastblock_endtime <- last(accread$P$data$time)
           lastblock_enddata <-
             last(accread$P$data[, c("x", "y", "z")])
 
         } else {
 
-          # https://github.com/wadpac/GGIR/blob/388064b707df4fcfb7f9b755c5a43a477d371092/R/g.getmeta.R#L258
-          # Impute gap between chunks
-          timegap <- accread$P$data$time[1] - lastblock_endtime
+          chk_gap <- near(
+            x   = accread$P$data$time[1] - lastblock_endtime,
+            y   = 1 / I$sf,
+            tol = 0.0001
+          )
 
-          if (timegap > 3600 * I$sf) {
+          if (chk_gap) {
 
-            stop(paste0("Time gap observed of more than 1 hour between data ",
-                        "chunks for ", basename(datafile), " . Please contact ",
-                        "package maintainer."), call. = FALSE)
-
-          } else if (timegap > (3 / I$sf)) {
-
-            # impute time gap of more than 3 samples and equal to or less than 1 hour
-            # normalise last value
-            lastblock_enddata <- lastblock_enddata / sqrt(sum(lastblock_enddata^2))
-
-            # get number of rows to replicate last value, should always be a whole number...right? Sometimes
-            # there is very very very small decimal left so truncate but double check
-            # round would lead to same number.
-            n_rep <- timegap  * I$sf
-
-            if (trunc(n_rep) != round(n_rep)) stop("Imputing time between chunks, time gap does not result in whole number when multiplied by sample frequency.") # n_gap <- round(timegap  * I$sf)
-
-            n_rep <- trunc(n_rep)
-            accread$P$data <- bind_rows(
-              # replicate last row and append to beginning, time column doesn't
-              # matter since its not used for calibrating or in future steps.
-              lastblock_enddata[rep(1, times = n_rep), ],
-              accread$P$data
-            )
             lastblock_endtime <- last(accread$P$data$time)
             lastblock_enddata <-
               last(accread$P$data[, c("x", "y", "z")])
 
+          } else {
+
+            # https://github.com/wadpac/GGIR/blob/388064b707df4fcfb7f9b755c5a43a477d371092/R/g.getmeta.R#L258
+            # Impute gap between chunks
+            timegap <- accread$P$data$time[1] - lastblock_endtime
+
+            if (timegap > 3600 * I$sf) {
+
+              stop(paste0("Time gap observed of more than 1 hour between data ",
+                          "chunks for ", basename(datafile), " . Please contact ",
+                          "package maintainer."), call. = FALSE)
+
+            } else if (timegap > (3 / I$sf)) {
+
+              # impute time gap of more than 3 samples and equal to or less than 1 hour
+              # normalise last value
+              lastblock_enddata <- lastblock_enddata / sqrt(sum(lastblock_enddata^2))
+
+              # get number of rows to replicate last value, should always be a whole number...right? Sometimes
+              # there is very very very small decimal left so truncate but double check
+              # round would lead to same number.
+              n_rep <- timegap  * I$sf
+
+              if (trunc(n_rep) != round(n_rep)) stop("Imputing time between chunks, time gap does not result in whole number when multiplied by sample frequency.") # n_gap <- round(timegap  * I$sf)
+
+              n_rep <- trunc(n_rep)
+              accread$P$data <- bind_rows(
+                # replicate last row and append to beginning, time column doesn't
+                # matter since its not used for calibrating or in future steps.
+                lastblock_enddata[rep(1, times = n_rep), ],
+                accread$P$data
+              )
+              lastblock_endtime <- last(accread$P$data$time)
+              lastblock_enddata <-
+                last(accread$P$data[, c("x", "y", "z")])
+
+            }
           }
         }
       }
-    }
 
-    ## calibrate ----
-    if (chk_cal) {accread$P$data[, c("x", "y", "z")] <- scale(
-      accread$P$data[, c("x", "y", "z")],
-      center = -C$offset,
-      scale  = 1 / C$scale
-    )}
+      ## calibrate ----
+      if (chk_cal) {accread$P$data[, c("x", "y", "z")] <- scale(
+        accread$P$data[, c("x", "y", "z")],
+        center = -C$offset,
+        scale  = 1 / C$scale
+      )}
 
-    ## mtx_data ----
-    n_data <- nrow(accread$P$data)
+      ## mtx_data ----
+      n_data <- nrow(accread$P$data)
 
-    if (is.null(n_data)) n_data <- 0
+      if (is.null(n_data)) n_data <- 0
 
-    cols_temp <- grep(
-      x           = names(accread$P$data),
-      pattern     = "temp|temperature",
-      ignore.case = TRUE
-    )
-    cols_all <-
-      c(cols_desired, names(accread$P$data)[cols_temp])
-
-    if (blocknumber == 1) {
-      mtx_data <-
-        as.matrix(accread$P$data[, cols_all])
-    } else if (n_data >= 1) {
-      mtx_data <-rbind(
-        mtx_data,
-        as.matrix(accread$P$data[, cols_all])
+      cols_temp <- grep(
+        x           = names(accread$P$data),
+        pattern     = "temp|temperature",
+        ignore.case = TRUE
       )
+      cols_all <-
+        c(cols_desired, names(accread$P$data)[cols_temp])
+
+      if (blocknumber == 1) {
+        mtx_data <-
+          as.matrix(accread$P$data[, cols_all])
+      } else if (n_data >= 1) {
+        mtx_data <-rbind(
+          mtx_data,
+          as.matrix(accread$P$data[, cols_all])
+        )
+      }
+
+      blocknumber <- blocknumber + 1
+      rm(accread)
+      gc()
+
     }
-
-    blocknumber <- blocknumber + 1
-    rm(accread)
-    gc()
-
   }
 
   # Idle Sleep Mode ----

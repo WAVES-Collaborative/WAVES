@@ -1,0 +1,52 @@
+# Copy to config.yml and edit per dataset. config.yml is gitignored.
+
+study:
+  name: "WAVES study"
+  timezone: "America/Chicago"
+  sampling_frequency: 100
+  n_workers: 2
+
+data:
+  raw_path: "data/2_INTERIM/RAW"
+  raw_pattern: ".*\\.(gt3x|cwa|bin)$"
+
+# format.type:
+#   "binary"     -> GGIR's native readers for .gt3x / .cwa / .bin
+#   "custom_csv" -> GGIR::read.myacc.csv with csv_spec below
+format:
+  type: "binary"
+
+# --- custom_csv example (Capture-24) ----------------------------------------
+# format:
+#   type: "custom_csv"
+#   label: "CAPTURE24 - CSV"
+#
+#   # Forwarded as rmc.* to GGIR. See ?GGIR::read.myacc.csv.
+#   csv_spec:
+#     col_acc: [2, 3, 4]
+#     col_time: 1
+#     unit_acc: "g"
+#     unit_time: "POSIX"
+#     format_time: "%Y-%m-%d %H:%M:%OS"
+#     sf: 100
+#     firstrow_acc: 2
+#     firstrow_header: 1
+#     dec: "."
+#
+#   # Strategy in R/format_strategies.R: first_data_row | header_field
+#   start_extraction: "first_data_row"
+#   start_extraction_args:
+#     time_col: 1
+#     time_format: "%Y-%m-%d %H:%M:%OS"
+#
+#   # Columns in the CSV that aren't acc data. Reserved for ground-truth
+#   # comparison; sidecar materialization not implemented yet.
+#   sidecar_cols: ["annotation"]
+#
+#   # OxWearables CLI flags vary per tool. Set enabled: false to skip the
+#   # OxWearables branch for this dataset.
+#   oxwearables:
+#     enabled: true
+#     csv_time_format: "%Y-%m-%d %H:%M:%S.%f"
+#     csv_time_col: "time"
+#     csv_xyz_cols: ["x", "y", "z"]

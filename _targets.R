@@ -9,23 +9,24 @@ library(targets)
 library(tarchetypes)
 library(crew)
 library(autometric)
+library(yaml)
 Sys.setenv(
   TAR_PROJECT = "main",
   # change below environment variable if you already have a conda installation readily accessible.
   RETICULATE_MINICONDA_PATH = reticulate::miniconda_path()
 )
 
-study_timezone     <- Sys.timezone()
-sampling_frequency <- 100
-n_workers          <- 2 # future::availableCores() - 1
+# Study/format config. See config.example.yml.
+source(file.path("R", "format_strategies.R"))
+lst_config <- load_pipeline_config()
+
+study_timezone     <- lst_config$study$timezone
+sampling_frequency <- lst_config$study$sampling_frequency
+n_workers          <- lst_config$study$n_workers %||% 2
 
 vct_raw_fpa <- list.files(
-  path = file.path(
-    "S:", "_R_CHS_Research", "PAHRL", "Student Access", "4_Research",
-    "2017 Strath R01 FLAC", "Data", "ActiGraph_GT3X", c("V1", "V2", "V3"),
-    "LW", "LW_RAW"
-  ),
-  pattern    = ".*",
+  path       = lst_config$data$raw_path,
+  pattern    = lst_config$data$raw_pattern,
   full.names = TRUE,
   recursive  = TRUE
 )
@@ -194,6 +195,7 @@ tar_plan(
     format  = "qs"
   ),
   my_tz = study_timezone,
+  cfg   = lst_config,
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                             FILE DIRECTORIES                           ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -221,16 +223,19 @@ tar_plan(
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                              PROCESS - GGIR                            ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  vct_raw_type = config_raw_type(vct_raw),
+  vct_raw_type = config_raw_type(vct_raw, cfg),
   tar_files(
     name    = vct_basic,
     command = wrapper_GGIR(vct_raw,
-                           vct_raw_type)
+                           vct_raw_type,
+                           lst_config = cfg)
   ),
   tar_parquet(
     name    = df_start_tz,
     command = get_start_tz_df(vct_basic,
-                              my_tz)
+                              my_tz,
+                              vct_raw    = vct_raw,
+                              lst_config = cfg)
   ),
   tar_file(
     name      = vct_out.cut,
@@ -247,7 +252,8 @@ tar_plan(
   vct_ox_input = prepare_ox_input(
     vct_raw,
     vct_raw_type,
-    vct_basic
+    vct_basic,
+    lst_config = cfg
   ),
   tar_file(
     name    = vct_ox_step,
@@ -256,7 +262,8 @@ tar_plan(
       fdr_write     = file.path(getwd(), dir_stepcount),
       fdr_log       = dir_logs,
       log_prefix    = "main_",
-      lst_miniconda = lst_miniconda
+      lst_miniconda = lst_miniconda,
+      lst_config    = cfg
     ),
     pattern   = map(vct_ox_input),
     iteration = "vector"
@@ -268,7 +275,8 @@ tar_plan(
       fdr_write     = file.path(getwd(), dir_walmsley),
       fdr_log       = dir_logs,
       log_prefix    = "main_",
-      lst_miniconda = lst_miniconda
+      lst_miniconda = lst_miniconda,
+      lst_config    = cfg
     ),
     pattern   = map(vct_ox_input),
     iteration = "vector"
@@ -280,7 +288,8 @@ tar_plan(
       fdr_write     = file.path(getwd(), dir_actinet),
       fdr_log       = dir_logs,
       log_prefix    = "main_",
-      lst_miniconda = lst_miniconda
+      lst_miniconda = lst_miniconda,
+      lst_config    = cfg
     ),
     pattern   = map(vct_ox_input),
     iteration = "vector"
@@ -305,7 +314,8 @@ tar_plan(
       fpa_read      = vct_raw,
       le_type       = vct_raw_type,
       vct_fpa_basic = vct_basic,
-      dir_cal       = dir_cal
+      dir_cal       = dir_cal,
+      lst_config    = cfg
     ),
     pattern   = map(vct_raw, vct_raw_type),
     iteration = "vector"

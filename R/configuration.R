@@ -363,7 +363,14 @@ config_miniconda <- function(df_module_stepcount,
 #' @export
 #'
 #' @examples
-config_raw_type <- function(vct_raw) {
+config_raw_type <- function(vct_raw, lst_config = NULL) {
+
+  # Custom CSV: label all files with the configured label.
+  # GGIR's g.inspectfile would error on these.
+  if (!is.null(lst_config) &&
+      identical(lst_config$format$type, "custom_csv")) {
+    return(rep(lst_config$format$label, length(vct_raw)))
+  }
 
   vct_type <- vector(
     mode = "character",

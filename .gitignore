@@ -29,3 +29,5 @@ reports/
 /.quarto/
 
 **/*.quarto_ipynb
+
+/config.yml
