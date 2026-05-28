@@ -122,8 +122,7 @@ apply_methods_cutpoints <- function(fpa_basic,
   fnm_sans_ext <-
     fpa_basic |>
     basename() |>
-    tools::file_path_sans_ext() |>
-    tools::file_path_sans_ext() |>
+    strip_all_ext() |>
     sub(x = _,
         pattern = "meta_",
         replacement = "")

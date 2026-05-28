@@ -1,7 +1,6 @@
 library(arrow)
 crew::crew_controller_local
 library(data.table)
-library(dplyr)
 library(GGIR)
 library(gt)
 library(knitr)
@@ -23,3 +22,6 @@ library(kernlab)
 library(rattle)
 library(signal)
 library(tzdb)
+
+# Load dplyr after signal so filter() resolves to dplyr.
+library(dplyr)

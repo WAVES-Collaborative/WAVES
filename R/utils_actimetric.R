@@ -169,3 +169,13 @@ inbed = function(angle,
     naplightson = naplightson
   ))
 }
+
+# Strip every extension; handles stacked ones like .csv.gz.
+strip_all_ext <- function(x) {
+  repeat {
+    stripped <- tools::file_path_sans_ext(x)
+    if (identical(stripped, x)) break
+    x <- stripped
+  }
+  x
+}

@@ -192,8 +192,7 @@ get_start_tz_df <- function(vct_fpa_basic,
   vct_fnm <-
     vct_fpa_basic |>
     basename() |>
-    file_path_sans_ext() |>
-    file_path_sans_ext() |>
+    strip_all_ext() |>
     gsub(
       x = _,
       pattern = "meta_",
