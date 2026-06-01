@@ -274,7 +274,7 @@ apply_methods_raw <- function(fpa_read,
     basename(fpa_read)
   fnm_sans_ext <-
     basename(fpa_read) |>
-    tools::file_path_sans_ext()
+    strip_all_ext()
 
   # Check if file was already created from a previous run of the pipeline.
   fpa_write <- file.path(
