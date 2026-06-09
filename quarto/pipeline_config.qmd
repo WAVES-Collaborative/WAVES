@@ -13,6 +13,8 @@ editor_options:
 #| label: setup
 #| echo: false
 
+source("packages.R")
+
 tar_load(vct_raw)
 tar_load(vct_basic)
 tar_load(vct_out.cut)
@@ -75,13 +77,13 @@ common_cols <- c("file", setdiff(common_cols, "file"))
 
 df_out <-
   df_out |>
-  filter(file %in% common_files) |>
+  dplyr::filter(file %in% common_files) |>
   select(all_of(common_cols)) |>
   arrange(file)
 
 df_test_out <-
   df_test_out |>
-  filter(file %in% common_files) |>
+  dplyr::filter(file %in% common_files) |>
   select(all_of(common_cols)) |>
   arrange(file)
 
