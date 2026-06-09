@@ -13,6 +13,8 @@ editor_options:
 #| label: setup
 #| echo: false
 
+source("packages.R")
+
 tar_load(vct_raw)
 tar_load(vct_basic)
 tar_load(vct_out.cut)
