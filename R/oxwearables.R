@@ -363,18 +363,18 @@ merge_ox <- function(vct_ox_step,
                      vct_raw_type,
                      df_start_tz) {
 
-  # Only merge files that have gone through all three algorithms.
-  vct_fnm <-
-    sapply(
-      c(vct_ox_step, vct_ox_wlms, vct_ox_acti),
-      \(.x) {
-        basename(.x) |>
-          sub(x = _,
-              pattern = "-StepTimes\\.csv\\.gz|-timeSeries\\.csv\\.gz",
-              replacement = "")
-      }
-    ) |>
-    unique()
+  ox_names <- function(.x) {
+    basename(.x) |>
+      sub(x = _,
+          pattern = "-StepTimes\\.csv\\.gz|-timeSeries\\.csv\\.gz",
+          replacement = "")
+  }
+  # Only merge files that have gone through all three algorithms. Intersecting
+  # avoids a character(0) read when a file is missing from one method's output.
+  vct_fnm <- Reduce(
+    intersect,
+    list(ox_names(vct_ox_step), ox_names(vct_ox_wlms), ox_names(vct_ox_acti))
+  )
   vct_fpa_write <- file.path(
     dir_write, paste0(vct_fnm, ".parquet")
   )
