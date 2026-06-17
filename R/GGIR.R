@@ -11,22 +11,28 @@
 #'
 #' @examples
 wrapper_GGIR <- function(vct_raw,
-                         vct_raw_type) {
+                         vct_raw_type,
+                         lst_config = NULL) {
 
   if (is.null(vct_raw)) return(NULL)
 
-  chk_csv_type <- any(vct_raw_type %in% c(
-    "GENEACTIV - CSV w/ HEADER",
-    "ADHOC",
-    "UNKNOWN"
-  ))
+  is_custom_csv <- !is.null(lst_config) &&
+    identical(lst_config$format$type, "custom_csv")
 
-  if (chk_csv_type) {
-    cli::cli_abort(c(
-      "Raw GENEActiv and adhoc csv's are currently not supported.",
-      "i" = "Please use raw exported data such as {.value '.bin' '.gt3x' or '.cwa'} data.",
-      "i" = "If non-csv data is not available, please reach out to WAVES data team for possible solutions."
+  if (!is_custom_csv) {
+    chk_csv_type <- any(vct_raw_type %in% c(
+      "GENEACTIV - CSV w/ HEADER",
+      "ADHOC",
+      "UNKNOWN"
     ))
+
+    if (chk_csv_type) {
+      cli::cli_abort(c(
+        "Raw GENEActiv and adhoc csv's are not supported under {.field format.type=binary}.",
+        "i" = "Set {.field format.type: custom_csv} in {.path config.yml} and provide a {.field csv_spec}.",
+        "i" = "See {.path config.example.yml} for the schema."
+      ))
+    }
   }
 
   # Make regex that collates vct_raw and escapes regex characters.
@@ -53,18 +59,23 @@ wrapper_GGIR <- function(vct_raw,
 
   if (length(vct_incomplete) == 0) return(vct_basic)
 
-  GGIR::GGIR(
+  base_args <- list(
     mode       = c(1, 2, 3, 4),
     datadir    = vct_incomplete,
     outputdir  = "data/GGIR",
     studyname  = "WAVES",
-    # fo         = 1,
-    # f1         = 2,
     do.report  = c(),
     configfile = "data/GGIR/config_WAVES.csv"
   )
 
-  # Make regex that collates vct_raw and escapes regex characters.
+  if (is_custom_csv) {
+    rmc_args <- build_rmc_args(lst_config$format$csv_spec,
+                               target_fn = GGIR::GGIR)
+    do.call(GGIR::GGIR, c(base_args, rmc_args))
+  } else {
+    do.call(GGIR::GGIR, base_args)
+  }
+
   list.files(
     file.path("data", "GGIR", "output_WAVES", "meta", "basic"),
     pattern = le_regex,
@@ -187,7 +198,12 @@ find_offset <- function(tz) {
 
 }
 get_start_tz_df <- function(vct_fpa_basic,
-                            my_tz) {
+                            my_tz,
+                            vct_raw    = NULL,
+                            lst_config = NULL) {
+
+  is_custom_csv <- !is.null(lst_config) &&
+    identical(lst_config$format$type, "custom_csv")
 
   vct_fnm <-
     vct_fpa_basic |>
@@ -205,6 +221,30 @@ get_start_tz_df <- function(vct_fpa_basic,
 
     fnm <-
       vct_fnm[i]
+
+    if (is_custom_csv) {
+      # Custom CSV: GGIR header isn't useful, use start_extraction strategy.
+      fpa_raw_match <- grep(
+        x = vct_raw,
+        pattern = stringr::str_escape(fnm),
+        value = TRUE
+      )
+      if (length(fpa_raw_match) == 0) {
+        warning(sprintf("No raw file match for basic '%s'; skipping.", fnm),
+                call. = FALSE)
+        next
+      }
+      meta <- run_start_strategy(lst_config, fpa_raw_match[[1]], my_tz)
+      lst_start_tz[[i]] <- list(
+        fnm        = fnm,
+        start_dttm = meta$start_dttm,
+        start_secs = as.numeric(meta$start_dttm),
+        offset     = meta$offset,
+        tz         = meta$tz
+      )
+      next
+    }
+
     load(vct_fpa_basic[i])
     I$header
 

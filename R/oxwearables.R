@@ -1,6 +1,61 @@
+#' @title Translate a Python strftime format to Java DateTimeFormatter.
+#' @description walmsley/accProcess is Java-based and uses a different
+#'  pattern syntax than Python strftime.
+strftime_to_java <- function(fmt) {
+  mapping <- c(
+    "%Y" = "yyyy", "%m" = "MM",     "%d" = "dd",
+    "%H" = "HH",   "%M" = "mm",     "%S" = "ss",
+    "%f" = "SSSSSS", "%y" = "yy",   "%j" = "DDD",
+    "%%" = "%"
+  )
+  for (py in names(mapping)) {
+    fmt <- gsub(py, mapping[[py]], fmt, fixed = TRUE)
+  }
+  fmt
+}
+
+
+#' @title CLI flag suffix for an OxWearables tool on a custom CSV input.
+#' @description Each tool (stepcount / walmsley / actinet) uses different
+#'  flag names. Returns "" if OxWearables is disabled in the config.
+build_ox_flags <- function(tool, lst_config) {
+  ox  <- lst_config$format$oxwearables
+  spc <- lst_config$format$csv_spec
+  if (is.null(ox) || !isTRUE(ox$enabled)) return("")
+
+  fmt  <- ox$csv_time_format
+  tcol <- ox$csv_time_col
+  xyz  <- ox$csv_xyz_cols
+  # 0-indexed positions for tools that want column indices.
+  idx0 <- paste(c(spc$col_time, spc$col_acc) - 1, collapse = ",")
+
+  switch(
+    tool,
+    stepcount = sprintf(
+      ' --csv-time-format "%s" --csv-txyz "%s"',
+      fmt, paste(c(tcol, xyz), collapse = ",")
+    ),
+    walmsley = sprintf(
+      ' --csvTimeFormat "%s" --csvTimeXYZTempColsIndex %s --csvStartRow %d',
+      strftime_to_java(fmt), idx0, (spc$firstrow_acc %||% 2L)
+    ),
+    actinet = sprintf(
+      ' --csv-date-format "%s" --txyz "%s"',
+      fmt, paste(c(tcol, xyz), collapse = ",")
+    ),
+    stop("Unknown OxWearables tool: ", tool)
+  )
+}
+
+
 prepare_ox_input <- function(vct_raw,
                              vct_raw_type,
-                             vct_basic) {
+                             vct_basic,
+                             lst_config = NULL) {
+
+  is_custom_csv <- !is.null(lst_config) &&
+    identical(lst_config$format$type, "custom_csv")
+  ox_cfg <- if (is_custom_csv) lst_config$format$oxwearables else NULL
 
   vct_ox_input <- vector(
     mode = "character",
@@ -11,10 +66,20 @@ prepare_ox_input <- function(vct_raw,
 
     fpa_raw <- vct_raw[i]
     le_type <- vct_raw_type[i]
+
+    # Custom CSV: emit the quoted path; apply_ox_* appends its own flags.
+    if (is_custom_csv) {
+      if (is.null(ox_cfg) || !isTRUE(ox_cfg$enabled)) {
+        next()
+      }
+      vct_ox_input[i] <- paste0('"', fpa_raw, '"')
+      next()
+    }
+
     chk_gen <- le_type %in% c(
       "GENEACTIV - CSV w/ HEADER",
       "ADHOC",
-      "UKNOWN"
+      "UNKNOWN"
     )
     chk_gt3x <- le_type == "ACTIGRAPH - CSV"
     chk_axiv <- le_type == "AXIVITY - CSV"
@@ -72,7 +137,13 @@ apply_ox_stepcount <- function(ox_input,
                                fdr_write,
                                fdr_log,
                                log_prefix = "",
-                               lst_miniconda) {
+                               lst_miniconda,
+                               lst_config = NULL) {
+
+  ox_flags <- if (!is.null(lst_config) &&
+                  identical(lst_config$format$type, "custom_csv")) {
+    build_ox_flags("stepcount", lst_config)
+  } else ""
 
   chk_windows <- grepl(
     x = Sys.getenv("OS"),
@@ -87,7 +158,8 @@ apply_ox_stepcount <- function(ox_input,
          pattern = '"',
          replacement = "") |>
     basename() |>
-    file_path_sans_ext()
+    file_path_sans_ext() |>
+    file_path_sans_ext()   # second strip handles .csv.gz
   fpa_write <- file.path(
     fdr_write, fnm_write,
     paste0(fnm_write, "-StepTimes.csv.gz")
@@ -102,7 +174,7 @@ apply_ox_stepcount <- function(ox_input,
       args = paste0(
         "activate WHO_WAVES_stepcount & ",
         paste0(
-          'stepcount ', ox_input, ' -o "', fdr_write, '"'
+          'stepcount ', ox_input, ox_flags, ' -o "', fdr_write, '"'
         ) |>
           # file paths to windows style.
           gsub(x = _,
@@ -122,7 +194,7 @@ apply_ox_stepcount <- function(ox_input,
         paste0('"', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
         "conda activate WHO_WAVES_stepcount",
         paste0(
-          'stepcount ', ox_input, ' -o "', fdr_write, '"'
+          'stepcount ', ox_input, ox_flags, ' -o "', fdr_write, '"'
         ),
         sep = " ; "
       ),
@@ -138,7 +210,13 @@ apply_ox_walmsley <- function(ox_input,
                               fdr_write,
                               fdr_log,
                               log_prefix = "",
-                              lst_miniconda) {
+                              lst_miniconda,
+                              lst_config = NULL) {
+
+  ox_flags <- if (!is.null(lst_config) &&
+                  identical(lst_config$format$type, "custom_csv")) {
+    build_ox_flags("walmsley", lst_config)
+  } else ""
 
   chk_windows <- grepl(
     x = Sys.getenv("OS"),
@@ -153,7 +231,8 @@ apply_ox_walmsley <- function(ox_input,
          pattern = '"',
          replacement = "") |>
     basename() |>
-    file_path_sans_ext()
+    file_path_sans_ext() |>
+    file_path_sans_ext()   # second strip handles .csv.gz
   fpa_write <- file.path(
     fdr_write,
     paste0(fnm_write, "-timeSeries.csv.gz")
@@ -169,7 +248,7 @@ apply_ox_walmsley <- function(ox_input,
       args = paste0(
         "activate WHO_WAVES_accelerometer & ",
         paste0(
-          'accProcess ', ox_input, ' -o "', fdr_write, '"', " --timeZone UTC"
+          'accProcess ', ox_input, ox_flags, ' -o "', fdr_write, '"', " --timeZone UTC"
         ) |>
           # file paths to windows style.
           gsub(x = _,
@@ -190,7 +269,7 @@ apply_ox_walmsley <- function(ox_input,
         paste0('"', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
         "conda activate WHO_WAVES_accelerometer",
         paste0(
-          'accProcess ', ox_input, ' -o "', fdr_write, '"', " --timeZone UTC"
+          'accProcess ', ox_input, ox_flags, ' -o "', fdr_write, '"', " --timeZone UTC"
         ),
         sep = " ; "
       ),
@@ -206,7 +285,13 @@ apply_ox_actinet <- function(ox_input,
                              fdr_write,
                              fdr_log,
                              log_prefix = "",
-                             lst_miniconda) {
+                             lst_miniconda,
+                             lst_config = NULL) {
+
+  ox_flags <- if (!is.null(lst_config) &&
+                  identical(lst_config$format$type, "custom_csv")) {
+    build_ox_flags("actinet", lst_config)
+  } else ""
 
   chk_windows <- grepl(
     x = Sys.getenv("OS"),
@@ -221,7 +306,8 @@ apply_ox_actinet <- function(ox_input,
          pattern = '"',
          replacement = "") |>
     basename() |>
-    file_path_sans_ext()
+    file_path_sans_ext() |>
+    file_path_sans_ext()   # second strip handles .csv.gz
   fpa_write <- file.path(
     fdr_write, fnm_write,
     paste0(fnm_write, "-timeSeries.csv.gz")
@@ -237,7 +323,7 @@ apply_ox_actinet <- function(ox_input,
       args = paste0(
         "activate WHO_WAVES_actinet & ",
         paste0(
-          'actinet ', ox_input, ' -o "', fdr_write, '"'
+          'actinet ', ox_input, ox_flags, ' -o "', fdr_write, '"'
         ) |>
           # file paths to windows style.
           gsub(x = _,
@@ -258,7 +344,7 @@ apply_ox_actinet <- function(ox_input,
         paste0('"', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
         "conda activate WHO_WAVES_actinet",
         paste0(
-          'actinet ', ox_input, ' -o "', fdr_write, '"'
+          'actinet ', ox_input, ox_flags, ' -o "', fdr_write, '"'
         ),
         sep = " ; "
       ),
@@ -277,18 +363,18 @@ merge_ox <- function(vct_ox_step,
                      vct_raw_type,
                      df_start_tz) {
 
-  # Only merge files that have gone through all three algorithms.
-  vct_fnm <-
-    sapply(
-      c(vct_ox_step, vct_ox_wlms, vct_ox_acti),
-      \(.x) {
-        basename(.x) |>
-          sub(x = _,
-              pattern = "-StepTimes\\.csv\\.gz|-timeSeries\\.csv\\.gz",
-              replacement = "")
-      }
-    ) |>
-    unique()
+  ox_names <- function(.x) {
+    basename(.x) |>
+      sub(x = _,
+          pattern = "-StepTimes\\.csv\\.gz|-timeSeries\\.csv\\.gz",
+          replacement = "")
+  }
+  # Only merge files that have gone through all three algorithms. Intersecting
+  # avoids a character(0) read when a file is missing from one method's output.
+  vct_fnm <- Reduce(
+    intersect,
+    list(ox_names(vct_ox_step), ox_names(vct_ox_wlms), ox_names(vct_ox_acti))
+  )
   vct_fpa_write <- file.path(
     dir_write, paste0(vct_fnm, ".parquet")
   )
