@@ -1,5 +1,6 @@
 summarize_major_steps <- function(vct_raw,
                                   vct_basic,
+                                  vct_nw.sleep,
                                   vct_cal,
                                   vct_out.raw,
                                   vct_out.oak.pre,
@@ -18,6 +19,9 @@ summarize_major_steps <- function(vct_raw,
     gsub(x = _,
          pattern = "meta_|\\.RData",
          replacement = "")
+  vct_nm_nw.sleep <-
+    basename(vct_nw.sleep) |>
+    file_path_sans_ext()
   vct_nm_cal <-
     basename(vct_cal) |>
     file_path_sans_ext()
@@ -49,6 +53,7 @@ summarize_major_steps <- function(vct_raw,
   df |>
     mutate(
     GGIR          = file %in% vct_nm_ggir,
+    nw.sleep      = file_noext %in% vct_nm_nw.sleep,
     calibration   = file_noext %in% vct_nm_cal,
     `raw methods` = file_noext %in% vct_nm_raw,
     oak.pre       = file_noext %in% vct_nm_oak.pre,
@@ -137,6 +142,16 @@ summarize_metrics_config <- function(df_pipe) {
   load("data/0_CONFIG/MERGED/WAVES_ALL_TEST.RData")
 
   # total ----
+  # df_nw.sleep
+  #   df_pipe |>
+  #   select(id, date, invalid, sleep) |>
+  #   summarise(
+  #     `invalid (hours)` = sum(invalid, na.rm = TRUE) / 60 / 60,
+  #     `sleep (hours)`   = sum(sleep, na.rm = TRUE) / 60 / 60,
+  #     .by = c(id, date)
+  #   ) |>
+  #   gt(groupname_col = "id",
+  #      rowname_col   = "date")
   df_sed <-
     df_pipe |>
     select(id, starts_with("intensity")) |>

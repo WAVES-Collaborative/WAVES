@@ -15,6 +15,7 @@ editor_options:
 
 tar_load(vct_raw)
 tar_load(vct_basic)
+tar_load(vct_nw.sleep)
 tar_load(vct_out.cut)
 tar_load(vct_cal)
 tar_load(vct_out.raw)
@@ -28,6 +29,7 @@ len_raw <- length(vct_raw)
 df_out <- summarize_major_steps(
   vct_raw,
   vct_basic,
+  vct_nw.sleep,
   vct_cal,
   vct_out.raw,
   vct_out.oak.pre,
@@ -45,6 +47,9 @@ df_test_out <- tibble(
     "WAVES_10006_RAW.csv.gz"
   ),
   GGIR = c(
+    FALSE, FALSE, TRUE, TRUE, TRUE
+  ),
+  nw.sleep = c(
     FALSE, FALSE, TRUE, TRUE, TRUE
   ),
   calibration = c(
@@ -69,21 +74,22 @@ df_test_out <- tibble(
     FALSE, FALSE, TRUE, TRUE, FALSE
   )
 )
-common_files <- intersect(df_out$file, df_test_out$file)
-common_cols <- intersect(names(df_out), names(df_test_out))
-common_cols <- c("file", setdiff(common_cols, "file"))
-
-df_out <-
-  df_out |>
-  filter(file %in% common_files) |>
-  select(all_of(common_cols)) |>
-  arrange(file)
-
-df_test_out <-
-  df_test_out |>
-  filter(file %in% common_files) |>
-  select(all_of(common_cols)) |>
-  arrange(file)
+# common_files <- intersect(df_out$file, df_test_out$file)
+# common_cols <- intersect(names(df_out), names(df_test_out))
+# common_cols <- c("file", setdiff(common_cols, "file"))
+# 
+# df_out <-
+#   df_out |>
+#   filter(.data$file %in% common_files) |>
+#   select(all_of(common_cols)) |>
+#   arrange(.data$file)
+# cli::cli_abort("Made it this far.")
+# 
+# df_test_out <-
+#   df_test_out |>
+#   filter(.data$file %in% common_files) |>
+#   select(all_of(common_cols)) |>
+#   arrange(.data$file)
 
 df_equal <- 
   (df_out[, -1] == df_test_out[, -1]) |>
