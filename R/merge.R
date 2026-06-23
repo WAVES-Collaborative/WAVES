@@ -48,7 +48,7 @@ merge_wrangler <- function(df) {
                    "nonwear")
       )
     ) |>
-    select(id, datetime,
+    select(id, datetime, invalid, sleep,
            starts_with("intensity"),
            starts_with("steps"),
            starts_with("class")) |>
@@ -58,7 +58,8 @@ merge_wrangler <- function(df) {
       .fns = ~factor(.x, levels = c("sedentary", "light", "mvpa", "sleep", "nonwear"))
     ))
 }
-merge_output <- function(vct_out.raw,
+merge_output <- function(vct_nw.sleep,
+                         vct_out.raw,
                          vct_out.oak.pre,
                          vct_out.cut,
                          vct_ox,
@@ -69,10 +70,10 @@ merge_output <- function(vct_out.raw,
   # Name vectors with filenames.
   lst_out <-
     lapply(
-      list(vct_out.raw, vct_out.oak.pre, vct_out.cut, vct_ox),
+      list(vct_nw.sleep, vct_out.raw, vct_out.oak.pre, vct_out.cut, vct_ox),
       FUN = \(x) setNames(x, basename(x) |> file_path_sans_ext())
     ) |>
-    setNames(c("raw", "oak.pre", "cut", "ox"))
+    setNames(c("nw.sleep", "raw", "oak.pre", "cut", "ox"))
   # Only merge files that have gone through all steps.
   vct_fnm <- Reduce(
     intersect,
@@ -105,15 +106,23 @@ merge_output <- function(vct_out.raw,
     }
 
     # read & merge
+    # First full join non-wear and sleep with cutpoint as they are both based off
+    # M$metashort and can just do a down fill for non-wear/sleep.
     full_join(
-      read_parquet(lst_out$raw[le_fnm]) |> mutate(datetime = as.POSIXct(datetime, tz = "UTC")),
-      read_parquet(lst_out$oak.pre[le_fnm]) |> mutate(datetime = as.POSIXct(datetime, tz = "UTC")),
+      read_parquet(lst_out$cut[le_fnm]),
+      read_parquet(lst_out$nw.sleep[le_fnm]),
       by = join_by(id, datetime)
     ) |>
-      full_join(
-        read_parquet(lst_out$cut[le_fnm]),
+      fill(sleep:invalid,
+           .direction = "down") |>
+      left_join(
+        read_parquet(lst_out$raw[le_fnm]) |> mutate(datetime = as.POSIXct(datetime, tz = "UTC")),
         by = join_by(id, datetime)
       ) |>
+      left_join(
+        read_parquet(lst_out$oak.pre[le_fnm]) |> mutate(datetime = as.POSIXct(datetime, tz = "UTC")),
+        by = join_by(id, datetime)
+      )
       left_join(
         read_parquet(lst_out$ox[le_fnm]),
         by = join_by(id, datetime)
@@ -140,28 +149,49 @@ merge_output <- function(vct_out.raw,
   return(vct_fpa_write[vct_complete])
 
 }
-merge_output_config <- function(vct_out.raw,
+merge_output_config <- function(vct_nw.sleep,
+                                vct_out.raw,
                                 vct_out.oak.pre,
                                 vct_out.cut,
                                 vct_ox) {
 
+  # First full join non-wear and sleep with cutpoint as they are both based off
+  # M$metashort and can just do a down fill for non-wear/sleep.
   full_join(
-    lapply(vct_out.raw, read_parquet) |>
-      rbindlist() |>
-      mutate(datetime = as.POSIXct(datetime, tz = "UTC")),
     lapply(vct_out.cut, read_parquet) |>  rbindlist(),
+    lapply(vct_nw.sleep, read_parquet) |>  rbindlist(),
     by = join_by(id, datetime)
   ) |>
+    fill(sleep:invalid,
+         .direction = "down") |>
+    # out.raw
+    left_join(
+      lapply(vct_out.raw, read_parquet) |>
+        rbindlist() |>
+        mutate(datetime = as.POSIXct(datetime, tz = "UTC")),
+      by = join_by(id, datetime)
+    ) |>
+    # out.oak.pre
     left_join(
       lapply(vct_out.oak.pre, read_parquet) |>
         rbindlist() |>
         mutate(datetime = as.POSIXct(datetime, tz = "UTC")),
       by = join_by(id, datetime)
     ) |>
+    # ox
     left_join(
       lapply(vct_ox, read_parquet) |>  rbindlist(),
       by = join_by(id, datetime)
     ) |>
-    merge_wrangler()
+    merge_wrangler() |>
+    mutate(
+      date =
+        with_tz(datetime, tzone = "UTC") |>
+        date(),
+      time =
+        with_tz(datetime, tzone = "UTC") |>
+        format("%H:%M:%S%z"),
+      .after = datetime
+    )
 
 }

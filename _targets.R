@@ -359,6 +359,7 @@ tar_plan(
   tar_target(
     name    = vct_merge,
     command = merge_output(
+      vct_nw.sleep    = vct_nw.sleep,
       vct_out.raw     = vct_out.raw,
       vct_out.oak.pre = vct_out.oak.pre,
       vct_out.cut     = vct_out.cut,

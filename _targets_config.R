@@ -456,6 +456,7 @@ tar_plan(
   tar_parquet(
     name    = df_pipe,
     command = merge_output_config(
+      vct_nw.sleep    = vct_nw.sleep,
       vct_out.raw     = vct_out.raw,
       vct_out.oak.pre = vct_out.oak.pre,
       vct_out.cut     = vct_out.cut,
