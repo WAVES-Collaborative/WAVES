@@ -584,14 +584,17 @@ apply_methods_raw <- function(fpa_read,
         x_bout = np$array(mtx_data[ind_chunk_oak, "x"], dtype = "float64"),
         y_bout = np$array(mtx_data[ind_chunk_oak, "y"], dtype = "float64"),
         z_bout = np$array(mtx_data[ind_chunk_oak, "z"], dtype = "float64"),
-        fs     = as.integer(I$sf)
+        # This should always be 10L as this is the frequency the raw data is
+        # interpolated to. This is NOT the sampling frequency of the raw data!
+        fs     = 10L
       )
 
       # defaults except for fs
       # https://github.com/onnela-lab/forest/blob/develop/docs/source/oak.md#default-tuning-parameters-for-walking-recognition-and-step-counting
       df_all$steps_oak.1.0[ind_steps_oak] <- forest$oak$base$find_walking(
         vm_bout = vm_bout[[2]],
-        fs = as.integer(I$sf),
+        # See above comment on why it is always 10L.
+        fs = 10L,
         min_amp = 0.3,
         step_freq = c(1.4, 2.3),
         alpha = 0.6,
@@ -867,14 +870,17 @@ apply_oak.pre <- function(fpa_read,
       x_bout = np$array(mtx_data[ind_chunk_oak, "x"], dtype = "float64"),
       y_bout = np$array(mtx_data[ind_chunk_oak, "y"], dtype = "float64"),
       z_bout = np$array(mtx_data[ind_chunk_oak, "z"], dtype = "float64"),
-      fs     = as.integer(I$sf)
+      # This should always be 10L as this is the frequency the raw data is
+      # interpolated to. This is NOT the sampling frequency of the raw data!
+      fs     = 10L
     )
 
     # defaults except for fs
     # https://github.com/onnela-lab/forest/blob/develop/docs/source/oak.md#default-tuning-parameters-for-walking-recognition-and-step-counting
     df_all$steps_oak.pre[ind_steps_oak] <- forest$oak$base$find_walking(
       vm_bout = vm_bout[[2]],
-      fs = as.integer(I$sf),
+      # See above comment on why it is always 10L.
+      fs = 10L,
       min_amp = 0.3,
       step_freq = c(1.4, 2.3),
       alpha = 0.6,
