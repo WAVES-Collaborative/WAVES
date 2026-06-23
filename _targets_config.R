@@ -87,6 +87,9 @@ fdr_ggir <- file.path(
 fdr_calibrated <- file.path(
   "data", "0_CONFIG", "RAW-CALIBRATED_QS2"
 )
+fdr_nonwear.sleep <- file.path(
+  "data", "0_CONFIG", "NONWEAR-SLEEP_PARQUET"
+)
 fdr_output.oxwearable <- file.path(
   "data", "0_CONFIG", "OUTPUT-OXWEARABLE_PARQUET"
 )
@@ -119,6 +122,7 @@ fs::dir_create(c(
   fdr_logs,
   fdr_ggir,
   fdr_calibrated,
+  fdr_nonwear.sleep,
   fdr_output.oxwearable,
   fdr_output.cutpoint,
   fdr_output.raw,
@@ -293,6 +297,7 @@ tar_plan(
   dir_models      = "models",
   dir_logs        = fdr_logs,
   dir_cal         = fdr_calibrated,
+  dir_nw.sleep    = fdr_nonwear.sleep,
   dir_out.ox      = fdr_output.oxwearable,
   dir_out.cut     = fdr_output.cutpoint,
   dir_out.raw     = fdr_output.raw,
@@ -328,6 +333,16 @@ tar_plan(
     name    = df_start_tz,
     command = get_start_tz_df(vct_basic,
                               my_tz)
+  ),
+  tar_file(
+    name      = vct_nw.sleep,
+    command   = get_nonwear_sleep(
+      fpa_basic   = vct_basic,
+      df_start_tz = df_start_tz,
+      fdr_write   = dir_nw.sleep
+    ),
+    pattern   = map(vct_basic),
+    iteration = "vector"
   ),
   tar_file(
     name      = vct_out.cut,
