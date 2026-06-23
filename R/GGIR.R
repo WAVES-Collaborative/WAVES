@@ -13,7 +13,7 @@
 wrapper_GGIR <- function(vct_raw,
                          vct_raw_type) {
 
-  if (is.null(vct_raw)) return(NULL)
+  if (length(vct_raw) == 0) return(NULL)
 
   chk_csv_type <- any(vct_raw_type %in% c(
     "GENEACTIV - CSV w/ HEADER",
@@ -86,7 +86,7 @@ wrapper_GGIR <- function(vct_raw,
 wrapper_GGIR_config <- function(vct_raw,
                                 vct_raw_type) {
 
-  if (is.null(vct_raw)) return(NULL)
+  if (length(vct_raw) == 0) return(NULL)
 
   successful_raw <- character()
 

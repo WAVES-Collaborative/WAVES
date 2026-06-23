@@ -3,7 +3,7 @@ read_acc_raw <- function(fpa_read,
                          vct_fpa_basic,
                          dir_cal) {
 
-  if (is.null(fpa_read)) return(NULL)
+  if (length(fpa_read) == 0) return(NULL)
 
   # Read ----
   # Adapted from "readAX_jhm" Sydney group code originally in "features.R".
@@ -11,7 +11,7 @@ read_acc_raw <- function(fpa_read,
   fnm_sans_ext <-
     fpa_read |>
     basename() |>
-    tools::file_path_sans_ext()
+    strip_all_ext()
 
   chk_gen <- le_type %in% c(
     "GENEACTIV - CSV w/ HEADER",

@@ -266,7 +266,7 @@ apply_methods_raw <- function(fpa_read,
                               df_start_tz,
                               lst_miniconda) {
 
-  if (is.null(fpa_read)) return(NULL)
+  if (length(fpa_read) == 0) return(NULL)
 
   # Read ----
   # Find the corresponding GGIR basic RData by matching raw csv filename.
@@ -741,7 +741,7 @@ apply_oak.pre <- function(fpa_read,
                           df_start_tz,
                           lst_miniconda) {
 
-  if (is.null(fpa_read)) return(NULL)
+  if (length(fpa_read) == 0) return(NULL)
 
   # Read ----
   # Find the corresponding GGIR basic RData by matching raw csv filename.
