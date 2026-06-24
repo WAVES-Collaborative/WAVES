@@ -23,7 +23,7 @@ Thank you for your collaboration in the Wrist Algorithm Verification and Evaluat
 
 The proposed flow diagram outlines the process for how the validation data and data pipeline will work with the WAVES team and groups who have potentially available validation data.
 
-![Flow Diagram](media/WAVES%20Diagram.png)
+![Flow Diagram](man/figures/WAVES%20Diagram.png)
 
 **Full description of the flow diagram coming soon** \## Setup
 
@@ -50,13 +50,13 @@ The proposed flow diagram outlines the process for how the validation data and d
 
     Several R packages need to be compiled from source. Install the following dependencies via [Homebrew](https://brew.sh/) by running the following command within the system shell (Terminal):
 
-    ```
+    ```         
     brew install cmake gcc gettext
     ```
 
     Then create `~/.R/Makevars` so R can find the installed libraries by running the following code within the system shell (Terminal):
 
-    ```
+    ```         
     mkdir -p ~/.R
     cat > ~/.R/Makevars << 'EOF'
     CPPFLAGS += -I/opt/homebrew/opt/gettext/include
@@ -69,7 +69,7 @@ The proposed flow diagram outlines the process for how the validation data and d
 
     Additionally, the `arrow` R package requires setting an environment variable before running `renv::restore()`. Run the following within the system shell (Terminal):
 
-    ```
+    ```         
     export LIBARROW_BINARY=true
     ```
 
@@ -111,7 +111,7 @@ The proposed flow diagram outlines the process for how the validation data and d
 
 6.  In Console, run `tar_make().`The "configuration" pipeline is now running, which will print messages out in the Console like the below image.
 
-    ![](media/Screenshot%202026-01-17%20173935.png)
+    ![](man/figures/Screenshot%202026-01-17%20173935.png)
 
     The "configuration" pipeline is:
 
@@ -125,11 +125,11 @@ The proposed flow diagram outlines the process for how the validation data and d
 
 7.  Once the pipeline is complete the console should say "ended pipeline" with how long it took.
 
-    ![](media/Screenshot%202026-01-20%20234701.png)
+    ![](man/figures/Screenshot%202026-01-20%20234701.png)
 
     Or it may error like so:
 
-    ![](media/Screenshot%202026-01-20%20000733.png)
+    ![](man/figures/Screenshot%202026-01-20%20000733.png)
 
     At least `config_miniconda` should be completed, allowing you to move on to step 8.
 
@@ -169,7 +169,7 @@ The proposed flow diagram outlines the process for how the validation data and d
         1.  We provide an example of how to do so using the `list.files` function, where the `file.path` function is used to list multiple directories at once.
         2.  We suggest putting a "[1]" at the end of `list.files` to make sure pipeline works with one file. (image below)
 
-    ![](media/Screenshot 2026-03-02 114951.png)
+    ![](man/figures/Screenshot%202026-03-02%20114951.png)
 
 3.  Save the "\_targets.R" script.
 
@@ -201,13 +201,13 @@ The proposed flow diagram outlines the process for how the validation data and d
 
     -   Stop the pipeline by clicking the "STOP" button that appears in the top right corner of the Console pane.
 
-    ![](media/Screenshot%202026-01-17%20132513.png)
+    ![](man/figures/Screenshot%202026-01-17%20132513.png)
 
     -   Change the `n_workers` object to 1, which will remove parallel processing.
 
 -   **Resetting conda environments:** Once the WAVES repository has been installed, major version changes to the pipeline may result in prior conda environment installations to be outdated. Unfortunately, re-running the configuration pipeline by itself may not be sufficient, which will require removing the existing environments entirely before rerunning the configuration pipeline. To do so, first run the code within the INPUT section of `_targets_config.R`. Then, run the following code within the R console:
 
-    ```
+    ```         
     library(reticulate)
     conda_remove("WHO_WAVES_stepcount")
     conda_remove("WHO_WAVES_accelerometer")
@@ -280,13 +280,13 @@ Within the description of the issue, please either:
 
 -   screenshot your console that includes the pipeline output and the error itself (example below)
 
-![](media/example_issue_screenshot.png)
+![](man/figures/example_issue_screenshot.png)
 
 -   Copy the output from the console into a codeblock
 
     -   With the description box highlighted, enter a forward slash `/` and then select "Code Block"
 
-    ![](media/example_issue_pasting_code.png)
+    ![](man/figures/example_issue_pasting_code.png)
 
     -   For language, select "R"
 
