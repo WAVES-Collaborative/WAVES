@@ -10,7 +10,7 @@ The proposed flow diagram outlines the process for how the validation
 data and data pipeline will work with the WAVES team and groups who have
 potentially available validation data.
 
-![Flow Diagram](media/WAVES%20Diagram.png)
+![Flow Diagram](reference/figures/WAVES%20Diagram.png)
 
 Flow Diagram
 
@@ -140,7 +140,7 @@ Flow Diagram
     running, which will print messages out in the Console like the below
     image.
 
-    ![](media/Screenshot%202026-01-17%20173935.png)
+    ![](reference/figures/Screenshot%202026-01-17%20173935.png)
 
     The “configuration” pipeline is:
 
@@ -159,11 +159,11 @@ Flow Diagram
 7.  Once the pipeline is complete the console should say “ended
     pipeline” with how long it took.
 
-    ![](media/Screenshot%202026-01-20%20234701.png)
+    ![](reference/figures/Screenshot%202026-01-20%20234701.png)
 
     Or it may error like so:
 
-    ![](media/Screenshot%202026-01-20%20000733.png)
+    ![](reference/figures/Screenshot%202026-01-20%20000733.png)
 
     At least `config_miniconda` should be completed, allowing you to
     move on to step 8.
@@ -239,7 +239,7 @@ Flow Diagram
         2.  We suggest putting a “\[1\]” at the end of `list.files` to
             make sure pipeline works with one file. (image below)
 
-    ![](media/Screenshot%202026-03-02%20114951.png)
+    ![](reference/figures/Screenshot%202026-03-02%20114951.png)
 
 3.  Save the “\_targets.R” script.
 
@@ -303,7 +303,7 @@ Flow Diagram
   - Stop the pipeline by clicking the “STOP” button that appears in the
     top right corner of the Console pane.
 
-  ![](media/Screenshot%202026-01-17%20132513.png)
+  ![](reference/figures/Screenshot%202026-01-17%20132513.png)
 
   - Change the `n_workers` object to 1, which will remove parallel
     processing.
@@ -398,14 +398,14 @@ Within the description of the issue, please either:
 - screenshot your console that includes the pipeline output and the
   error itself (example below)
 
-![](media/example_issue_screenshot.png)
+![](reference/figures/example_issue_screenshot.png)
 
 - Copy the output from the console into a codeblock
 
   - With the description box highlighted, enter a forward slash `/` and
     then select “Code Block”
 
-  ![](media/example_issue_pasting_code.png)
+  ![](reference/figures/example_issue_pasting_code.png)
 
   - For language, select “R”
 
@@ -448,10 +448,10 @@ please also attach the “summary_miniconda.html” report.
 
 1\.
 
-Bakrania K, Yates T, Rowlands AV, et al. [Intensity thresholds on raw
-acceleration data: Euclidean norm minus one (ENMO) and mean amplitude
-deviation (MAD)
-approaches](https://doi.org/10.1371/journal.pone.0164045). *PLOS ONE*
+Bakrania K, Yates T, Rowlands AV, et al. [Intensity Thresholds on Raw
+Acceleration Data: Euclidean Norm Minus One (ENMO) and Mean Amplitude
+Deviation (MAD)
+Approaches](https://doi.org/10.1371/journal.pone.0164045). *PLOS ONE*
 2016; 11: e0164045.
 
 2\.
@@ -527,9 +527,9 @@ data*. Zenodo. Epub ahead of print 13 July 2025. DOI:
 
 12\.
 
-White T, Westgate K, Wareham NJ, et al. [Estimation of physical activity
-energy expenditure during free-living from wrist accelerometry in UK
-adults](https://doi.org/10.1371/journal.pone.0167472). *PLOS ONE* 2016;
+White T, Westgate K, Wareham NJ, et al. [Estimation of Physical Activity
+Energy Expenditure during Free-Living from Wrist Accelerometry in UK
+Adults](https://doi.org/10.1371/journal.pone.0167472). *PLOS ONE* 2016;
 11: e0167472.
 
 13\.
@@ -562,8 +562,8 @@ print 15 January 2026. DOI:
 
 17\.
 
-Ducharme SW, Lim J, Busa MA, et al. A transparent method for step
-detection using an acceleration threshold. Epub ahead of print 25
+Ducharme SW, Lim J, Busa MA, et al. A Transparent Method for Step
+Detection Using an Acceleration Threshold. Epub ahead of print 25
 October 2021. DOI:
 [10.1123/jmpb.2021-0011](https://doi.org/10.1123/jmpb.2021-0011).
 
@@ -576,8 +576,8 @@ Journal* 2017; 17: 3453–3460.
 
 19\.
 
-Maylor BD, Edwardson CL, Dempsey PC, et al. Stepping towards more
-intuitive physical activity metrics with wrist-worn accelerometry:
-Validity of an open-source step-count algorithm. *Sensors*; 22. Epub
+Maylor BD, Edwardson CL, Dempsey PC, et al. Stepping towards More
+Intuitive Physical Activity Metrics with Wrist-Worn Accelerometry:
+Validity of an Open-Source Step-Count Algorithm. *Sensors*; 22. Epub
 ahead of print 18 December 2022. DOI:
 [10.3390/s22249984](https://doi.org/10.3390/s22249984).
