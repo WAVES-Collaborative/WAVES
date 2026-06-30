@@ -74,6 +74,7 @@ merge_output <- function(vct_nw.sleep,
       FUN = \(x) setNames(x, basename(x) |> file_path_sans_ext())
     ) |>
     setNames(c("nw.sleep", "raw", "oak.pre", "cut", "ox"))
+
   # Only merge files that have gone through all steps.
   vct_fnm <- Reduce(
     intersect,
@@ -122,7 +123,7 @@ merge_output <- function(vct_nw.sleep,
       left_join(
         read_parquet(lst_out$oak.pre[le_fnm]) |> mutate(datetime = as.POSIXct(datetime, tz = "UTC")),
         by = join_by(id, datetime)
-      )
+      ) |>
       left_join(
         read_parquet(lst_out$ox[le_fnm]),
         by = join_by(id, datetime)
