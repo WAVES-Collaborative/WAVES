@@ -2,7 +2,7 @@ pandoc: 3.8.3
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles: {}
-last_built: 2026-06-24T15:57Z
+last_built: 2026-06-30T15:54Z
 urls:
   reference: https://waves-collaborative.github.io/WAVES/reference
   article: https://waves-collaborative.github.io/WAVES/articles
