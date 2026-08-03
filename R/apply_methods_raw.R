@@ -326,7 +326,7 @@ apply_methods_raw <- function(fpa_read,
   Sys.setenv(SSQ_PARALLEL = 0)
   suffix_python <- if (reticulate:::is_windows()) "python.exe" else "bin/python"
   use_python(
-    file.path(miniconda_path(), "envs", "WHO_WAVES_oak_1.0", suffix_python),
+    file.path(miniconda_path(), "envs", "WAVES_oak_1.0", suffix_python),
     required = TRUE
   )
   forest <- import("forest")
@@ -724,9 +724,9 @@ apply_methods_raw <- function(fpa_read,
 #' @description This cannot be within `apply_methods_raw` function as reticulate
 #'  does not like swithing between conda environments within the same R session.
 #'  The following error appears:
-#'  The requested version of Python ('C:\Users\martinezj7\AppData\Local\r-miniconda\envs\WHO_WAVES_oak_pre/python.exe')
+#'  The requested version of Python ('C:\Users\martinezj7\AppData\Local\r-miniconda\envs\WAVES_oak_pre/python.exe')
 #'  cannot be used, as another version of Python
-#'  ('C:/Users/martinezj7/AppData/Local/r-miniconda/envs/WHO_WAVES_oak_1.0/python.exe') has already been initialized. Please
+#'  ('C:/Users/martinezj7/AppData/Local/r-miniconda/envs/WAVES_oak_1.0/python.exe') has already been initialized. Please
 #'  restart the R session if you need to attach reticulate to a different version of Python.
 #' @param fpa_read
 #' @param vct_fpa_basic
@@ -794,7 +794,7 @@ apply_oak.pre <- function(fpa_read,
   Sys.setenv(SSQ_PARALLEL = 0)
   suffix_python <- if (reticulate:::is_windows()) "python.exe" else "bin/python"
   use_python(
-    file.path(miniconda_path(), "envs", "WHO_WAVES_oak_pre", suffix_python),
+    file.path(miniconda_path(), "envs", "WAVES_oak_pre", suffix_python),
     required = TRUE
   )
   forest <- import("forest")
