@@ -483,6 +483,9 @@ summarize_metrics_config <- function(df_pipe) {
       label = "Stepcount", columns = ends_with("stepcount")
     ) |>
     tab_spanner(
+      label = "Trost", columns = ends_with("trost")
+    ) |>
+    tab_spanner(
       label = "Verisense (Original)", columns = ends_with("verisense.original")
     ) |>
     tab_spanner(
@@ -723,6 +726,7 @@ summarize_metrics_config <- function(df_pipe) {
       "oak.pre" = "Oak Pre",
       "sdt" = "SDT",
       "stepcount" = "Stepcount",
+      "trost" = "Trost",
       "verisense.original" = "Verisense (Original)",
       "verisense.revised" = "Verisense (Revised)"
     )
@@ -732,6 +736,7 @@ summarize_metrics_config <- function(df_pipe) {
     "oak.pre" ~ "Oak Pre",
     "sdt" ~ "SDT",
     "stepcount" ~ "Stepcount",
+    "trost" ~ "Trost",
     "verisense.original" ~ "Verisense (Original)",
     "verisense.revised" ~ "Verisense (Revised)"
   )
@@ -865,6 +870,7 @@ summarize_metrics_main <- function(vct_merge) {
       "oak.pre" = "Oak Pre",
       "sdt" = "SDT",
       "stepcount" = "Stepcount",
+      "trost" = "Trost",
       "verisense.original" = "Verisense (Original)",
       "verisense.revised" = "Verisense (Revised)"
     )

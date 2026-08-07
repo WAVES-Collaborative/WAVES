@@ -354,6 +354,7 @@ apply_methods_raw <- function(fpa_read,
     class_ellis = NA_character_,
     steps_oak.1.0            = NA,
     steps_sdt                = NA_integer_,
+    steps_trost              = NA_integer_,
     steps_verisense.original = NA_integer_,
     steps_verisense.revised  = NA_integer_
   )
@@ -589,7 +590,6 @@ apply_methods_raw <- function(fpa_read,
         fs     = 10L
       )
 
-      # defaults except for fs
       # https://github.com/onnela-lab/forest/blob/develop/docs/source/oak.md#default-tuning-parameters-for-walking-recognition-and-step-counting
       df_all$steps_oak.1.0[ind_steps_oak] <- forest$oak$base$find_walking(
         vm_bout = vm_bout[[2]],
@@ -704,6 +704,14 @@ apply_methods_raw <- function(fpa_read,
     fill(
       matches("intensity|class"),
       .direction = "down"
+    ) |>
+    # create steps_trost now since class was not filled down yet
+    mutate(
+      steps_trost = ifelse(
+        !class_trost %in% c("2","3","4","mpa"),
+        yes = 0L,
+        no  = steps_verisense.original
+      )
     )
 
   # Shouldn't be any NA for other variables.
@@ -875,7 +883,6 @@ apply_oak.pre <- function(fpa_read,
       fs     = 10L
     )
 
-    # defaults except for fs
     # https://github.com/onnela-lab/forest/blob/develop/docs/source/oak.md#default-tuning-parameters-for-walking-recognition-and-step-counting
     df_all$steps_oak.pre[ind_steps_oak] <- forest$oak$base$find_walking(
       vm_bout = vm_bout[[2]],
