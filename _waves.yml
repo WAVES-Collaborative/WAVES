@@ -1,0 +1,25 @@
+study_timezone: ~
+sampling_frequency: ~
+vct_raw_directories:
+  - ~
+vct_raw_filepaths:
+  - ~
+reference:
+  direct_observation:
+    directories:
+    - ~
+    id_pattern:
+    - ~
+    mapping_filepath: ~
+  activPAL:
+    directories_1secEpochs:
+    - ~
+    directories_events:
+    - ~
+    id_pattern:
+    - ~
+  actiPASS:
+    directories:
+    - ~
+    id_pattern:
+    - ~

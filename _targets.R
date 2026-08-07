@@ -15,19 +15,6 @@ Sys.setenv(
   RETICULATE_MINICONDA_PATH = reticulate::miniconda_path()
 )
 
-study_timezone     <- Sys.timezone()
-sampling_frequency <- 100
-n_workers          <- 2 # future::availableCores() - 1
-
-vct_raw_fpa <- list.files(
-  path = file.path(
-    "S:", "_R_CHS_Research", "PAHRL", "Student Access", "4_Research",
-    "2017 Strath R01 FLAC", "Data", "ActiGraph_GT3X", c("V1", "V2", "V3"),
-    "LW", "LW_RAW"
-  ),
-  pattern    = ".*",
-  full.names = TRUE,
-  recursive  = TRUE
 )
 
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -41,6 +28,19 @@ vct_raw_fpa <- list.files(
 source("packages.R") |>
   suppressMessages() |>
   suppressWarnings()
+
+# Run the R scripts in the R/ folder with your custom functions:
+list.files(
+  path       = "R",
+  pattern    = "\\.R$",
+  full.names = TRUE
+) |>
+  grep(x       = _,
+       pattern = "^R\\/_",
+       value   = TRUE,
+       invert  = TRUE) |>
+  sapply(FUN = source) |>
+  invisible()
 
 # Make sure conda isn't being used by another process: TEST ON MAC
 chk_conda <-
@@ -142,18 +142,6 @@ tar_option_set(
   # trust_timestamps = TRUE
 )
 
-# Run the R scripts in the R/ folder with your custom functions:
-list.files(
-  path       = "R",
-  pattern    = "\\.R$",
-  full.names = TRUE
-) |>
-  grep(x       = _,
-       pattern = "^R\\/_",
-       value   = TRUE,
-       invert  = TRUE) |>
-  sapply(FUN = source) |>
-  invisible()
 
 # If there are warnings, run the following in the console:
 # df_warnings <-
@@ -191,13 +179,13 @@ if (tar_active()) {
 }
 
 tar_plan(
+  lst_yaml = parse_waves_yaml(),
   tar_file_read(
     name    = lst_miniconda,
     command = file.path("_targets_config", "objects", "lst_miniconda"),
     read    = qs2::qs_read(!!.x),
     format  = "qs"
   ),
-  my_tz = study_timezone,
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                             FILE DIRECTORIES                           ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -216,9 +204,9 @@ tar_plan(
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                                FILE PATHS                              ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  tar_files_input(
-    name  = vct_raw,
-    files = vct_raw_fpa
+  tar_files(
+    name    = vct_raw,
+    command = lst_yaml$vct_raw_fpa
   ),
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                               DEMOGRAPHICS                             ----
@@ -235,7 +223,7 @@ tar_plan(
   tar_parquet(
     name    = df_start_tz,
     command = get_start_tz_df(vct_basic,
-                              my_tz)
+                              my_tz = lst_yaml$my_tz)
   ),
   tar_file(
     name      = vct_nw.sleep,

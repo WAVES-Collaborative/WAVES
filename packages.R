@@ -14,6 +14,7 @@ tarchetypes::tar_file
 targets::tar_active
 library(tidyr)
 library(tools)
+library(yaml12)
 # Sydney ----
 library(C50)
 library(caret)

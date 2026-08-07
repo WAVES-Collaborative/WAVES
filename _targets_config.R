@@ -13,22 +13,9 @@ Sys.setenv(
   TAR_PROJECT = "config",
   # change below environment variable if you already have a conda installation readily accessible.
   RETICULATE_MINICONDA_PATH = reticulate::miniconda_path()
-)
-
-study_timezone     <- Sys.timezone()
-sampling_frequency <- 100
-n_workers          <- 2 # future::availableCores() - 1
-
-vct_raw_fpa <- file.path(
-  "data", "0_CONFIG", "RAW",
-  c(
-    "WAVES_10002_RAW.csv.gz",
-    "WAVES_10003_RAW.csv.gz",
-    "WAVES_10004_RAW.gt3x",
-    "WAVES_10005_RAW.cwa",
-    "WAVES_10006_RAW.csv.gz"
   )
 )
+n_workers <- 2 # future::availableCores() - 1
 
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -42,9 +29,22 @@ source("packages.R") |>
   suppressMessages() |>
   suppressWarnings()
 
+# Run the R scripts in the R/ folder with your custom functions:
+list.files(
+  path       = "R",
+  pattern    = "\\.R$",
+  full.names = TRUE
+) |>
+  grep(x       = _,
+       pattern = "^R\\/_",
+       value   = TRUE,
+       invert  = TRUE) |>
+  sapply(FUN = source) |>
+  invisible()
+
 # Decompress config files.
-chk_10004 <- !file.exists(vct_raw_fpa[3])
-chk_10005 <- !file.exists(vct_raw_fpa[4])
+chk_10004 <- !file.exists("data/0_CONFIG/RAW/WAVES_10004_RAW.gt3x")
+chk_10005 <- !file.exists("data/0_CONFIG/RAW/WAVES_10005_RAW.cwa")
 
 if (chk_10004) {R.utils::decompressFile(
   filename = "data/0_CONFIG/RAW/WAVES_10004_RAW.gt3x.xz",
@@ -68,7 +68,6 @@ chk_conda <-
              full.names = TRUE)
 
 if (length(chk_conda) != 0) {
-
   stop(c(
     "A process within a conda environment was interrupted or is currently ongoing.
     Please only run the pipeline without any other processes running in the background
@@ -163,19 +162,6 @@ tar_option_set(
   # trust_timestamps = TRUE
 )
 
-# Run the R scripts in the R/ folder with your custom functions:
-list.files(
-  path       = "R",
-  pattern    = "\\.R$",
-  full.names = TRUE
-) |>
-  grep(x       = _,
-       pattern = "^R\\/_",
-       value   = TRUE,
-       invert  = TRUE) |>
-  sapply(FUN = source) |>
-  invisible()
-
 # If there are warnings, run the following in the console:
 # df_warnings <-
 #   tar_meta(fields = warnings, complete_only = TRUE) |>
@@ -212,6 +198,7 @@ if (tar_active()) {
 }
 
 tar_plan(
+  lst_yaml = parse_waves_yaml(),
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                             MINICONDA SETUP                            ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -289,8 +276,6 @@ tar_plan(
     path = "quarto/config_miniconda.qmd",
     output_file = file.path(getwd(), fdr_reports, "summary_miniconda.html")
   ),
-  my_tz = study_timezone,
-  my_sf = sampling_frequency,
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                             FILE DIRECTORIES                           ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -309,9 +294,9 @@ tar_plan(
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                                FILE PATHS                              ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  tar_files_input(
-    name  = vct_raw,
-    files = vct_raw_fpa
+  tar_files(
+    name    = vct_raw,
+    command = lst_yaml$vct_raw_fpa
   ),
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                               DEMOGRAPHICS                             ----
@@ -332,7 +317,7 @@ tar_plan(
   tar_parquet(
     name    = df_start_tz,
     command = get_start_tz_df(vct_basic,
-                              my_tz)
+                              my_tz = lst_yaml$my_tz)
   ),
   tar_file(
     name      = vct_nw.sleep,
@@ -367,7 +352,7 @@ tar_plan(
       ox_input      = vct_ox_input,
       fdr_write     = file.path(getwd(), dir_stepcount),
       fdr_log       = dir_logs,
-      log_prefix    = "main_",
+      log_prefix    = "config_",
       lst_miniconda = lst_miniconda
     ),
     pattern   = map(vct_ox_input),
@@ -379,7 +364,7 @@ tar_plan(
       ox_input      = vct_ox_input,
       fdr_write     = file.path(getwd(), dir_walmsley),
       fdr_log       = dir_logs,
-      log_prefix    = "main_",
+      log_prefix    = "config_",
       lst_miniconda = lst_miniconda
     ),
     pattern   = map(vct_ox_input),
@@ -391,7 +376,7 @@ tar_plan(
       ox_input      = vct_ox_input,
       fdr_write     = file.path(getwd(), dir_actinet),
       fdr_log       = dir_logs,
-      log_prefix    = "main_",
+      log_prefix    = "config_",
       lst_miniconda = lst_miniconda
     ),
     pattern   = map(vct_ox_input),
