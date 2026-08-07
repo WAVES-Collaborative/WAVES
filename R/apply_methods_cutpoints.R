@@ -188,6 +188,13 @@ apply_methods_cutpoints <- function(fpa_basic,
                      "mvpa")
         )}
       ),
+      intensity_ggir = cut(
+        ENMO,
+        breaks = c(-Inf, 40, 100, # 400,
+                   Inf),
+        labels = c("sedentary", "light", # "moderate", "vigorous",
+                   "mvpa")
+      ),
       intensity_mielke = switch(
         brand,
         "actigraph" = {cut(

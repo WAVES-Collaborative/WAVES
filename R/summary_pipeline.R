@@ -260,6 +260,9 @@ summarize_metrics_config <- function(df_pipe) {
       label = "Hildrebrand", columns = ends_with("hildebrand")
     ) |>
     tab_spanner(
+      label = "GGIR Default", columns = ends_with("ggir")
+    ) |>
+    tab_spanner(
       label = "Mielke", columns = ends_with("mielke")
     ) |>
     tab_spanner(
@@ -368,6 +371,9 @@ summarize_metrics_config <- function(df_pipe) {
     ) |>
     tab_spanner(
       label = "Hildrebrand", columns = ends_with("hildebrand")
+    ) |>
+    tab_spanner(
+      label = "GGIR Default", columns = ends_with("ggir")
     ) |>
     tab_spanner(
       label = "Mielke", columns = ends_with("mielke")
@@ -623,6 +629,7 @@ summarize_metrics_config <- function(df_pipe) {
       "esliger" = "Esliger",
       "fraysee" = "Fraysee",
       "hildebrand" = "Hildrebrand",
+      "ggir" = "GGIR Default",
       "mielke" = "Mielke",
       "montoye.dt" = "Montoye (DT)",
       "montoye.nn" = "Montoye (NN)",
@@ -646,6 +653,7 @@ summarize_metrics_config <- function(df_pipe) {
     "esliger" ~ "Esliger",
     "fraysee" ~ "Fraysee",
     "hildebrand" ~ "Hildrebrand",
+    "ggir" ~ "GGIR Default",
     "mielke" ~ "Mielke",
     "montoye.dt" ~ "Montoye (DT)",
     "montoye.nn" ~ "Montoye (NN)",
@@ -671,6 +679,7 @@ summarize_metrics_config <- function(df_pipe) {
       "esliger" = "Esliger",
       "fraysee" = "Fraysee",
       "hildebrand" = "Hildrebrand",
+      "ggir" = "GGIR Default",
       "mielke" = "Mielke",
       "montoye.dt" = "Montoye (DT)",
       "montoye.nn" = "Montoye (NN)",
@@ -690,6 +699,7 @@ summarize_metrics_config <- function(df_pipe) {
     "esliger" ~ "Esliger",
     "fraysee" ~ "Fraysee",
     "hildebrand" ~ "Hildrebrand",
+    "ggir" ~ "GGIR Default",
     "mielke" ~ "Mielke",
     "montoye.dt" ~ "Montoye (DT)",
     "montoye.nn" ~ "Montoye (NN)",
@@ -804,6 +814,7 @@ summarize_metrics_main <- function(vct_merge) {
       "esliger" = "Esliger",
       "fraysee" = "Fraysee",
       "hildebrand" = "Hildrebrand",
+      "ggir" = "GGIR Default",
       "mielke" = "Mielke",
       "montoye.dt" = "Montoye (DT)",
       "montoye.nn" = "Montoye (NN)",
@@ -829,6 +840,7 @@ summarize_metrics_main <- function(vct_merge) {
       "esliger" = "Esliger",
       "fraysee" = "Fraysee",
       "hildebrand" = "Hildrebrand",
+      "ggir" = "GGIR Default",
       "mielke" = "Mielke",
       "montoye.dt" = "Montoye (DT)",
       "montoye.nn" = "Montoye (NN)",
