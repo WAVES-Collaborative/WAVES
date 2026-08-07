@@ -1,8 +1,19 @@
-is_null_simplify <- function(x) {
+simplify_is_null <- function(x) {
   sapply(
     x,
     FUN = \(.x) length(.x) == 0
   )
+}
+simplify_post_expr <- function(x) {
+  if (is.list(x)) {
+    chk_type <-
+      sapply(x, typeof) |>
+      vctrs::vec_duplicate_detect() |>
+      all()
+    if (chk_type) unlist(x) else x
+  } else {
+    x
+  }
 }
 format_abort_message <- function(x,
                                  msg_info) {
@@ -56,33 +67,42 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
 
   # Even though "simplify = TRUE" is default in read_yaml, NULL parameters are
   # kept in list format. Truly simplify NULLs then.
-  if (all(is_null_simplify(lst_yaml$vct_raw_fdr))) {
+  if (all(simplify_is_null(lst_yaml$vct_raw_fdr))) {
     lst_yaml["vct_raw_fdr"] <- list(NULL)
   }
-  if (all(is_null_simplify(lst_yaml$vct_raw_fpa))) {
+  if (all(simplify_is_null(lst_yaml$vct_raw_fpa))) {
     lst_yaml["vct_raw_fpa"] <- list(NULL)
   }
-  if (all(is_null_simplify(lst_yaml$ref$do$fdr))) {
+  if (all(simplify_is_null(lst_yaml$ref$do$fdr))) {
     lst_yaml$ref$do["fdr"] <- list(NULL)
   }
-  if (all(is_null_simplify(lst_yaml$ref$do$id_pt))) {
+  if (all(simplify_is_null(lst_yaml$ref$do$id_pt))) {
     lst_yaml$ref$do["id_pt"] <- list(NULL)
   }
-  if (all(is_null_simplify(lst_yaml$ref$pal$fdr_ep))) {
+  if (all(simplify_is_null(lst_yaml$ref$pal$fdr_ep))) {
     lst_yaml$ref$pal["fdr_ep"] <- list(NULL)
   }
-  if (all(is_null_simplify(lst_yaml$ref$pal$fdr_ev))) {
+  if (all(simplify_is_null(lst_yaml$ref$pal$fdr_ev))) {
     lst_yaml$ref$pal["fdr_ev"] <- list(NULL)
   }
-  if (all(is_null_simplify(lst_yaml$ref$pal$id_pt))) {
+  if (all(simplify_is_null(lst_yaml$ref$pal$id_pt))) {
     lst_yaml$ref$pal["id_pt"] <- list(NULL)
   }
-  if (all(is_null_simplify(lst_yaml$ref$pass$fdr))) {
+  if (all(simplify_is_null(lst_yaml$ref$pass$fdr))) {
     lst_yaml$ref$pass["fdr"] <- list(NULL)
   }
-  if (all(is_null_simplify(lst_yaml$ref$pass$id_pt))) {
+  if (all(simplify_is_null(lst_yaml$ref$pass$id_pt))) {
     lst_yaml$ref$pass["id_pt"] <- list(NULL)
   }
+
+  # If !expr tag is used for directory/filepath, then handlers will still return
+  # a list for list items that are all character.
+  lst_yaml$vct_raw_fdr    <- simplify_post_expr(lst_yaml$vct_raw_fdr)
+  lst_yaml$vct_raw_fpa    <- simplify_post_expr(lst_yaml$vct_raw_fpa)
+  lst_yaml$ref$do$fdr     <- simplify_post_expr(lst_yaml$ref$do$fdr)
+  lst_yaml$ref$pal$fdr_ep <- simplify_post_expr(lst_yaml$ref$pal$fdr_ep)
+  lst_yaml$ref$pal$fdr_ev <- simplify_post_expr(lst_yaml$ref$pal$fdr_ev)
+  lst_yaml$ref$pass$fdr   <- simplify_post_expr(lst_yaml$ref$pass$fdr)
 
   if (identical(Sys.getenv("TAR_PROJECT"), "config")) {
     lst_yaml$my_tz <- "Etc/UTC"
@@ -201,9 +221,9 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
   ## ref ------------------------------------------
   # Make sure values are present for at least one reference.
   chk_ref <- all(
-    is_null_simplify(lst_yaml$ref$do),
-    is_null_simplify(lst_yaml$ref$pal),
-    is_null_simplify(lst_yaml$ref$pass)
+    simplify_is_null(lst_yaml$ref$do),
+    simplify_is_null(lst_yaml$ref$pal),
+    simplify_is_null(lst_yaml$ref$pass)
   )
 
   if (chk_ref) {
@@ -213,13 +233,13 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
       ""
     )
   } else {
-    if (!all(is_null_simplify(lst_yaml$ref$do))) {
+    if (!all(simplify_is_null(lst_yaml$ref$do))) {
       ### do ----------------------------------------
       #### directories
       if (length(lst_yaml$ref$do$fdr) == 0) {
         lst_msg[["ref_do_fdr"]] <-
           "Direct observation `directories` is not defined."
-      } else if (!any(fs::is_dir(lst_yaml$do$fdr))) {
+      } else if (!any(fs::is_dir(lst_yaml$ref$do$fdr))) {
         lst_msg[["ref_do_fdr"]] <-
           "Direct observation `directories` contains a string that is NOT a file directory."
       }
@@ -257,13 +277,13 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
           "Please define one filepath to mapping csv."
       )
     }
-    if (!all(is_null_simplify(lst_yaml$ref$pal))) {
+    if (!all(simplify_is_null(lst_yaml$ref$pal))) {
       ### pal ---------------------------------------
       #### directories_1secEpochs
       if (length(lst_yaml$ref$pal$fdr_ep) == 0) {
         lst_msg[["ref_pal_fdr_ep"]] <-
           "activPAL `directories_1secEpochs` is not defined."
-      } else if (!any(fs::is_dir(lst_yaml$pal$fdr_ep))) {
+      } else if (!any(fs::is_dir(lst_yaml$ref$pal$fdr_ep))) {
         lst_msg[["ref_pal_fdr_ep"]] <-
           "activPAL `directories_1secEpochs` contains a string that is NOT a file directory."
       }
@@ -277,7 +297,7 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
       if (length(lst_yaml$ref$pal$fdr_ev) == 0) {
         lst_msg[["ref_pal_fdr_ev"]] <-
           "activPAL `directories_events` is not defined."
-      } else if (!any(fs::is_dir(lst_yaml$pal$fdr_ev))) {
+      } else if (!any(fs::is_dir(lst_yaml$ref$pal$fdr_ev))) {
         lst_msg[["ref_pal_fdr_ev"]] <-
           "activPAL `directories_events` contains a string that is NOT a file directory."
       }
@@ -301,13 +321,13 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
           "Please define as one or more strings with '0' as a placeholder for numbers."
       )
     }
-    if (!all(is_null_simplify(lst_yaml$ref$pass))) {
+    if (!all(simplify_is_null(lst_yaml$ref$pass))) {
       ### pass ---------------------------------------
       #### directories
       if (length(lst_yaml$ref$pass$fdr) == 0) {
         lst_msg[["ref_pass_fdr"]] <-
           "ActiPass `directories` is not defined."
-      } else if (!any(fs::is_dir(lst_yaml$pass$fdr))) {
+      } else if (!any(fs::is_dir(lst_yaml$ref$pass$fdr))) {
         lst_msg[["ref_pass_fdr"]] <-
           "ActiPass `directories` contains a string that is NOT a file directory."
       }

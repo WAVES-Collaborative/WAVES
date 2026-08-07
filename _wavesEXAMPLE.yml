@@ -1,0 +1,52 @@
+study_timezone: "America/Los_Angeles"
+sampling_frequency: 80
+vct_raw_directories:
+  - ~
+vct_raw_filepaths:
+  - !expr list.files(
+      path = file.path(
+        getwd() |>
+          dirname() |>
+          dirname(),
+        'CalpolyData',
+        'actigraph',
+        'original_GT3X'
+      ),
+      pattern    = 'ACT24_105|ACT24_147|ACT24_158',
+      full.names = TRUE,
+      recursive  = FALSE
+    )
+  - !expr list.files(
+      path = file.path(
+        getwd() |>
+          dirname() |>
+          dirname(),
+        'PALS',
+        'GENEActiv_raw_files'
+      ),
+      pattern    = '\\.bin$',
+      full.names = TRUE,
+     recursive  = FALSE
+    )
+reference:
+  direct_observation:
+    directories:
+    - ~
+    id_pattern:
+    - ~
+    mapping_filepath: ~
+  activPAL:
+    directories_1secEpochs:
+    - "/vf/users/UKBB_Matthews/CalpolyData/activPAL_Data/1_sec_epochs"
+    - "/vf/users/UKBB_Matthews/PALS/activpal/1sec_epochs"
+    directories_events:
+    - "/vf/users/UKBB_Matthews/CalpolyData/activPAL_Data/events/all_events"
+    - "/vf/users/UKBB_Matthews/PALS/activpal/extended_all"
+    id_pattern:
+    - "ACT24_000"
+    - "PALS00000"
+  actiPASS:
+    directories:
+    - ~
+    id_pattern:
+    - ~
