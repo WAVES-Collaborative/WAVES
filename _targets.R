@@ -14,8 +14,8 @@ Sys.setenv(
   # change below environment variable if you already have a conda installation readily accessible.
   RETICULATE_MINICONDA_PATH = reticulate::miniconda_path()
 )
-
 )
+n_workers <- 2 # future::availableCores() - 1
 
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -357,9 +357,17 @@ tar_plan(
     ),
     format = "file"
   ),
-  tar_render(
-    name = pipeline_summary,
-    path = "quarto/pipeline_main.qmd",
-    output_file = file.path(getwd(), fdr_reports, "summary_pipeline_main.html")
-  )
+  if (reticulate:::is_linux()) {
+    tar_render(
+      name = pipeline_summary,
+      path = "quarto/pipeline_main.qmd",
+      output_file = file.path(getwd(), fdr_reports, "summary_pipeline_main.html")
+    )
+  } else {
+    tar_quarto(
+      name = pipeline_summary,
+      path = "quarto/pipeline_main.qmd",
+      output_file = file.path(getwd(), fdr_reports, "summary_pipeline_main.html")
+    )
+  }
 )

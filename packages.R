@@ -6,6 +6,7 @@ library(gt)
 library(knitr)
 library(lubridate)
 library(nnet)
+quarto::quarto_render
 qs2::qs_save
 library(randomForest)
 library(reticulate)

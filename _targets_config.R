@@ -448,9 +448,17 @@ tar_plan(
       vct_ox          = vct_ox
     )
   ),
-  tar_render(
-    name = pipeline_summary,
-    path = "quarto/pipeline_config.qmd",
-    output_file = file.path(getwd(), fdr_reports, "summary_pipeline_config.html")
-  )
+  if (reticulate:::is_linux()) {
+    tar_render(
+      name = pipeline_summary,
+      path = "quarto/pipeline_config.qmd",
+      output_file = file.path(getwd(), fdr_reports, "summary_pipeline_config.html")
+    )
+  } else {
+    tar_quarto(
+      name = pipeline_summary,
+      path = "quarto/pipeline_config.qmd",
+      output_file = file.path(getwd(), fdr_reports, "summary_pipeline_config.html")
+    )
+  }
 )

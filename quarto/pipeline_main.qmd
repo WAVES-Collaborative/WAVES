@@ -1,9 +1,9 @@
 ---
 title: "Pipeline Summary"
 format: 
-  html: 
+  html:  
+    toc: true
     page-layout: full
-    embed-resources: true
 editor: visual
 editor_options: 
   chunk_output_type: console
@@ -63,28 +63,35 @@ Below is a table listing if each major step was successful for a file (TRUE) or 
 #| label: tbl-major
 #| echo: false
 
-tbl_out <- gt(df_out)
-# df_out <- 
-#   df_out |> 
-#   mutate(
-#     rowid = rleid(file),
-#     clr = ifelse(
-#       equal,
-#       yes = "#D9F1D5",
-#       no  = "#ea9999"
-#     )
-#   )
-# 
-# for (i in seq_len(nrow(df_equal))) {
-#   tbl_out <-
-#     tbl_out |>
-#     tab_style(
-#       style = cell_fill(color = df_equal$clr[i]),
-#       locations = cells_body(columns = df_equal$step[i],
-#                              rows = df_equal$rowid[i])
-#     )
-# }
-tbl_out
+gt(df_out) |> 
+  tab_style(
+    style = cell_fill(color = "#D9F1D5"),
+    locations = list(
+      cells_body(columns = GGIR,          rows = GGIR),
+      cells_body(columns = nw.sleep,      rows = nw.sleep),
+      cells_body(columns = calibration,   rows = calibration),
+      cells_body(columns = `raw methods`, rows = `raw methods`),
+      cells_body(columns = oak.pre,       rows = oak.pre),
+      cells_body(columns = cutpoints,     rows = cutpoints),
+      cells_body(columns = stepcount,     rows = stepcount),
+      cells_body(columns = walmsley,      rows = walmsley),
+      cells_body(columns = actinet,       rows = actinet)
+    )
+  ) |> 
+  tab_style(
+    style = cell_fill(color = "#ea9999"),
+    locations = list(
+      cells_body(columns = GGIR,          rows = !GGIR),
+      cells_body(columns = nw.sleep,      rows = !nw.sleep),
+      cells_body(columns = calibration,   rows = !calibration),
+      cells_body(columns = `raw methods`, rows = !`raw methods`),
+      cells_body(columns = oak.pre,       rows = !oak.pre),
+      cells_body(columns = cutpoints,     rows = !cutpoints),
+      cells_body(columns = stepcount,     rows = !stepcount),
+      cells_body(columns = walmsley,      rows = !walmsley),
+      cells_body(columns = actinet,       rows = !actinet)
+    )
+  )
 
 ```
 

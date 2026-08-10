@@ -2,8 +2,8 @@
 title: "Configuration Pipeline Summary"
 format: 
   html: 
+    toc: true
     page-layout: full
-    embed-resources: true
 editor: visual
 editor_options: 
   chunk_output_type: console

@@ -31,3 +31,5 @@ reports/
 
 **/*.quarto_ipynb
 docs
+
+/.quarto/
