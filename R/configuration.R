@@ -16,21 +16,23 @@ get_tbl_module <- function(df_module_WAVES,
     full_join(
       df_module_WAVES,
       reticulate:::conda_list_packages(conda_env) |>
-        mutate(
+        select(
           Module = package,
           `Version Installed` = version,
-          .keep = "none"
+          channel_yours = channel
         ),
       by = join_by(Module)
     ) |>
-    select(Module, starts_with("Version"), Channel) |>
+    select(Module, `Version WAVES`, `Version Installed`, Channel, channel_yours) |>
     mutate(
       Module =
         factor(Module) |>
-        relevel(ref = le_primary_module)
-    ) |>
-    arrange(Module) |>
-    mutate(
+        relevel(ref = le_primary_module),
+      Channel = ifelse(
+        is.na(Channel),
+        yes = channel_yours,
+        no = Channel
+      ),
       clr = case_when(
         # The below packages don't matter for version/date.
         Module %in% c("ca-certificates", "certifi") ~ "#FFFFFF",
@@ -44,8 +46,10 @@ get_tbl_module <- function(df_module_WAVES,
         # Module version for other modules do not match.
         `Version WAVES` != `Version Installed`       ~ "#FAFA8E",
         .default                                     = "#D9F1D5"
-      )
-    )
+      ),
+      channel_yours = NULL
+    ) |>
+    arrange(Module)
   tbl_module <-
     df_module_installed |>
     select(-clr) |>
@@ -91,12 +95,6 @@ config_miniconda <- function(df_module_stepcount,
                              df_module_oak_1.0,
                              df_module_oak_pre) {
 
-  chk_windows <- grepl(
-    x = Sys.getenv(c("OS", "R_PLATFORM")),
-    pattern = "windows",
-    ignore.case = TRUE
-  ) |>
-    any()
   suffix_python <- if (reticulate:::is_windows()) "python.exe" else "bin/python"
 
   # conda ----

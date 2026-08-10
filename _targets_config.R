@@ -211,53 +211,41 @@ tar_plan(
   tar_file_read(
     name    = df_module_walmsley,
     command = file.path("data", "0_CONFIG", "RAW", "df_modules_walmsley.csv"),
-    read    =
-      fread(!!.x, sep = ",") |>
-      mutate(
-        `Version WAVES` = case_when(
-          Module %in% c("packaging", "symlink-exe-runtime") ~ paste0(`Version WAVES`, ".0"),
-          .default = `Version WAVES`
-        )
-      ),
+    read    = fread(
+      !!.x,
+      sep        = ",",
+      colClasses = list(character=c("Module","Version WAVES","Channel"))
+    ),
     format  = "parquet"
   ),
   tar_file_read(
     name    = df_module_actinet,
     command = file.path("data", "0_CONFIG", "RAW", "df_modules_actinet.csv"),
-    read    =
-      fread(!!.x, sep = ",") |>
-      mutate(
-        `Version WAVES` = case_when(
-          Module %in% c("packaging", "symlink-exe-runtime") ~ paste0(`Version WAVES`, ".0"),
-          .default = `Version WAVES`
-        )
-      ),
+    read    = fread(
+      !!.x,
+      sep        = ",",
+      colClasses = list(character=c("Module","Version WAVES","Channel"))
+    ),
     format  = "parquet"
   ),
   tar_file_read(
     name    = df_module_oak_1.0,
     command = file.path("data", "0_CONFIG", "RAW", "df_modules_oak1.0.csv"),
-    read    =
-      fread(!!.x, sep = ",") |>
-      mutate(
-        `Version WAVES` = case_when(
-          Module %in% c("packaging", "symlink-exe-runtime") ~ paste0(`Version WAVES`, ".0"),
-          .default = `Version WAVES`
-        )
-      ),
+    read    = fread(
+      !!.x,
+      sep        = ",",
+      colClasses = list(character=c("Module","Version WAVES","Channel"))
+    ),
     format  = "parquet"
   ),
   tar_file_read(
     name    = df_module_oak_pre,
     command = file.path("data", "0_CONFIG", "RAW", "df_modules_oakpre.csv"),
-    read    =
-      fread(!!.x, sep = ",") |>
-      mutate(
-        `Version WAVES` = case_when(
-          Module %in% c("packaging", "symlink-exe-runtime") ~ paste0(`Version WAVES`, ".0"),
-          .default = `Version WAVES`
-        )
-      ),
+    read    = fread(
+      !!.x,
+      sep        = ",",
+      colClasses = list(character=c("Module","Version WAVES","Channel"))
+    ),
     format  = "parquet"
   ),
   tar_qs(
@@ -271,11 +259,19 @@ tar_plan(
     ),
     cue = tar_cue(mode = "always")
   ),
-  tar_render(
-    name = minconda_summary,
-    path = "quarto/config_miniconda.qmd",
-    output_file = file.path(getwd(), fdr_reports, "summary_miniconda.html")
-  ),
+  if (reticulate:::is_linux()) {
+    tar_render(
+      name = minconda_summary,
+      path = "quarto/config_miniconda.qmd",
+      output_file = file.path(getwd(), fdr_reports, "summary_miniconda.html")
+    )
+  } else {
+    tar_quarto(
+      name = minconda_summary,
+      path = "quarto/config_miniconda.qmd",
+      output_file = file.path(getwd(), fdr_reports, "summary_miniconda.html")
+    )
+  },
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                             FILE DIRECTORIES                           ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
