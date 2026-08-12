@@ -100,7 +100,7 @@ apply_ox_stepcount <- function(ox_input,
     system2(
       command = file.path(miniconda_path(), "Scripts", "activate.bat"),
       args = paste0(
-        "activate WHO_WAVES_stepcount & ",
+        "activate WAVES_stepcount & ",
         paste0(
           'stepcount ', ox_input, ' -o "', fdr_write, '"'
         ) |>
@@ -115,12 +115,12 @@ apply_ox_stepcount <- function(ox_input,
     )
   } else {
     # The `system2` command uses a shell within MacOS and Linux.
-    # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_stepcount ; stepcount "data/0_CONFIG/RAW/WAVES_10004_RAW.gt3x" -o ~/WAVES/data/stepcount
+    # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WAVES_stepcount ; stepcount "data/0_CONFIG/RAW/WAVES_10004_RAW.gt3x" -o ~/WAVES/data/stepcount
     system2(
       command = "source",
       args = paste(
         paste0('"', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
-        "conda activate WHO_WAVES_stepcount",
+        "conda activate WAVES_stepcount",
         paste0(
           'stepcount ', ox_input, ' -o "', fdr_write, '"'
         ),
@@ -167,7 +167,7 @@ apply_ox_walmsley <- function(ox_input,
     system2(
       command = file.path(miniconda_path(), "Scripts", "activate.bat"),
       args = paste0(
-        "activate WHO_WAVES_accelerometer & ",
+        "activate WAVES_accelerometer & ",
         paste0(
           'accProcess ', ox_input, ' -o "', fdr_write, '"', " --timeZone UTC"
         ) |>
@@ -183,12 +183,12 @@ apply_ox_walmsley <- function(ox_input,
 
   } else {
     # The `system2` command uses a shell within MacOS and Linux.
-    # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_accelerometer ; accProcess "data/0_CONFIG/RAW/WAVES_10004_RAW.gt3x" -o ~/WAVES/data/walmsley --timeZone UTC
+    # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WAVES_accelerometer ; accProcess "data/0_CONFIG/RAW/WAVES_10004_RAW.gt3x" -o ~/WAVES/data/walmsley --timeZone UTC
     system2(
       command = "source",
       args = paste(
         paste0('"', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
-        "conda activate WHO_WAVES_accelerometer",
+        "conda activate WAVES_accelerometer",
         paste0(
           'accProcess ', ox_input, ' -o "', fdr_write, '"', " --timeZone UTC"
         ),
@@ -235,7 +235,7 @@ apply_ox_actinet <- function(ox_input,
     system2(
       command = file.path(miniconda_path(), "Scripts", "activate.bat"),
       args = paste0(
-        "activate WHO_WAVES_actinet & ",
+        "activate WAVES_actinet & ",
         paste0(
           'actinet ', ox_input, ' -o "', fdr_write, '"'
         ) |>
@@ -251,12 +251,12 @@ apply_ox_actinet <- function(ox_input,
 
   } else {
     # The `system2` command uses a shell within MacOS and Linux.
-    # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WHO_WAVES_actinet ; actinet "data/0_CONFIG/RAW/WAVES_10004_RAW.gt3x" -o ~/WAVES/data/actinet
+    # source C:/Users/marti994/AppData/Local/r-miniconda/etc/profile.d/conda.sh ; conda activate WAVES_actinet ; actinet "data/0_CONFIG/RAW/WAVES_10004_RAW.gt3x" -o ~/WAVES/data/actinet
     system2(
       command = "source",
       args = paste(
         paste0('"', file.path(miniconda_path(), "etc", "profile.d", "conda.sh"), '"'),
-        "conda activate WHO_WAVES_actinet",
+        "conda activate WAVES_actinet",
         paste0(
           'actinet ', ox_input, ' -o "', fdr_write, '"'
         ),

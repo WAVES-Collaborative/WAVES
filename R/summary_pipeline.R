@@ -10,10 +10,9 @@ summarize_major_steps <- function(vct_raw,
                                   vct_ox_acti) {
 
   df <- tibble(
-    file = basename(vct_raw),
+    file       = basename(vct_raw),
     file_noext = strip_all_ext(file)
   )
-
   vct_nm_ggir <-
     basename(vct_basic) |>
     gsub(x = _,
@@ -49,20 +48,127 @@ summarize_major_steps <- function(vct_raw,
     gsub(x = _,
          pattern = "-timeSeries\\.csv\\.gz",
          replacement = "")
-
   df |>
     mutate(
-    GGIR          = file %in% vct_nm_ggir,
-    nw.sleep      = file_noext %in% vct_nm_nw.sleep,
-    calibration   = file_noext %in% vct_nm_cal,
-    `raw methods` = file_noext %in% vct_nm_raw,
-    oak.pre       = file_noext %in% vct_nm_oak.pre,
-    `cutpoints`   = file_noext %in% vct_nm_cut,
-    stepcount     = file_noext %in% vct_nm_stp,
-    walmsley      = file_noext %in% vct_nm_wlm,,
-    actinet       = file_noext %in% vct_nm_act,,
-    file_noext    = NULL
+      GGIR          = file %in% vct_nm_ggir,
+      nw.sleep      = file_noext %in% vct_nm_nw.sleep,
+      calibration   = file_noext %in% vct_nm_cal,
+      `raw methods` = file_noext %in% vct_nm_raw,
+      oak.pre       = file_noext %in% vct_nm_oak.pre,
+      `cutpoints`   = file_noext %in% vct_nm_cut,
+      stepcount     = file_noext %in% vct_nm_stp,
+      walmsley      = file_noext %in% vct_nm_wlm,,
+      actinet       = file_noext %in% vct_nm_act,,
+      file_noext    = NULL
+    )
+}
+summarize_major_main_steps <- function(lst_yaml,
+                                       vct_out.ref,
+                                       vct_raw,
+                                       vct_basic,
+                                       vct_nw.sleep,
+                                       vct_cal,
+                                       vct_out.raw,
+                                       vct_out.oak.pre,
+                                       vct_out.cut,
+                                       vct_ox_step,
+                                       vct_ox_wlms,
+                                       vct_ox_acti) {
+
+  df <- tibble(
+    id         = stri_extract(
+      basename(vct_raw),
+      # TODO: When working with UWM data, have a id_pt
+      # for raw data. What to do if lst_yaml$raw$id_pt
+      # is not the same as lst_yaml$ref$pal$id_pt?
+      regex = paste0(lst_yaml$ref$pal$id_pt, collapse = "|")
+    ),
+    file       = basename(vct_raw),
+    file_noext = strip_all_ext(file)
   )
+
+  if (!all(simplify_is_null(lst_yaml$ref$do))) {
+    vct_nm_pal <-
+      basename(vct_out.ref) |>
+      file_path_sans_ext() |>
+      grep(x = _,
+           pattern = "do",
+           value = TRUE) |>
+      stri_replace(regex = "_do",
+                   replacement = "")
+  }
+  if (!all(simplify_is_null(lst_yaml$ref$pal))) {
+    vct_nm_pal <-
+      basename(vct_out.ref) |>
+      file_path_sans_ext() |>
+      grep(x = _,
+           pattern = "pal",
+           value = TRUE) |>
+      stri_replace(regex = "_pal",
+                   replacement = "")
+  }
+  if (!all(simplify_is_null(lst_yaml$ref$pal))) {
+    vct_nm_pal <-
+      basename(vct_out.ref) |>
+      file_path_sans_ext() |>
+      grep(x = _,
+           pattern = "pal",
+           value = TRUE) |>
+      stri_replace(regex = "_pal",
+                   replacement = "")
+  }
+  vct_nm_ggir <-
+    basename(vct_basic) |>
+    gsub(x = _,
+         pattern = "meta_|\\.RData",
+         replacement = "")
+  vct_nm_nw.sleep <-
+    basename(vct_nw.sleep) |>
+    file_path_sans_ext()
+  vct_nm_cal <-
+    basename(vct_cal) |>
+    file_path_sans_ext()
+  vct_nm_raw <-
+    basename(vct_out.raw) |>
+    file_path_sans_ext()
+  vct_nm_oak.pre <-
+    basename(vct_out.oak.pre) |>
+    file_path_sans_ext()
+  vct_nm_cut <-
+    basename(vct_out.cut) |>
+    file_path_sans_ext()
+  vct_nm_stp <-
+    basename(vct_ox_step) |>
+    gsub(x = _,
+         pattern = "-StepTimes\\.csv\\.gz",
+         replacement = "")
+  vct_nm_wlm <-
+    basename(vct_ox_wlms) |>
+    gsub(x = _,
+         pattern = "-timeSeries\\.csv\\.gz",
+         replacement = "")
+  vct_nm_act <-
+    basename(vct_ox_acti) |>
+    gsub(x = _,
+         pattern = "-timeSeries\\.csv\\.gz",
+         replacement = "")
+  df |>
+    mutate(
+      DO            = if (exists("vct_nm_do")) {id %in% vct_nm_do} else NULL,
+      activPAL      = if (exists("vct_nm_pal")) {id %in% vct_nm_pal} else NULL,
+      ActiPass      = if (exists("vct_nm_pass")) {id %in% vct_nm_pass} else NULL,
+      GGIR          = file %in% vct_nm_ggir,
+      nw.sleep      = file_noext %in% vct_nm_nw.sleep,
+      calibration   = file_noext %in% vct_nm_cal,
+      `raw methods` = file_noext %in% vct_nm_raw,
+      oak.pre       = file_noext %in% vct_nm_oak.pre,
+      `cutpoints`   = file_noext %in% vct_nm_cut,
+      stepcount     = file_noext %in% vct_nm_stp,
+      walmsley      = file_noext %in% vct_nm_wlm,,
+      actinet       = file_noext %in% vct_nm_act,,
+      file          = NULL,
+      file_noext    = NULL
+    )
 }
 make_table_agr.cor <- function(mtx_yours,
                                mtx_waves,
@@ -154,9 +260,9 @@ summarize_metrics_config <- function(df_pipe) {
   #      rowname_col   = "date")
   df_sed <-
     df_pipe |>
-    select(id, starts_with("intensity")) |>
+    select(id, starts_with("intensity3")) |>
     rename_with(.cols = !id,
-                .fn = ~sub(x = .x, pattern = "intensity_", replacement = "")) |>
+                .fn = ~sub(x = .x, pattern = "intensity3_", replacement = "")) |>
     summarise(across(
       .cols = everything(),
       .fns = ~sum(.x == "sedentary", na.rm = TRUE) / 60
@@ -166,9 +272,9 @@ summarize_metrics_config <- function(df_pipe) {
   ]
   df_mvpa <-
     df_pipe |>
-    select(id, starts_with("intensity")) |>
+    select(id, starts_with("intensity3")) |>
     rename_with(.cols = !id,
-                .fn = ~sub(x = .x, pattern = "intensity_", replacement = "")) |>
+                .fn = ~sub(x = .x, pattern = "intensity3_", replacement = "")) |>
     select(id, !starts_with("bakrania")) |>
     summarise(across(
       .cols = everything(),
@@ -258,6 +364,9 @@ summarize_metrics_config <- function(df_pipe) {
     ) |>
     tab_spanner(
       label = "Hildrebrand", columns = ends_with("hildebrand")
+    ) |>
+    tab_spanner(
+      label = "GGIR Default", columns = ends_with("ggir")
     ) |>
     tab_spanner(
       label = "Mielke", columns = ends_with("mielke")
@@ -370,6 +479,9 @@ summarize_metrics_config <- function(df_pipe) {
       label = "Hildrebrand", columns = ends_with("hildebrand")
     ) |>
     tab_spanner(
+      label = "GGIR Default", columns = ends_with("ggir")
+    ) |>
+    tab_spanner(
       label = "Mielke", columns = ends_with("mielke")
     ) |>
     tab_spanner(
@@ -475,6 +587,9 @@ summarize_metrics_config <- function(df_pipe) {
     ) |>
     tab_spanner(
       label = "Stepcount", columns = ends_with("stepcount")
+    ) |>
+    tab_spanner(
+      label = "Trost", columns = ends_with("trost")
     ) |>
     tab_spanner(
       label = "Verisense (Original)", columns = ends_with("verisense.original")
@@ -623,6 +738,7 @@ summarize_metrics_config <- function(df_pipe) {
       "esliger" = "Esliger",
       "fraysee" = "Fraysee",
       "hildebrand" = "Hildrebrand",
+      "ggir" = "GGIR Default",
       "mielke" = "Mielke",
       "montoye.dt" = "Montoye (DT)",
       "montoye.nn" = "Montoye (NN)",
@@ -646,6 +762,7 @@ summarize_metrics_config <- function(df_pipe) {
     "esliger" ~ "Esliger",
     "fraysee" ~ "Fraysee",
     "hildebrand" ~ "Hildrebrand",
+    "ggir" ~ "GGIR Default",
     "mielke" ~ "Mielke",
     "montoye.dt" ~ "Montoye (DT)",
     "montoye.nn" ~ "Montoye (NN)",
@@ -671,6 +788,7 @@ summarize_metrics_config <- function(df_pipe) {
       "esliger" = "Esliger",
       "fraysee" = "Fraysee",
       "hildebrand" = "Hildrebrand",
+      "ggir" = "GGIR Default",
       "mielke" = "Mielke",
       "montoye.dt" = "Montoye (DT)",
       "montoye.nn" = "Montoye (NN)",
@@ -690,6 +808,7 @@ summarize_metrics_config <- function(df_pipe) {
     "esliger" ~ "Esliger",
     "fraysee" ~ "Fraysee",
     "hildebrand" ~ "Hildrebrand",
+    "ggir" ~ "GGIR Default",
     "mielke" ~ "Mielke",
     "montoye.dt" ~ "Montoye (DT)",
     "montoye.nn" ~ "Montoye (NN)",
@@ -713,6 +832,7 @@ summarize_metrics_config <- function(df_pipe) {
       "oak.pre" = "Oak Pre",
       "sdt" = "SDT",
       "stepcount" = "Stepcount",
+      "trost" = "Trost",
       "verisense.original" = "Verisense (Original)",
       "verisense.revised" = "Verisense (Revised)"
     )
@@ -722,6 +842,7 @@ summarize_metrics_config <- function(df_pipe) {
     "oak.pre" ~ "Oak Pre",
     "sdt" ~ "SDT",
     "stepcount" ~ "Stepcount",
+    "trost" ~ "Trost",
     "verisense.original" ~ "Verisense (Original)",
     "verisense.revised" ~ "Verisense (Revised)"
   )
@@ -737,7 +858,9 @@ summarize_metrics_config <- function(df_pipe) {
   ))
 
 }
-summarize_metrics_main <- function(vct_merge) {
+summarize_metrics_main <- function(lst_yaml,
+                                   vct_ref,
+                                   vct_merge) {
 
   lst_sed  <- vector(mode = "list", length(vct_merge))
   lst_mvpa <- vector(mode = "list", length(vct_merge))
@@ -749,9 +872,9 @@ summarize_metrics_main <- function(vct_merge) {
 
     df_sed <-
       df_pipe |>
-      select(id, starts_with("intensity")) |>
+      select(id, starts_with("intensity3")) |>
       rename_with(.cols = !id,
-                  .fn = ~sub(x = .x, pattern = "intensity_", replacement = "")) |>
+                  .fn = ~sub(x = .x, pattern = "intensity3_", replacement = "")) |>
       summarise(id = id[1], across(
         .cols = !id,
         .fns = ~sum(.x == "sedentary", na.rm = TRUE) / 60
@@ -761,9 +884,9 @@ summarize_metrics_main <- function(vct_merge) {
     ]
     df_mvpa <-
       df_pipe |>
-      select(id, starts_with("intensity")) |>
+      select(id, starts_with("intensity3")) |>
       rename_with(.cols = !id,
-                  .fn = ~sub(x = .x, pattern = "intensity_", replacement = "")) |>
+                  .fn = ~sub(x = .x, pattern = "intensity3_", replacement = "")) |>
       select(id, !starts_with("bakrania")) |>
       summarise(id = id[1], across(
         .cols = !id,
@@ -787,75 +910,135 @@ summarize_metrics_main <- function(vct_merge) {
 
   }
 
+  vct_label_sed <- c(
+    "do"   = if (vct_ref["do"]) "DO" else NULL,
+    "palp" = if (vct_ref["pal"]) "activPAL Epoch" else NULL,
+    "palv" = if (vct_ref["pal"]) "activPAL Event" else NULL,
+    "pass" = if (vct_ref["pass"]) "ActiPass" else NULL,
+    "actinet"               = "Actinet",
+    "bakrania.enmo.average" = "Bakrania (ENMO Average)",
+    "bakrania.enmo.simple"  = "Bakrania (ENMO Simple)",
+    "bakrania.mad.average"  = "Bakrania (MAD Average)",
+    "bakrania.mad.simple"   = "Bakrania (MAD Simple)",
+    "ellis"                 = "Ellis",
+    "esliger"               = "Esliger",
+    "fraysee"               = "Fraysee",
+    "hildebrand"            = "Hildrebrand",
+    "ggir"                  = "GGIR Default",
+    "mielke"                = "Mielke",
+    "montoye.dt"            = "Montoye (DT)",
+    "montoye.nn"            = "Montoye (NN)",
+    "montoye.rf"            = "Montoye (RF)",
+    "montoye.svm"           = "Montoye (SVM)",
+    "trost"                 = "Trost",
+    "walmsley"              = "Walmsley",
+    "white.enmo.lin"        = "White (ENMO Linear)",
+    "white.enmo.pol"        = "White (ENMO Polynomial)",
+    "white.hpfvm.lin"       = "White (HPFVM Linear)",
+    "white.hpfvm.pol"       = "White (HPFVM Polynomial)"
+  )
   tbl_sed <-
     rbindlist(lst_sed) |>
-    mutate(across(
-      .cols = !id,
-      .fns = ~round(.x, digits = 1)
-    )) |>
+    select(
+      id,
+      starts_with("do"),
+      starts_with("pal"),
+      starts_with("pass"),
+      everything()
+    ) |>
+    mutate(
+      # TODO: change when id_pt is implemented in vct_raw/working with UWM data.
+      id = stri_extract(
+        id,
+        regex = paste0(lst_yaml$ref$pal$id_pt, collapse = "|")
+      ),
+      across(
+        .cols = !id,
+        .fns = ~round(.x, digits = 1)
+      )
+    ) |>
     gt() |>
-    cols_label(
-      "actinet" = "Actinet",
-      "bakrania.enmo.average" = "Bakrania (ENMO Average)",
-      "bakrania.enmo.simple" = "Bakrania (ENMO Simple)",
-      "bakrania.mad.average" = "Bakrania (MAD Average)",
-      "bakrania.mad.simple" = "Bakrania (MAD Simple)",
-      "ellis" = "Ellis",
-      "esliger" = "Esliger",
-      "fraysee" = "Fraysee",
-      "hildebrand" = "Hildrebrand",
-      "mielke" = "Mielke",
-      "montoye.dt" = "Montoye (DT)",
-      "montoye.nn" = "Montoye (NN)",
-      "montoye.rf" = "Montoye (RF)",
-      "montoye.svm" = "Montoye (SVM)",
-      "trost" = "Trost",
-      "walmsley" = "Walmsley",
-      "white.enmo.lin" = "White (ENMO Linear)",
-      "white.enmo.pol" = "White (ENMO Polynomial)",
-      "white.hpfvm.lin" = "White (HPFVM Linear)",
-      "white.hpfvm.pol" = "White (HPFVM Polynomial)"
-    )
+    cols_label(.list = vct_label_sed)
+  vct_label_mvpa <- c(
+    "do"   = if (vct_ref["do"]) "DO" else NULL,
+    "palp" = if (vct_ref["pal"]) "activPAL Epoch" else NULL,
+    "palv" = if (vct_ref["pal"]) "activPAL Event" else NULL,
+    "pass" = if (vct_ref["pass"]) "ActiPass" else NULL,
+    "actinet"         = "Actinet",
+    "ellis"           = "Ellis",
+    "esliger"         = "Esliger",
+    "fraysee"         = "Fraysee",
+    "hildebrand"      = "Hildrebrand",
+    "ggir"            = "GGIR Default",
+    "mielke"          = "Mielke",
+    "montoye.dt"      = "Montoye (DT)",
+    "montoye.nn"      = "Montoye (NN)",
+    "montoye.rf"      = "Montoye (RF)",
+    "montoye.svm"     = "Montoye (SVM)",
+    "trost"           = "Trost",
+    "walmsley"        = "Walmsley",
+    "white.enmo.lin"  = "White (ENMO Linear)",
+    "white.enmo.pol"  = "White (ENMO Polynomial)",
+    "white.hpfvm.lin" = "White (HPFVM Linear)",
+    "white.hpfvm.pol" = "White (HPFVM Polynomial)"
+  )
   tbl_mvpa <-
     rbindlist(lst_mvpa) |>
-    mutate(across(
-      .cols = !id,
-      .fns = ~round(.x, digits = 1)
-    )) |>
+    select(
+      id,
+      starts_with("do"),
+      starts_with("pal"),
+      starts_with("pass"),
+      everything()
+    ) |>
+    mutate(
+      # TODO: change when id_pt is implemented in vct_raw/working with UWM data.
+      id = stri_extract(
+        id,
+        regex = paste0(lst_yaml$ref$pal$id_pt, collapse = "|")
+      ),
+      across(
+        .cols = !id,
+        .fns = ~round(.x, digits = 1)
+      )
+    ) |>
     gt() |>
-    cols_label(
-      "actinet" = "Actinet",
-      "ellis" = "Ellis",
-      "esliger" = "Esliger",
-      "fraysee" = "Fraysee",
-      "hildebrand" = "Hildrebrand",
-      "mielke" = "Mielke",
-      "montoye.dt" = "Montoye (DT)",
-      "montoye.nn" = "Montoye (NN)",
-      "montoye.rf" = "Montoye (RF)",
-      "montoye.svm" = "Montoye (SVM)",
-      "trost" = "Trost",
-      "walmsley" = "Walmsley",
-      "white.enmo.lin" = "White (ENMO Linear)",
-      "white.enmo.pol" = "White (ENMO Polynomial)",
-      "white.hpfvm.lin" = "White (HPFVM Linear)",
-      "white.hpfvm.pol" = "White (HPFVM Polynomial)"
-    )
+    cols_label(.list = vct_label_mvpa)
+  vct_label_step <- c(
+    "do"   = if (vct_ref["do"]) "DO" else NULL,
+    "palp" = if (vct_ref["pal"]) "activPAL Epoch" else NULL,
+    "palv" = if (vct_ref["pal"]) "activPAL Event" else NULL,
+    "pass" = if (vct_ref["pass"]) "ActiPass" else NULL,
+    "oak.1.0"            = "Oak 1.0",
+    "oak.pre"            = "Oak Pre",
+    "sdt"                = "SDT",
+    "stepcount"          = "Stepcount",
+    "trost"              = "Trost",
+    "verisense.original" = "Verisense (Original)",
+    "verisense.revised"  = "Verisense (Revised)"
+  )
   tbl_step <-
     rbindlist(lst_step) |>
-    mutate(across(
-      .cols = !id,
-      .fns = ~round(.x, digits = 0)
-    )) |>
+    select(
+      id,
+      starts_with("do"),
+      starts_with("pal"),
+      starts_with("pass"),
+      everything()
+    ) |>
+    mutate(
+      # TODO: change when id_pt is implemented in vct_raw/working with UWM data.
+      id = stri_extract(
+        id,
+        regex = paste0(lst_yaml$ref$pal$id_pt, collapse = "|")
+      ),
+      across(
+        .cols = !id,
+        .fns = ~round(.x, digits = 1)
+      )
+    ) |>
     gt() |>
-    cols_label(
-      "oak.1.0" = "Oak 1.0",
-      "oak.pre" = "Oak Pre",
-      "sdt" = "SDT",
-      "stepcount" = "Stepcount",
-      "verisense.original" = "Verisense (Original)",
-      "verisense.revised" = "Verisense (Revised)"
-    )
+    cols_label(.list = vct_label_step)
 
   # return ----
   return(list(

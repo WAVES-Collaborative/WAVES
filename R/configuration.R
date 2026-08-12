@@ -3,7 +3,7 @@ get_tbl_module <- function(df_module_WAVES,
 
   le_primary_module <-
     sub(x = conda_env,
-        pattern = "WHO_WAVES_",
+        pattern = "WAVES_",
         replacement = "")
   le_primary_module <- case_match(
     le_primary_module,
@@ -16,21 +16,23 @@ get_tbl_module <- function(df_module_WAVES,
     full_join(
       df_module_WAVES,
       reticulate:::conda_list_packages(conda_env) |>
-        mutate(
+        select(
           Module = package,
           `Version Installed` = version,
-          .keep = "none"
+          channel_yours = channel
         ),
       by = join_by(Module)
     ) |>
-    select(Module, starts_with("Version"), Channel) |>
+    select(Module, `Version WAVES`, `Version Installed`, Channel, channel_yours) |>
     mutate(
       Module =
         factor(Module) |>
-        relevel(ref = le_primary_module)
-    ) |>
-    arrange(Module) |>
-    mutate(
+        relevel(ref = le_primary_module),
+      Channel = ifelse(
+        is.na(Channel),
+        yes = channel_yours,
+        no = Channel
+      ),
       clr = case_when(
         # The below packages don't matter for version/date.
         Module %in% c("ca-certificates", "certifi") ~ "#FFFFFF",
@@ -44,8 +46,10 @@ get_tbl_module <- function(df_module_WAVES,
         # Module version for other modules do not match.
         `Version WAVES` != `Version Installed`       ~ "#FAFA8E",
         .default                                     = "#D9F1D5"
-      )
-    )
+      ),
+      channel_yours = NULL
+    ) |>
+    arrange(Module)
   tbl_module <-
     df_module_installed |>
     select(-clr) |>
@@ -85,64 +89,12 @@ get_msg_module <- function(tbl_module) {
     .default             = "Modules installation successful."
   )
 }
-# Code for getting module WAVES version
-# reticulate:::conda_list_packages("WHO_WAVES_stepcount") |>
-#   mutate(
-#     Module = package,
-#     `Version WAVES` = version,
-#     requirement,
-#     Channel = channel,
-#     .keep = "none"
-#   ) |>
-#   fwrite(file = file.path("data", "0_CONFIG", "RAW", "df_modules_stepcount.csv"))
-# reticulate:::conda_list_packages("WHO_WAVES_accelerometer") |>
-#   mutate(
-#     Module = package,
-#     `Version WAVES` = version,
-#     requirement,
-#     Channel = channel,
-#     .keep = "none"
-#   ) |>
-#   fwrite(file = file.path("data", "0_CONFIG", "RAW", "df_modules_walmsley.csv"))
-# reticulate:::conda_list_packages("WHO_WAVES_actinet") |>
-#   mutate(
-#     Module = package,
-#     `Version WAVES` = version,
-#     requirement,
-#     Channel = channel,
-#     .keep = "none"
-#   ) |>
-#   fwrite(file = file.path("data", "0_CONFIG", "RAW", "df_modules_actinet.csv"))
-# reticulate:::conda_list_packages("WHO_WAVES_oak_1.0") |>
-#   mutate(
-#     Module = package,
-#     `Version WAVES` = version,
-#     requirement,
-#     Channel = channel,
-#     .keep = "none"
-#   ) |>
-#   fwrite(file = file.path("data", "0_CONFIG", "RAW", "df_modules_oak1.0.csv"))
-# reticulate:::conda_list_packages("WHO_WAVES_oak_pre") |>
-#   mutate(
-#     Module = package,
-#     `Version WAVES` = version,
-#     requirement,
-#     Channel = channel,
-#     .keep = "none"
-#   ) |>
-#   fwrite(file = file.path("data", "0_CONFIG", "RAW", "df_modules_oakpre.csv"))
 config_miniconda <- function(df_module_stepcount,
                              df_module_walmsley,
                              df_module_actinet,
                              df_module_oak_1.0,
                              df_module_oak_pre) {
 
-  chk_windows <- grepl(
-    x = Sys.getenv(c("OS", "R_PLATFORM")),
-    pattern = "windows",
-    ignore.case = TRUE
-  ) |>
-    any()
   suffix_python <- if (reticulate:::is_windows()) "python.exe" else "bin/python"
 
   # conda ----
@@ -180,11 +132,11 @@ config_miniconda <- function(df_module_stepcount,
     file.path(miniconda_path(), "envs")
   )
   vct_env <- c(
-    "WHO_WAVES_stepcount",
-    "WHO_WAVES_accelerometer",
-    "WHO_WAVES_actinet",
-    "WHO_WAVES_oak_1.0",
-    "WHO_WAVES_oak_pre"
+    "WAVES_stepcount",
+    "WAVES_accelerometer",
+    "WAVES_actinet",
+    "WAVES_oak_1.0",
+    "WAVES_oak_pre"
   )
   lst_module_creation <-
     list("openjdk",
@@ -319,16 +271,16 @@ config_miniconda <- function(df_module_stepcount,
     Message = c(
       msg_conda,
       conda_version(),
-      vct_msg_env["WHO_WAVES_stepcount"],
-      vct_msg_module["WHO_WAVES_stepcount"],
-      vct_msg_env["WHO_WAVES_accelerometer"],
-      vct_msg_module["WHO_WAVES_accelerometer"],
-      vct_msg_env["WHO_WAVES_actinet"],
-      vct_msg_module["WHO_WAVES_actinet"],
-      vct_msg_env["WHO_WAVES_oak_1.0"],
-      vct_msg_module["WHO_WAVES_oak_1.0"],
-      vct_msg_env["WHO_WAVES_oak_pre"],
-      vct_msg_module["WHO_WAVES_oak_pre"]
+      vct_msg_env["WAVES_stepcount"],
+      vct_msg_module["WAVES_stepcount"],
+      vct_msg_env["WAVES_accelerometer"],
+      vct_msg_module["WAVES_accelerometer"],
+      vct_msg_env["WAVES_actinet"],
+      vct_msg_module["WAVES_actinet"],
+      vct_msg_env["WAVES_oak_1.0"],
+      vct_msg_module["WAVES_oak_1.0"],
+      vct_msg_env["WAVES_oak_pre"],
+      vct_msg_module["WAVES_oak_pre"]
     )
   )
   rownames(df_msg) <- c(
@@ -347,11 +299,11 @@ config_miniconda <- function(df_module_stepcount,
   )
   return(list(
     df_msg   = df_msg,
-    tbl_step = lst_tbl_module[["WHO_WAVES_stepcount"]],
-    tbl_wlms = lst_tbl_module[["WHO_WAVES_accelerometer"]],
-    tbl_acti = lst_tbl_module[["WHO_WAVES_actinet"]],
-    tbl_oak1 = lst_tbl_module[["WHO_WAVES_oak_1.0"]],
-    tbl_oakp = lst_tbl_module[["WHO_WAVES_oak_pre"]]
+    tbl_step = lst_tbl_module[["WAVES_stepcount"]],
+    tbl_wlms = lst_tbl_module[["WAVES_accelerometer"]],
+    tbl_acti = lst_tbl_module[["WAVES_actinet"]],
+    tbl_oak1 = lst_tbl_module[["WAVES_oak_1.0"]],
+    tbl_oakp = lst_tbl_module[["WAVES_oak_pre"]]
   ))
 
 }
