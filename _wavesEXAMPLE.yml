@@ -36,12 +36,16 @@ reference:
     - ~
     mapping_filepath: ~
   activPAL:
-    directories_1secEpochs:
+    1secEpochs_directories:
     - "/vf/users/UKBB_Matthews/CalpolyData/activPAL_Data/1_sec_epochs"
     - "/vf/users/UKBB_Matthews/PALS/activpal/1sec_epochs"
-    directories_events:
+    1secEpochs_filepaths:
+    - ~
+    events_directories:
     - "/vf/users/UKBB_Matthews/CalpolyData/activPAL_Data/events/all_events"
     - "/vf/users/UKBB_Matthews/PALS/activpal/extended_all"
+    events_filepaths:
+    - ~
     id_pattern:
     - "ACT24_000"
     - "PALS00000"

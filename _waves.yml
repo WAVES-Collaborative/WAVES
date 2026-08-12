@@ -12,9 +12,13 @@ reference:
     - ~
     mapping_filepath: ~
   activPAL:
-    directories_1secEpochs:
+    1secEpochs_directories:
     - ~
-    directories_events:
+    1secEpochs_filepaths:
+    - ~
+    events_directories:
+    - ~
+    events_filepaths:
     - ~
     id_pattern:
     - ~

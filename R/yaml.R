@@ -1,3 +1,11 @@
+get_id_regex <- function(id_pt) {
+  stri_replace_all(
+    id_pt,
+    regex = "0",
+    replacement = "\\\\d"
+  ) |>
+    paste0("^", ... = _)
+}
 simplify_is_null <- function(x) {
   sapply(
     x,
@@ -56,8 +64,10 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
     "map_fpa"
   )
   names(lst_yaml$ref$pal) <- c(
-    "fdr_ep",
-    "fdr_ev",
+    "palp_fdr",
+    "palp_fpa",
+    "palv_fdr",
+    "palv_fpa",
     "id_pt"
   )
   names(lst_yaml$ref$pass) <- c(
@@ -67,27 +77,37 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
 
   # Even though "simplify = TRUE" is default in read_yaml, NULL parameters are
   # kept in list format. Truly simplify NULLs then.
+  # vct_raw
   if (all(simplify_is_null(lst_yaml$vct_raw_fdr))) {
     lst_yaml["vct_raw_fdr"] <- list(NULL)
   }
   if (all(simplify_is_null(lst_yaml$vct_raw_fpa))) {
     lst_yaml["vct_raw_fpa"] <- list(NULL)
   }
+  # do
   if (all(simplify_is_null(lst_yaml$ref$do$fdr))) {
     lst_yaml$ref$do["fdr"] <- list(NULL)
   }
   if (all(simplify_is_null(lst_yaml$ref$do$id_pt))) {
     lst_yaml$ref$do["id_pt"] <- list(NULL)
   }
-  if (all(simplify_is_null(lst_yaml$ref$pal$fdr_ep))) {
-    lst_yaml$ref$pal["fdr_ep"] <- list(NULL)
+  # pal
+  if (all(simplify_is_null(lst_yaml$ref$pal$palp_fdr))) {
+    lst_yaml$ref$pal["palp_fdr"] <- list(NULL)
   }
-  if (all(simplify_is_null(lst_yaml$ref$pal$fdr_ev))) {
-    lst_yaml$ref$pal["fdr_ev"] <- list(NULL)
+  if (all(simplify_is_null(lst_yaml$ref$pal$palp_fpa))) {
+    lst_yaml$ref$pal["palp_fpa"] <- list(NULL)
+  }
+  if (all(simplify_is_null(lst_yaml$ref$pal$palv_fdr))) {
+    lst_yaml$ref$pal["palv_fdr"] <- list(NULL)
+  }
+  if (all(simplify_is_null(lst_yaml$ref$pal$palv_fpa))) {
+    lst_yaml$ref$pal["palv_fpa"] <- list(NULL)
   }
   if (all(simplify_is_null(lst_yaml$ref$pal$id_pt))) {
     lst_yaml$ref$pal["id_pt"] <- list(NULL)
   }
+  # pass
   if (all(simplify_is_null(lst_yaml$ref$pass$fdr))) {
     lst_yaml$ref$pass["fdr"] <- list(NULL)
   }
@@ -97,12 +117,34 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
 
   # If !expr tag is used for directory/filepath, then handlers will still return
   # a list for list items that are all character.
-  lst_yaml$vct_raw_fdr    <- simplify_post_expr(lst_yaml$vct_raw_fdr)
-  lst_yaml$vct_raw_fpa    <- simplify_post_expr(lst_yaml$vct_raw_fpa)
-  lst_yaml$ref$do$fdr     <- simplify_post_expr(lst_yaml$ref$do$fdr)
-  lst_yaml$ref$pal$fdr_ep <- simplify_post_expr(lst_yaml$ref$pal$fdr_ep)
-  lst_yaml$ref$pal$fdr_ev <- simplify_post_expr(lst_yaml$ref$pal$fdr_ev)
-  lst_yaml$ref$pass$fdr   <- simplify_post_expr(lst_yaml$ref$pass$fdr)
+  # vct_raw
+  if (length(lst_yaml$vct_raw_fdr) != 0) {
+    lst_yaml$vct_raw_fdr <- simplify_post_expr(lst_yaml$vct_raw_fdr)
+  }
+  if (length(lst_yaml$vct_raw_fpa) != 0) {
+    lst_yaml$vct_raw_fpa <- simplify_post_expr(lst_yaml$vct_raw_fpa)
+  }
+  # do
+  if (length(lst_yaml$ref$do$fdr) != 0) {
+    lst_yaml$ref$do$fdr <- simplify_post_expr(lst_yaml$ref$do$fdr)
+  }
+  # pal
+  if (length(lst_yaml$ref$pal$palp_fdr) != 0) {
+    lst_yaml$ref$pal$palp_fdr <- simplify_post_expr(lst_yaml$ref$pal$palp_fdr)
+  }
+  if (length(lst_yaml$ref$pal$palp_fpa) != 0) {
+    lst_yaml$ref$pal$palp_fpa <- simplify_post_expr(lst_yaml$ref$pal$palp_fpa)
+  }
+  if (length(lst_yaml$ref$pal$palv_fdr) != 0) {
+    lst_yaml$ref$pal$palv_fdr <- simplify_post_expr(lst_yaml$ref$pal$palv_fdr)
+  }
+  if (length(lst_yaml$ref$pal$palv_fpa) != 0) {
+    lst_yaml$ref$pal$palv_fpa <- simplify_post_expr(lst_yaml$ref$pal$palv_fpa)
+  }
+  # pass
+  if (length(lst_yaml$ref$pass$fdr) != 0) {
+    lst_yaml$ref$pass$fdr <- simplify_post_expr(lst_yaml$ref$pass$fdr)
+  }
 
   if (identical(Sys.getenv("TAR_PROJECT"), "config")) {
     lst_yaml$my_tz <- "Etc/UTC"
@@ -204,18 +246,12 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
   # If vct_raw_fdr is valid, return the files in the directories provided.
   if (length(lst_yaml$vct_raw_fdr) != 0 &&
       all(fs::is_dir(lst_yaml$vct_raw_fdr))) {
-    lst_yaml$vct_raw_fpa <- lapply(
-      lst_yaml$vct_raw_fdr,
-      \(x) {
-        list.files(
-          path       = x,
-          pattern    = "\\.bin$|\\.csv$|\\.cwa$|\\.gt3x$",
-          full.names = TRUE,
-          recursive  = FALSE
-        )
-      }
-    ) |>
-      unlist()
+    lst_yaml$vct_raw_fpa <- list.files(
+      path       = lst_yaml$vct_raw_fdr,
+      pattern    = "\\.bin$|\\.csv$|\\.cwa$|\\.gt3x$",
+      full.names = TRUE,
+      recursive  = FALSE
+    )
   }
 
   ## ref ------------------------------------------
@@ -233,8 +269,8 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
       ""
     )
   } else {
+    ### do ----------------------------------------
     if (!all(simplify_is_null(lst_yaml$ref$do))) {
-      ### do ----------------------------------------
       #### directories
       if (length(lst_yaml$ref$do$fdr) == 0) {
         lst_msg[["ref_do_fdr"]] <-
@@ -263,6 +299,8 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
           "Please define as one or more strings with '0' as a placeholder for numbers."
       )
 
+      lst_yaml$ref$do$id_pt <- get_id_regex(lst_yaml$ref$do$id_pt)
+
       #### mapping_filepath
       if (length(lst_yaml$ref$do$map_fpa) == 0) {
         lst_msg[["ref_do_map_fpa"]] <-
@@ -277,35 +315,92 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
           "Please define one filepath to mapping csv."
       )
     }
-    if (!all(simplify_is_null(lst_yaml$ref$pal))) {
-      ### pal ---------------------------------------
-      #### directories_1secEpochs
-      if (length(lst_yaml$ref$pal$fdr_ep) == 0) {
-        lst_msg[["ref_pal_fdr_ep"]] <-
-          "activPAL `directories_1secEpochs` is not defined."
-      } else if (!any(fs::is_dir(lst_yaml$ref$pal$fdr_ep))) {
-        lst_msg[["ref_pal_fdr_ep"]] <-
-          "activPAL `directories_1secEpochs` contains a string that is NOT a file directory."
-      }
-      lst_msg[["ref_pal_fdr_ep"]] <- format_abort_message(
-        lst_msg[["ref_pal_fdr_ep"]],
-        msg_info =
-          "Please define as one or more strings corresponding to 1sec epoch directories."
-      )
 
-      #### directories_events
-      if (length(lst_yaml$ref$pal$fdr_ev) == 0) {
-        lst_msg[["ref_pal_fdr_ev"]] <-
-          "activPAL `directories_events` is not defined."
-      } else if (!any(fs::is_dir(lst_yaml$ref$pal$fdr_ev))) {
-        lst_msg[["ref_pal_fdr_ev"]] <-
-          "activPAL `directories_events` contains a string that is NOT a file directory."
+    ### pal ---------------------------------------
+    if (!all(simplify_is_null(lst_yaml$ref$pal))) {
+      #### vct_palp
+      if (length(lst_yaml$ref$pal$palp_fdr) == 0 &&
+          length(lst_yaml$ref$pal$palp_fpa) == 0) {
+        lst_msg[["vct_palp"]] <- c(
+          "`1secEpochs_directories` or `1secEpochs_filepaths` must be defined.",
+          "Please define either `1secEpochs_directories` or `1secEpochs_filepaths`, not both.",
+          ""
+        )
+      } else if (length(lst_yaml$ref$pal$palp_fdr) != 0 &&
+                 length(lst_yaml$ref$pal$palp_fpa) != 0) {
+        lst_msg[["vct_palp"]] <- c(
+          "`1secEpochs_directories` and `1secEpochs_filepaths` are both defined.",
+          "Please define either `1secEpochs_directories` or `1secEpochs_filepaths`, not both.",
+          ""
+        )
+      } else if (length(lst_yaml$ref$pal$palp_fdr) != 0 &&
+                 !any(fs::is_dir(lst_yaml$ref$pal$palp_fdr))) {
+        lst_msg[["vct_palp"]] <- c(
+          "`1secEpochs_directories` contains a string that is NOT a file directory.",
+          "Please define as one or more strings corresponding to directories.",
+          ""
+        )
+      } else if (length(lst_yaml$ref$pal$palp_fpa) != 0 &&
+                 !any(fs::is_file(lst_yaml$ref$pal$palp_fpa))) {
+        lst_msg[["vct_palp"]] <- c(
+          "`1secEpochs_filepaths` contains a string that is NOT a filepath.",
+          "Please define as one or more strings corresponding to filepaths.",
+          ""
+        )
       }
-      lst_msg[["ref_pal_fdr_ev"]] <- format_abort_message(
-        lst_msg[["ref_pal_fdr_ev"]],
-        msg_info =
-          "Please define as one or more strings corresponding to event directories."
-      )
+
+      # If palp_fdr is valid, return the files in the directories provided.
+      if (length(lst_yaml$ref$pal$palp_fdr) != 0 &&
+          all(fs::is_dir(lst_yaml$ref$pal$palp_fdr))) {
+        lst_yaml$ref$pal$palp_fpa <- list.files(
+          path       = lst_yaml$ref$pal$palp_fdr,
+          pattern    = "Epochs1s\\.csv$",
+          full.names = TRUE,
+          recursive  = FALSE
+        )
+      }
+
+      #### vct_palv
+      if (length(lst_yaml$ref$pal$palv_fdr) == 0 &&
+          length(lst_yaml$ref$pal$palv_fpa) == 0) {
+        lst_msg[["vct_palv"]] <- c(
+          "`events_directories` or `events_filepaths` must be defined.",
+          "Please define either `events_directories` or `events_filepaths`, not both.",
+          ""
+        )
+      } else if (length(lst_yaml$ref$pal$palv_fdr) != 0 &&
+                 length(lst_yaml$ref$pal$palv_fpa) != 0) {
+        lst_msg[["vct_palv"]] <- c(
+          "`events_directories` and `events_filepaths` are both defined.",
+          "Please define either `events_directories` or `events_filepaths`, not both.",
+          ""
+        )
+      } else if (length(lst_yaml$ref$pal$palv_fdr) != 0 &&
+                 !any(fs::is_dir(lst_yaml$ref$pal$palv_fdr))) {
+        lst_msg[["vct_palv"]] <- c(
+          "`events_directories` contains a string that is NOT a file directory.",
+          "Please define as one or more strings corresponding to directories.",
+          ""
+        )
+      } else if (length(lst_yaml$ref$pal$palv_fpa) != 0 &&
+                 !any(fs::is_file(lst_yaml$ref$pal$palv_fpa))) {
+        lst_msg[["vct_palv"]] <- c(
+          "`events_filepaths` contains a string that is NOT a filepath.",
+          "Please define as one or more strings corresponding to filepaths.",
+          ""
+        )
+      }
+
+      # If palv_fdr is valid, return the files in the directories provided.
+      if (length(lst_yaml$ref$pal$palv_fdr) != 0 &&
+          all(fs::is_dir(lst_yaml$ref$pal$palv_fdr))) {
+        lst_yaml$ref$pal$palv_fpa <- list.files(
+          path       = lst_yaml$ref$pal$palv_fdr,
+          pattern    = "-EventsEx\\.csv$",
+          full.names = TRUE,
+          recursive  = FALSE
+        )
+      }
 
       #### id_pattern
       if (length(lst_yaml$ref$pal$id_pt) == 0) {
@@ -320,9 +415,13 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
         msg_info =
           "Please define as one or more strings with '0' as a placeholder for numbers."
       )
+
+      lst_yaml$ref$pal$id_pt <- get_id_regex(lst_yaml$ref$pal$id_pt)
+
     }
+
+    ### pass ---------------------------------------
     if (!all(simplify_is_null(lst_yaml$ref$pass))) {
-      ### pass ---------------------------------------
       #### directories
       if (length(lst_yaml$ref$pass$fdr) == 0) {
         lst_msg[["ref_pass_fdr"]] <-
@@ -350,6 +449,9 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
         msg_info =
           "Please define as one or more strings with '0' as a placeholder for numbers."
       )
+
+      lst_yaml$ref$pass$id_pt <- get_id_regex(lst_yaml$ref$pass$id_pt)
+
     }
   }
 

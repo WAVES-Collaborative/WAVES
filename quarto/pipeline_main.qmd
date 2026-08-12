@@ -13,6 +13,8 @@ editor_options:
 #| label: setup
 #| echo: false
 
+tar_load(lst_yaml)
+tar_load(vct_out.ref)
 tar_load(vct_raw)
 tar_load(vct_basic)
 tar_load(vct_nw.sleep)
@@ -25,8 +27,14 @@ tar_load(vct_ox_wlms)
 tar_load(vct_ox_acti)
 tar_load(vct_merge)
 
+vct_ref <- sapply(
+    lst_yaml$ref,
+    \(x) !all(simplify_is_null(x))
+  )
 len_raw <- length(vct_raw)
-df_out <- summarize_major_steps(
+df_out <- summarize_major_main_steps(
+  lst_yaml,
+  vct_out.ref,
   vct_raw,
   vct_basic,
   vct_nw.sleep,
@@ -43,11 +51,13 @@ lgl_all <-
   rowwise() |> 
   mutate(
     all = all(c_across(
-      GGIR:actinet
+      !id
     ))
   ) |> 
   pull(all)
-lst_summary <- summarize_metrics_main(vct_merge)
+lst_summary <- summarize_metrics_main(lst_yaml,
+                                      vct_ref,
+                                      vct_merge)
 
 ```
 
@@ -63,34 +73,48 @@ Below is a table listing if each major step was successful for a file (TRUE) or 
 #| label: tbl-major
 #| echo: false
 
+lst_green <- 
+  list(
+    if (vct_ref["do"]) {cells_body(columns = DO, rows = DO)},
+    if (vct_ref["pal"]) {cells_body(columns = activPAL, rows = activPAL)},
+    if (vct_ref["pass"]) {cells_body(columns = ActiPass, rows = ActiPass)},
+    cells_body(columns = GGIR,          rows = GGIR),
+    cells_body(columns = nw.sleep,      rows = nw.sleep),
+    cells_body(columns = calibration,   rows = calibration),
+    cells_body(columns = `raw methods`, rows = `raw methods`),
+    cells_body(columns = oak.pre,       rows = oak.pre),
+    cells_body(columns = cutpoints,     rows = cutpoints),
+    cells_body(columns = stepcount,     rows = stepcount),
+    cells_body(columns = walmsley,      rows = walmsley),
+    cells_body(columns = actinet,       rows = actinet)
+  ) |> 
+  Filter(x = _,
+         f = Negate(is.null))
+lst_red <- 
+  list(
+    if (vct_ref["do"]) {cells_body(columns = DO, rows = !DO)},
+    if (vct_ref["pal"]) {cells_body(columns = activPAL, rows = !activPAL)},
+    if (vct_ref["pass"]) {cells_body(columns = ActiPass, rows = !ActiPass)},
+    cells_body(columns = GGIR,          rows = !GGIR),
+    cells_body(columns = nw.sleep,      rows = !nw.sleep),
+    cells_body(columns = calibration,   rows = !calibration),
+    cells_body(columns = `raw methods`, rows = !`raw methods`),
+    cells_body(columns = oak.pre,       rows = !oak.pre),
+    cells_body(columns = cutpoints,     rows = !cutpoints),
+    cells_body(columns = stepcount,     rows = !stepcount),
+    cells_body(columns = walmsley,      rows = !walmsley),
+    cells_body(columns = actinet,       rows = !actinet)
+  ) |> 
+  Filter(x = _,
+         f = Negate(is.null))
 gt(df_out) |> 
   tab_style(
-    style = cell_fill(color = "#D9F1D5"),
-    locations = list(
-      cells_body(columns = GGIR,          rows = GGIR),
-      cells_body(columns = nw.sleep,      rows = nw.sleep),
-      cells_body(columns = calibration,   rows = calibration),
-      cells_body(columns = `raw methods`, rows = `raw methods`),
-      cells_body(columns = oak.pre,       rows = oak.pre),
-      cells_body(columns = cutpoints,     rows = cutpoints),
-      cells_body(columns = stepcount,     rows = stepcount),
-      cells_body(columns = walmsley,      rows = walmsley),
-      cells_body(columns = actinet,       rows = actinet)
-    )
+    style     = cell_fill(color = "#D9F1D5"),
+    locations = lst_green
   ) |> 
   tab_style(
-    style = cell_fill(color = "#ea9999"),
-    locations = list(
-      cells_body(columns = GGIR,          rows = !GGIR),
-      cells_body(columns = nw.sleep,      rows = !nw.sleep),
-      cells_body(columns = calibration,   rows = !calibration),
-      cells_body(columns = `raw methods`, rows = !`raw methods`),
-      cells_body(columns = oak.pre,       rows = !oak.pre),
-      cells_body(columns = cutpoints,     rows = !cutpoints),
-      cells_body(columns = stepcount,     rows = !stepcount),
-      cells_body(columns = walmsley,      rows = !walmsley),
-      cells_body(columns = actinet,       rows = !actinet)
-    )
+    style     = cell_fill(color = "#ea9999"),
+    locations = lst_red
   )
 
 ```
