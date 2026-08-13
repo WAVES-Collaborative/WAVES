@@ -1,4 +1,19 @@
 url: https://waves-collaborative.github.io/WAVES/
 template:
   bootstrap: 5
+  light-switch: true
 
+articles:
+- title: WAVES Project
+  desc: >
+    Guiding documents for WAVES project.
+  navbar: ~
+  contents:
+  - authorship-guidelines
+
+- title: Testing
+  desc: >
+    This is a test section. It should not appear in the navigation bar dropdown
+    menu but should appear when clicking More Articles...
+  contents:
+  - test

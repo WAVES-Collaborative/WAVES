@@ -1,0 +1,19 @@
+---
+title: "Test"
+output: rmarkdown::html_vignette
+description: >
+  This should say "Blah"
+vignette: >
+  %\VignetteIndexEntry{Test}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Some random text. Help me. I need sleep.
