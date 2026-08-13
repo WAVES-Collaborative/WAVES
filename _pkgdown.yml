@@ -9,11 +9,11 @@ articles:
     Guiding documents for WAVES project.
   navbar: ~
   contents:
-  - authorship-guidelines
+  - articles/authorship-guidelines
 
 - title: Testing
   desc: >
     This is a test section. It should not appear in the navigation bar dropdown
     menu but should appear when clicking More Articles...
   contents:
-  - test
+  - articles/test
