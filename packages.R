@@ -1,4 +1,5 @@
 library(arrow)
+autometric::log_version
 crew::crew_controller_local
 library(data.table)
 library(GGIR)
