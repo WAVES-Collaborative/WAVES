@@ -10,6 +10,12 @@ Guiding documents for WAVES project.
   Transparent definitions and procedures for authorship on WAVES-related
   publications.
 
+- [Reference Data
+  Codebook](https://waves-collaborative.github.io/WAVES/articles/reference-codebook.md):
+
+  Description of variables required from some ground-truth data and
+  variables from processing other ground-truth data.
+
 ### Testing
 
 This is a test section. It should not appear in the navigation bar
