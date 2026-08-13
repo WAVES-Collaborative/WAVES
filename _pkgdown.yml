@@ -10,6 +10,7 @@ articles:
   navbar: ~
   contents:
   - articles/authorship-guidelines
+  - articles/reference-codebook
 
 - title: Testing
   desc: >
