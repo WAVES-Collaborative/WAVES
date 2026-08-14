@@ -151,7 +151,7 @@ tar_option_set(
     name = "my_controller",
     workers = n_workers,
     options_metrics = crew_options_metrics(
-      path = "/dev/stdout",
+      path = "logs/metrics_config/",
       seconds_interval = 1
     ),
     options_local = crew_options_local(
