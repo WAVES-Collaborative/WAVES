@@ -1,5 +1,4 @@
 project:
-  title: WHO_WAVES
+  title: WAVES
   execute-dir: project
   output-dir: "reports"
-  post-render: "quarto/rename.R"

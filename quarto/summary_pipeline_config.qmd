@@ -4,7 +4,7 @@ format:
   html: 
     toc: true
     page-layout: full
-editor: visual
+editor: source
 editor_options: 
   chunk_output_type: console
 ---
@@ -13,6 +13,10 @@ editor_options:
 #| label: setup
 #| echo: false
 
+library(targets)
+source("packages.R") |>
+  suppressMessages() |>
+  suppressWarnings()
 tar_load(vct_raw)
 tar_load(vct_basic)
 tar_load(vct_nw.sleep)
