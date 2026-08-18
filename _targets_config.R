@@ -308,17 +308,21 @@ tar_plan(
   ),
   if (reticulate:::is_linux()) {
     tar_render(
-      name = minconda_summary,
-      path = "quarto/config_miniconda.qmd",
-      output_file = file.path(getwd(), fdr_reports, "summary_miniconda.html")
+      name = miniconda_summary,
+      path = "quarto/summary_miniconda_config.qmd",
+      output_file = file.path(getwd(), fdr_reports, "summary_miniconda_config.html")
     )
   } else {
     tar_quarto(
-      name = minconda_summary,
-      path = "quarto/config_miniconda.qmd",
-      output_file = file.path(getwd(), fdr_reports, "summary_miniconda.html")
+      name  = miniconda_summary,
+      path  = "quarto/summary_miniconda_config.qmd",
+      quiet = FALSE
     )
   },
+  tar_file(
+    name = miniconda_summary_file,
+    command = move_render(miniconda_summary)
+  ),
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                             FILE DIRECTORIES                           ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

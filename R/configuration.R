@@ -35,7 +35,99 @@ get_tbl_module <- function(df_module_WAVES,
       ),
       clr = case_when(
         # The below packages don't matter for version/date.
-        Module %in% c("ca-certificates", "certifi") ~ "#FFFFFF",
+        Module %in% c(
+          # All
+          "ca-certificates",
+          "certifi",
+          "charset-normalizer",
+          "packaging",
+          # Windows
+          "colorama", # step, wlms, acti
+          "libhwloc", # wlms, oak
+          "libiconv", # oak
+          "libwinpthread", # oak
+          "libxml2", # wlms, oak
+          "libxml2-16", # oak
+          "llvm-openmp", # wlms, oak
+          "m2w64-gcc-libgfortran", # wlms
+          "m2w64-gcc-libs", # wlms
+          "m2w64-gcc-libs-core", # wlms
+          "m2w64-gmp", # wlms
+          "m2w64-libwinpthread-git", # wlms
+          "mkl", # wlms, oak
+          "msys2-conda-epoch", # wlms
+          "tbb", # wlms, oak
+          "pthreads-win32", # wlms
+          "symlink-exe-runtime", # step, wlms, acti
+          "ucrt", # step, wlms, acti, oak
+          "vc", # step, wlms, acti, oak
+          "vc14_runtime", # step, wlms, acti, oak
+          "vcomp14", # step, wlms, acti, oak
+          "vs2015_runtime" # wlms
+          # Below should be additional conda-forge packages that are not needed
+          # with latest change to conda_create(forge = FALSE) code.
+          # "_openmp_mutex",
+          # "alsa-lib",
+          # "audioread", # oak1.0
+          # "cairo",
+          # "font-ttf-dejavu-sans-mono",
+          # "font-ttf-inconsolata",
+          # "font-ttf-source-code-pro",
+          # "font-ttf-ubuntu",
+          # "fontconfig",
+          # "fonts-conda-ecosystem",
+          # "fonts-conda-forge",
+          # "giflib",
+          # "graphite2",
+          # "harfbuzz",
+          # "icu",
+          # "keyutils",
+          # "krb5",
+          # "lcms2",
+          # "ld_impl_linux-64",
+          # "lerc",
+          # "libcups",
+          # "libdeflate",
+          # "libedit",
+          # "libfreetype",
+          # "libfreetype6",
+          # "libgcc",
+          # "libgcc-ng",
+          # "libglib",
+          # "libgomp",
+          # "libiconv",
+          # "libjpeg-turbo",
+          # "libnsl",
+          # "libpng",
+          # "libstdcxx",
+          # "libtiff",
+          # "libuuid",
+          # "libwebp-base",
+          # "libxcb",
+          # "libxcrypt",
+          # "ncurses",
+          # "nvidia-cublas-cu11",
+          # "nvidia-cuda-nvrtc-cu11",
+          # "nvidia-cuda-runtime-cu11",
+          # "nvidia-cudnn-cu11",
+          # "pcre2",
+          # "pixman",
+          # "pthread-stubs",
+          # "readline",
+          # "xorg-libice",
+          # "xorg-libsm",
+          # "xorg-libx11",
+          # "xorg-libxau",
+          # "xorg-libxdmcp",
+          # "xorg-libxext",
+          # "xorg-libxi",
+          # "xorg-libxrandr",
+          # "xorg-libxrender",
+          # "xorg-libxt",
+          # "xorg-libxtst",
+          # "zlib",
+          # "zstd"
+        ) ~ "#FFFFFF",
         # Module appears in WAVES install but not your install.
         is.na(`Version Installed`)                   ~ "#ea9999",
         # Module appear in your install but not WAVES install.
@@ -190,7 +282,8 @@ config_miniconda <- function(df_module_stepcount,
       conda_create(
         envname        = le_env,
         packages       = lst_module_creation[[le_env]],
-        python_version = vct_python_version[le_env]
+        python_version = vct_python_version[le_env],
+        forge          = FALSE
       )
       chk_successful <- dir.exists(
         file.path(miniconda_path(), "envs", le_env)

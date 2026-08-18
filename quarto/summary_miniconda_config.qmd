@@ -2,9 +2,11 @@
 title: "Configuration"
 format: 
   html: 
-    embed-resources: true
-    output-file: "summary_config"
-editor: visual
+    toc: true
+    page-layout: full
+  typst: 
+    toc: true
+editor: source
 editor_options: 
   chunk_output_type: console
 ---
@@ -14,6 +16,10 @@ editor_options:
 #| echo: false
 #| warning: false
 
+library(targets)
+source("packages.R") |>
+  suppressMessages() |>
+  suppressWarnings()
 tar_load(lst_miniconda)
 
 ```
