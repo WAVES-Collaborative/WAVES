@@ -231,13 +231,14 @@ config_miniconda <- function(df_module_stepcount,
     "WAVES_oak_pre"
   )
   lst_module_creation <-
-    list("openjdk",
+    # openssl 3.6.3 on Windows fails in getting certificates in Oxwearable modules. For now, explicitely use 3.6.2.
+    list(c("openjdk", "openssl=3.6.2"),
          # For WAVES_accelerometer, install heavy deps via conda first (ARM64
          # binaries available across platforms). Without this, pip tries to
          # build pandas/numpy from source on macOS ARM64 and fails due to
          # setuptools 80+ dropping pkg_resources.
-         c("openjdk", "numpy==1.21", "pandas==1.3", "scipy==1.7"),
-         "openjdk",
+         c("openjdk", "numpy==1.21", "pandas==1.3", "scipy==1.7", "openssl=3.6.2"),
+         c("openjdk", "openssl=3.6.2"),
          "timezonefinder==8.1.0",
          NULL) |>
     setNames(vct_env)
