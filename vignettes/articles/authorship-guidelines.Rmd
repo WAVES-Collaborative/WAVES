@@ -1,5 +1,5 @@
 ---
-title: "WAVES Authorship Guidelines"
+title: "Authorship Guidelines"
 output: rmarkdown::html_vignette
 description: >
   Transparent definitions and procedures for authorship on WAVES-related publications.
