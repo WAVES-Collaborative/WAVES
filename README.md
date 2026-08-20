@@ -14,7 +14,7 @@ data and data pipeline will work with the WAVES team and groups who have
 potentially available validation data.
 
 <figure>
-<img src="man/figures/WAVES%20Diagram.png" alt="Flow Diagram" />
+<img src="man/figures/WAVES_Diagram.png" alt="Flow Diagram" />
 <figcaption aria-hidden="true">Flow Diagram</figcaption>
 </figure>
 

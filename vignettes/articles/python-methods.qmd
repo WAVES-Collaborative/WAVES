@@ -13,6 +13,8 @@ editor_options:
 If changes have been made to how the miniconda environments are setup, then the environments will have to be deleted and then be recreated in the config pipeline. Run the following code within the `CONSOLE`:
 
 ```{r}
+#| eval: false
+
 reticulate::conda_remove("WAVES_accelerometer")
 reticulate::conda_remove("WAVES_actinet")
 reticulate::conda_remove("WAVES_oak_1.0")

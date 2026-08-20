@@ -23,7 +23,7 @@ Thank you for your collaboration in the Wrist Algorithm Verification and Evaluat
 
 The proposed flow diagram outlines the process for how the validation data and data pipeline will work with the WAVES team and groups who have potentially available validation data.
 
-![Flow Diagram](man/figures/WAVES%20Diagram.png)
+![Flow Diagram](man/figures/WAVES_Diagram.png)
 
 **Full description of the flow diagram coming soon**
 

@@ -31,7 +31,7 @@ Before continuing, please ensure you have set up your computer according to the 
 
 4.  In the **Console** pane, you will see a bunch of text appear. At the bottom it will ask if "Do you want to proceed?". Type "Y" and press the "Enter" key.
 
-    ![](images/renv_restore_proceed.png)
+    ![](man/figures/renv_restore_proceed.png)
 
     a.  This will download all the R software packages needed for the WAVES repository. It will take a while.
 
@@ -39,13 +39,13 @@ Before continuing, please ensure you have set up your computer according to the 
 
 5.  Navigate to the **Files** pane within Rstudio (located either in the bottom right area of the RStudio window *if* you haven't changed the pane layout in "Global Settings"). Click on "\_targets*\_*config.R" to open it. This will open the "\_targets_config.R" script within the **Source** pane in the top left area of your RStudio window.
 
-    ![](images/files_pane.png)
+    ![](man/figures/files_pane.png)
 
     1.  Alternatively, open "\_targets*\_*config.R" script with the system File Explorer. It should open within the **Source** pane of RStudio.
 
 6.  Within the "INPUT" section of the "\_targets_config.R" script, check the following:
 
-    ![](images/section_input.png)
+    ![](man/figures/section_input.png)
 
     1.  `RETICULATE_MINICONDA_PATH`: The path to an existing conda installation or where you want a new minconda distribution to be installed.
         1.  If this is changed, please ensure there are no spaces within the file path
@@ -63,7 +63,7 @@ Before continuing, please ensure you have set up your computer according to the 
 
 9.  Bring the blinking cursor to the **Console** pane and run `tar_make()`. The "configuration" pipeline is now running, which will print messages out in the Console like the below image.
 
-    ![](images/tar_make.png)
+    ![](man/figures/tar_make.png)
 
     The "configuration" pipeline is:
 
@@ -77,7 +77,7 @@ Before continuing, please ensure you have set up your computer according to the 
 
 10. Once the pipeline is complete the console should say "ended pipeline" with how long it took.
 
-    ![](images/tar_make2.png)
+    ![](man/figures/tar_make2.png)
 
     Or it may error like so:
 
@@ -158,7 +158,7 @@ Before continuing, please ensure you have set up your computer according to the 
 
   - Stop the pipeline by clicking the "STOP" button that appears in the top right corner of the Console pane.
 
-  ![](images/console_stop.png)
+  ![](man/figures/console_stop.png)
 
   - Change the `n_workers` object to 1, which will remove parallel processing.
 
