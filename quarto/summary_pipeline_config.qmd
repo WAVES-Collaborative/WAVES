@@ -4,6 +4,14 @@ format:
   html: 
     toc: true
     page-layout: full
+  typst: 
+    toc: true
+    mainfont: arial
+    papersize: presentation-16-9
+    margin:
+      x: 1cm
+      y: 1cm
+    pdf-standard: ua-1
 editor: source
 editor_options: 
   chunk_output_type: console
@@ -17,6 +25,17 @@ library(targets)
 source("packages.R") |>
   suppressMessages() |>
   suppressWarnings()
+list.files(
+  path       = "R",
+  pattern    = "\\.R$",
+  full.names = TRUE
+) |>
+  grep(x       = _,
+       pattern = "^R\\/_",
+       value   = TRUE,
+       invert  = TRUE) |>
+  sapply(FUN = source) |>
+  invisible()
 tar_load(vct_raw)
 tar_load(vct_basic)
 tar_load(vct_nw.sleep)
@@ -28,6 +47,8 @@ tar_load(vct_ox_step)
 tar_load(vct_ox_wlms)
 tar_load(vct_ox_acti)
 tar_load(df_pipe)
+lst_info <- jsonlite::fromJSON(Sys.getenv("QUARTO_EXECUTE_INFO"))
+target_format <- lst_info$format$identifier$`target-format`
 
 len_raw <- length(vct_raw)
 df_out <- summarize_major_steps(
@@ -132,6 +153,17 @@ lgl_all <-
   ) |> 
   pull(all)
 lst_summary <- summarize_metrics_config(df_pipe)
+lst_methods <- lapply(
+  lst_summary,
+  \(x) {
+    extract_body(x) |> 
+      names() |> 
+      stri_replace(regex = "id|method|Yours_|WAVES_",
+                   replacement = "") |>
+      unique() |> 
+      stri_remove_empty()
+  }
+)
 
 ```
 
@@ -144,7 +176,7 @@ Out of `r len_raw` configuration test files, `r sum(lgl_all)` successfully went 
 Below is a table listing if each major step was successful for a file (TRUE) or unsuccessful (FALSE)
 
 ```{r}
-#| label: tbl-major
+#| label: major
 #| echo: false
 tbl_out
 
@@ -159,30 +191,133 @@ If all values are highlighted green, then the WAVES code is running successfully
 ### MVPA (minutes)
 
 ```{r}
-#| label: tbl-mvpa_total
+#| label: mvpa_total
 #| echo: false
+#| results: asis
 
-lst_summary$total_mvpa
+if (target_format == "html") {
+  lst_summary$total_mvpa
+} else {
+  # can't get the function to work so just type it out.
+  # print_total_gt(
+  #   lst_summary = lst_summary,
+  #   lst_methods = lst_methods,
+  #   le_tbl      = "total_mvpa",
+  #   size        = 4
+  # )
+  le_tbl <- "total_mvpa"
+  size   <- 5
+  lst_split <- split_in_seq(lst_methods[[le_tbl]], size = size)
+  for (i in seq_along(lst_split)) {
+    vct_hide <-
+      lst_methods[[le_tbl]][!lst_methods[[le_tbl]] %in% lst_split[[i]]]
+    le_gt <-
+      lst_summary[[le_tbl]] |>
+      cols_hide(
+        matches(paste0(vct_hide, collapse = "|"))
+      ) |>
+      cols_width(
+        matches("id") ~ pct(20),
+        everything()  ~ pct(8)
+      )
+    cat(
+      knitr::knit_child(
+        text = c(
+          "```{r}",
+          "#| echo: false",
+          "le_gt",
+          "```"
+        ),
+        quiet = TRUE
+      ),
+      sep = "\n"
+    )
+  }
+}
 
 ```
 
 ### Sedentary (minutes)
 
 ```{r}
-#| label: tbl-sed_total
+#| label: sed_total
 #| echo: false
+#| results: asis
 
-lst_summary$total_sed
+if (target_format == "html") {
+  lst_summary$total_sed
+} else {
+  le_tbl <- "total_sed"
+  size   <- 5
+  lst_split <- split_in_seq(lst_methods[[le_tbl]], size = size)
+  for (i in seq_along(lst_split)) {
+    vct_hide <-
+      lst_methods[[le_tbl]][!lst_methods[[le_tbl]] %in% lst_split[[i]]]
+    le_gt <-
+      lst_summary[[le_tbl]] |>
+      cols_hide(
+        matches(paste0(vct_hide, collapse = "|"))
+      ) |>
+      cols_width(
+        matches("id") ~ pct(20),
+        everything()  ~ pct(8)
+      )
+    cat(
+      knitr::knit_child(
+        text = c(
+          "```{r}",
+          "#| echo: false",
+          "le_gt",
+          "```"
+        ),
+        quiet = TRUE
+      ),
+      sep = "\n"
+    )
+  }
+}
 
 ```
 
 ### Steps
 
 ```{r}
-#| label: tbl-step_total
+#| label: step_total
 #| echo: false
+#| results: asis
 
-lst_summary$total_step
+if (target_format == "html") {
+  lst_summary$total_step
+} else {
+  le_tbl <- "total_step"
+  size   <- 5
+  lst_split <- split_in_seq(lst_methods[[le_tbl]], size = size)
+  for (i in seq_along(lst_split)) {
+    vct_hide <-
+      lst_methods[[le_tbl]][!lst_methods[[le_tbl]] %in% lst_split[[i]]]
+    le_gt <-
+      lst_summary[[le_tbl]] |>
+      cols_hide(
+        matches(paste0(vct_hide, collapse = "|"))
+      ) |>
+      cols_width(
+        matches("id") ~ pct(20),
+        everything()  ~ pct(8)
+      )
+    cat(
+      knitr::knit_child(
+        text = c(
+          "```{r}",
+          "#| echo: false",
+          "le_gt",
+          "```"
+        ),
+        quiet = TRUE
+      ),
+      sep = "\n"
+    )
+  }
+}
 
 ```
 
@@ -193,29 +328,210 @@ Bottom left of matrices represent summary agreement between methods, as calculat
 ### MVPA (Percent Agreement)
 
 ```{r}
-#| label: tbl-mvpa_agree
+#| label: mvpa_agree
 #| echo: false
+#| results: asis
 
-lst_summary$agree_mvpa
+if (target_format == "html") {
+  lst_summary$agree_mvpa
+} else {
+  # can't get the function to work so just type it out.
+  # print_agree_gt(
+  #   lst_summary = lst_summary,
+  #   lst_methods = lst_methods,
+  #   le_tbl      = "agree_mvpa",
+  #   size        = 4
+  # )
+  le_tbl <- "agree_mvpa"
+  size   <- 5
+  lst_split <- split_in_seq(lst_methods[[le_tbl]], size = size)
+  for (i in seq_along(lst_split)) {
+    ind_methods <- which(lst_methods[[le_tbl]] %in% lst_split[[i]])
+    le_df <- 
+      lst_summary[[le_tbl]][["_data"]] |>
+      select(c(1, ind_methods + 1)) |> 
+      slice(ind_methods)
+    le_styles <- 
+      lst_summary[[le_tbl]][["_styles"]] |> 
+      dplyr::filter(colname %in% names(le_df)[-1],
+                    rownum %in% ind_methods) |> 
+      mutate(
+        colname = recode_values(
+          colname,
+          from = names(le_df)[-1],
+          to   = le_df$method
+        ),
+        rownum = rownum - (5 * (i - 1))
+      )
+    names(le_df) <- c(
+      "Method",
+      le_df$method
+    )
+    le_gt <-
+      le_df |> 
+      gt() |> 
+      cols_width(
+        matches("Method") ~ pct(20),
+        everything()      ~ pct(16)
+      )
+    for (ii in seq_len(nrow(le_styles))) {
+      le_gt <-
+        le_gt |>
+        tab_style(
+          style = cell_fill(color = le_styles$styles[[ii]]$cell_fill$color),
+          locations = cells_body(columns = le_styles$colname[ii],
+                                 rows = le_styles$rownum[ii])
+        )
+    }
+    cat(
+      knitr::knit_child(
+        text = c(
+          "```{r}",
+          "#| echo: false",
+          "le_gt",
+          "```"
+        ),
+        quiet = TRUE
+      ),
+      sep = "\n"
+    )
+  }
+}
 
 ```
 
 ### Sedentary (Percent Agreement)
 
 ```{r}
-#| label: tbl-sed_agree
+#| label: sed_agree
 #| echo: false
+#| results: asis
 
-lst_summary$agree_sed
+if (target_format == "html") {
+  lst_summary$agree_sed
+} else {
+  le_tbl <- "agree_sed"
+  size   <- 5
+  lst_split <- split_in_seq(lst_methods[[le_tbl]], size = size)
+  for (i in seq_along(lst_split)) {
+    ind_methods <- which(lst_methods[[le_tbl]] %in% lst_split[[i]])
+    le_df <- 
+      lst_summary[[le_tbl]][["_data"]] |>
+      select(c(1, ind_methods + 1)) |> 
+      slice(ind_methods)
+    le_styles <- 
+      lst_summary[[le_tbl]][["_styles"]] |> 
+      dplyr::filter(colname %in% names(le_df)[-1],
+                    rownum %in% ind_methods) |> 
+      mutate(
+        colname = recode_values(
+          colname,
+          from = names(le_df)[-1],
+          to   = le_df$method
+        ),
+        rownum = rownum - (5 * (i - 1))
+      )
+    names(le_df) <- c(
+      "Method",
+      le_df$method
+    )
+    le_gt <-
+      le_df |> 
+      gt() |> 
+      cols_width(
+        matches("Method") ~ pct(20),
+        everything()      ~ pct(16)
+      )
+    for (ii in seq_len(nrow(le_styles))) {
+      le_gt <-
+        le_gt |>
+        tab_style(
+          style = cell_fill(color = le_styles$styles[[ii]]$cell_fill$color),
+          locations = cells_body(columns = le_styles$colname[ii],
+                                 rows = le_styles$rownum[ii])
+        )
+    }
+    cat(
+      knitr::knit_child(
+        text = c(
+          "```{r}",
+          "#| echo: false",
+          "le_gt",
+          "```"
+        ),
+        quiet = TRUE
+      ),
+      sep = "\n"
+    )
+  }
+}
 
 ```
 
 ### Steps (Correlation)
 
 ```{r}
-#| label: tbl-step_agree
+#| label: step_agree
 #| echo: false
+#| results: asis
 
-lst_summary$cor_step
+if (target_format == "html") {
+  lst_summary$cor_step
+} else {
+  le_tbl <- "cor_step"
+  size   <- 5
+  lst_split <- split_in_seq(lst_methods[[le_tbl]], size = size)
+  for (i in seq_along(lst_split)) {
+    ind_methods <- which(lst_methods[[le_tbl]] %in% lst_split[[i]])
+    le_df <- 
+      lst_summary[[le_tbl]][["_data"]] |>
+      select(c(1, ind_methods + 1)) |> 
+      slice(ind_methods)
+    le_styles <- 
+      lst_summary[[le_tbl]][["_styles"]] |> 
+      dplyr::filter(colname %in% names(le_df)[-1],
+                    rownum %in% ind_methods) |> 
+      mutate(
+        colname = recode_values(
+          colname,
+          from = names(le_df)[-1],
+          to   = le_df$method
+        ),
+        rownum = rownum - (5 * (i - 1))
+      )
+    names(le_df) <- c(
+      "Method",
+      le_df$method
+    )
+    le_gt <-
+      le_df |> 
+      gt() |> 
+      cols_width(
+        matches("Method") ~ pct(20),
+        everything()      ~ pct(16)
+      )
+    for (ii in seq_len(nrow(le_styles))) {
+      le_gt <-
+        le_gt |>
+        tab_style(
+          style = cell_fill(color = le_styles$styles[[ii]]$cell_fill$color),
+          locations = cells_body(columns = le_styles$colname[ii],
+                                 rows = le_styles$rownum[ii])
+        )
+    }
+    cat(
+      knitr::knit_child(
+        text = c(
+          "```{r}",
+          "#| echo: false",
+          "le_gt",
+          "```"
+        ),
+        quiet = TRUE
+      ),
+      sep = "\n"
+    )
+  }
+}
 
 ```

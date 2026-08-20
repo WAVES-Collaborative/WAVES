@@ -170,6 +170,129 @@ summarize_major_main_steps <- function(lst_yaml,
       file_noext    = NULL
     )
 }
+split_in_seq <- function(x, size) {
+  split(
+    x,
+    ceiling(seq_along(x) / size)
+  )
+}
+print_total_gt <- function(lst_summary,
+                           lst_methods,
+                           le_tbl,
+                           size) {
+  lst_split <- split_in_seq(lst_methods[[le_tbl]], size = size)
+  for (i in seq_along(lst_split)) {
+    vct_hide <-
+      lst_methods[[le_tbl]][!lst_methods[[le_tbl]] %in% lst_split[[i]]]
+    le_gt <-
+      lst_summary[[le_tbl]] |>
+      cols_hide(
+        matches(paste0(vct_hide, collapse = "|"))
+      ) |>
+      cols_width(
+        matches("id") ~ pct(20),
+        everything()  ~ pct(8)
+      )
+    cat(
+      knitr::knit_child(
+        text = c(
+          "```{r}",
+          "#| echo: false",
+          "le_gt",
+          "```"
+        ),
+        quiet = TRUE
+      ),
+      sep = "\n"
+    )
+  }
+  # lapply(
+  #   split_in_seq(lst_methods[[le_tbl]], size = size),
+  #   \(x) {
+  #     vct_hide <-
+  #       lst_methods[[le_tbl]][!lst_methods[[le_tbl]] %in% x]
+  #     le_gt <-
+  #       lst_summary[[le_tbl]] |>
+  #       cols_hide(
+  #         matches(paste0(vct_hide, collapse = "|"))
+  #       ) |>
+  #       cols_width(
+  #         matches("id") ~ pct(20)
+  #       )
+  #     cat(
+  #       knitr::knit_child(
+  #         text = c(
+  #           "```{r}",
+  #           "#| echo: false",
+  #           "le_gt",
+  #           "```"
+  #         ),
+  #         quiet = TRUE
+  #       ),
+  #       sep = "\n"
+  #     )
+  #   }
+  # ) |> print()
+}
+print_agree_gt <- function(lst_summary,
+                           lst_methods,
+                           le_tbl,
+                           size) {
+  le_tbl <- "agree_mvpa"
+  size   <- 5
+  lst_split <- split_in_seq(lst_methods[[le_tbl]], size = size)
+  for (i in seq_along(lst_split)) {
+    ind_methods <- which(lst_methods[[le_tbl]] %in% lst_split[[i]])
+    le_df <-
+      lst_summary[[le_tbl]][["_data"]] |>
+      select(c(1, ind_methods + 1)) |>
+      slice(ind_methods)
+    le_styles <-
+      lst_summary[[le_tbl]][["_styles"]] |>
+      dplyr::filter(colname %in% names(le_df)[-1],
+                    rownum %in% ind_methods) |>
+      mutate(
+        colname = recode_values(
+          colname,
+          from = names(le_df)[-1],
+          to   = le_df$method
+        ),
+        rownum = rownum - (5 * (i - 1))
+      )
+    names(le_df) <- c(
+      "Method",
+      le_df$method
+    )
+    le_gt <-
+      le_df |>
+      gt() |>
+      cols_width(
+        matches("Method") ~ pct(20),
+        everything()      ~ pct(16)
+      )
+    for (i in seq_len(nrow(le_styles))) {
+      le_gt <-
+        le_gt |>
+        tab_style(
+          style = cell_fill(color = le_styles$styles[[i]]$cell_fill$color),
+          locations = cells_body(columns = le_styles$colname[i],
+                                 rows = le_styles$rownum[i])
+        )
+    }
+    cat(
+      knitr::knit_child(
+        text = c(
+          "```{r}",
+          "#| echo: false",
+          "le_gt",
+          "```"
+        ),
+        quiet = TRUE
+      ),
+      sep = "\n"
+    )
+  }
+}
 make_table_agr.cor <- function(mtx_yours,
                                mtx_waves,
                                df_agr_waves) {
@@ -342,16 +465,16 @@ summarize_metrics_config <- function(df_pipe) {
       label = "Actinet", columns = ends_with("actinet")
     ) |>
     tab_spanner(
-      label = "Bakrania (ENMO Average)", columns = ends_with("bakrania.enmo.average")
+      label = "Bakrania (ENMO Avg)", columns = ends_with("bakrania.enmo.average")
     ) |>
     tab_spanner(
-      label = "Bakrania (ENMO Simple)", columns = ends_with("bakrania.enmo.simple")
+      label = "Bakrania (ENMO Simp)", columns = ends_with("bakrania.enmo.simple")
     ) |>
     tab_spanner(
-      label = "Bakrania (MAD Average)", columns = ends_with("bakrania.mad.average")
+      label = "Bakrania (MAD Avg)", columns = ends_with("bakrania.mad.average")
     ) |>
     tab_spanner(
-      label = "Bakrania (MAD Simple)", columns = ends_with("bakrania.mad.simple")
+      label = "Bakrania (MAD Simp)", columns = ends_with("bakrania.mad.simple")
     ) |>
     tab_spanner(
       label = "Ellis", columns = ends_with("ellis")
@@ -363,7 +486,7 @@ summarize_metrics_config <- function(df_pipe) {
       label = "Fraysee", columns = ends_with("fraysee")
     ) |>
     tab_spanner(
-      label = "Hildrebrand", columns = ends_with("hildebrand")
+      label = "Hildebrand", columns = ends_with("hildebrand")
     ) |>
     tab_spanner(
       label = "GGIR Default", columns = ends_with("ggir")
@@ -393,13 +516,13 @@ summarize_metrics_config <- function(df_pipe) {
       label = "White (ENMO Linear)", columns = ends_with("white.enmo.lin")
     ) |>
     tab_spanner(
-      label = "White (ENMO Polynomial)", columns = ends_with("white.enmo.pol")
+      label = "White (ENMO Poly)", columns = ends_with("white.enmo.pol")
     ) |>
     tab_spanner(
       label = "White (HPFVM Linear)", columns = ends_with("white.hpfvm.lin")
     ) |>
     tab_spanner(
-      label = "White (HPFVM Polynomial)", columns = ends_with("white.hpfvm.pol")
+      label = "White (HPFVM Poly)", columns = ends_with("white.hpfvm.pol")
     )
 
   for (i in seq_len(nrow(df_equal_sed))) {
@@ -476,7 +599,7 @@ summarize_metrics_config <- function(df_pipe) {
       label = "Fraysee", columns = ends_with("fraysee")
     ) |>
     tab_spanner(
-      label = "Hildrebrand", columns = ends_with("hildebrand")
+      label = "Hildebrand", columns = ends_with("hildebrand")
     ) |>
     tab_spanner(
       label = "GGIR Default", columns = ends_with("ggir")
@@ -506,13 +629,13 @@ summarize_metrics_config <- function(df_pipe) {
       label = "White (ENMO Linear)", columns = ends_with("white.enmo.lin")
     ) |>
     tab_spanner(
-      label = "White (ENMO Polynomial)", columns = ends_with("white.enmo.pol")
+      label = "White (ENMO Poly)", columns = ends_with("white.enmo.pol")
     ) |>
     tab_spanner(
       label = "White (HPFVM Linear)", columns = ends_with("white.hpfvm.lin")
     ) |>
     tab_spanner(
-      label = "White (HPFVM Polynomial)", columns = ends_with("white.hpfvm.pol")
+      label = "White (HPFVM Poly)", columns = ends_with("white.hpfvm.pol")
     )
 
   for (i in seq_len(nrow(df_equal_mvpa))) {
@@ -625,9 +748,9 @@ summarize_metrics_config <- function(df_pipe) {
   ## sed ----
   df_agr <-
     df_pipe |>
-    select(starts_with("intensity")) |>
+    select(starts_with("intensity3")) |>
     rename_with(.cols = everything(),
-                .fn = ~sub(x = .x, pattern = "intensity_", replacement = "")) |>
+                .fn = ~sub(x = .x, pattern = "intensity3_", replacement = "")) |>
     mutate(across(
       .cols = everything(),
       .fns =
@@ -663,9 +786,9 @@ summarize_metrics_config <- function(df_pipe) {
   ## mvpa ----
   df_agr <-
     df_pipe |>
-    select(starts_with("intensity")) |>
+    select(starts_with("intensity3")) |>
     rename_with(.cols = everything(),
-                .fn = ~sub(x = .x, pattern = "intensity_", replacement = "")) |>
+                .fn = ~sub(x = .x, pattern = "intensity3_", replacement = "")) |>
     select(!starts_with("bakrania")) |>
     mutate(across(
       .cols = everything(),
@@ -730,14 +853,14 @@ summarize_metrics_config <- function(df_pipe) {
     ) |>
     cols_label(
       "actinet" = "Actinet",
-      "bakrania.enmo.average" = "Bakrania (ENMO Average)",
-      "bakrania.enmo.simple" = "Bakrania (ENMO Simple)",
-      "bakrania.mad.average" = "Bakrania (MAD Average)",
-      "bakrania.mad.simple" = "Bakrania (MAD Simple)",
+      "bakrania.enmo.average" = "Bakrania (ENMO Avg)",
+      "bakrania.enmo.simple" = "Bakrania (ENMO Simp)",
+      "bakrania.mad.average" = "Bakrania (MAD Avg)",
+      "bakrania.mad.simple" = "Bakrania (MAD Simp)",
       "ellis" = "Ellis",
       "esliger" = "Esliger",
       "fraysee" = "Fraysee",
-      "hildebrand" = "Hildrebrand",
+      "hildebrand" = "Hildebrand",
       "ggir" = "GGIR Default",
       "mielke" = "Mielke",
       "montoye.dt" = "Montoye (DT)",
@@ -747,21 +870,21 @@ summarize_metrics_config <- function(df_pipe) {
       "trost" = "Trost",
       "walmsley" = "Walmsley",
       "white.enmo.lin" = "White (ENMO Linear)",
-      "white.enmo.pol" = "White (ENMO Polynomial)",
+      "white.enmo.pol" = "White (ENMO Poly)",
       "white.hpfvm.lin" = "White (HPFVM Linear)",
-      "white.hpfvm.pol" = "White (HPFVM Polynomial)"
+      "white.hpfvm.pol" = "White (HPFVM Poly)"
     )
   tbl_agr_sed$`_data`$method <- case_match(
     tbl_agr_sed$`_data`$method,
     "actinet" ~ "Actinet",
-    "bakrania.enmo.average" ~ "Bakrania (ENMO Average)",
-    "bakrania.enmo.simple" ~ "Bakrania (ENMO Simple)",
-    "bakrania.mad.average" ~ "Bakrania (MAD Average)",
-    "bakrania.mad.simple" ~ "Bakrania (MAD Simple)",
+    "bakrania.enmo.average" ~ "Bakrania (ENMO Avg)",
+    "bakrania.enmo.simple" ~ "Bakrania (ENMO Simp)",
+    "bakrania.mad.average" ~ "Bakrania (MAD Avg)",
+    "bakrania.mad.simple" ~ "Bakrania (MAD Simp)",
     "ellis" ~ "Ellis",
     "esliger" ~ "Esliger",
     "fraysee" ~ "Fraysee",
-    "hildebrand" ~ "Hildrebrand",
+    "hildebrand" ~ "Hildebrand",
     "ggir" ~ "GGIR Default",
     "mielke" ~ "Mielke",
     "montoye.dt" ~ "Montoye (DT)",
@@ -771,9 +894,9 @@ summarize_metrics_config <- function(df_pipe) {
     "trost" ~ "Trost",
     "walmsley" ~ "Walmsley",
     "white.enmo.lin" ~ "White (ENMO Linear)",
-    "white.enmo.pol" ~ "White (ENMO Polynomial)",
+    "white.enmo.pol" ~ "White (ENMO Poly)",
     "white.hpfvm.lin" ~ "White (HPFVM Linear)",
-    "white.hpfvm.pol" ~ "White (HPFVM Polynomial)"
+    "white.hpfvm.pol" ~ "White (HPFVM Poly)"
   )
 
   ## mvpa ----
@@ -787,7 +910,7 @@ summarize_metrics_config <- function(df_pipe) {
       "ellis" = "Ellis",
       "esliger" = "Esliger",
       "fraysee" = "Fraysee",
-      "hildebrand" = "Hildrebrand",
+      "hildebrand" = "Hildebrand",
       "ggir" = "GGIR Default",
       "mielke" = "Mielke",
       "montoye.dt" = "Montoye (DT)",
@@ -797,9 +920,9 @@ summarize_metrics_config <- function(df_pipe) {
       "trost" = "Trost",
       "walmsley" = "Walmsley",
       "white.enmo.lin" = "White (ENMO Linear)",
-      "white.enmo.pol" = "White (ENMO Polynomial)",
+      "white.enmo.pol" = "White (ENMO Poly)",
       "white.hpfvm.lin" = "White (HPFVM Linear)",
-      "white.hpfvm.pol" = "White (HPFVM Polynomial)"
+      "white.hpfvm.pol" = "White (HPFVM Poly)"
     )
   tbl_agr_mvpa$`_data`$method <- case_match(
     tbl_agr_mvpa$`_data`$method,
@@ -807,7 +930,7 @@ summarize_metrics_config <- function(df_pipe) {
     "ellis" ~ "Ellis",
     "esliger" ~ "Esliger",
     "fraysee" ~ "Fraysee",
-    "hildebrand" ~ "Hildrebrand",
+    "hildebrand" ~ "Hildebrand",
     "ggir" ~ "GGIR Default",
     "mielke" ~ "Mielke",
     "montoye.dt" ~ "Montoye (DT)",
@@ -817,9 +940,9 @@ summarize_metrics_config <- function(df_pipe) {
     "trost" ~ "Trost",
     "walmsley" ~ "Walmsley",
     "white.enmo.lin" ~ "White (ENMO Linear)",
-    "white.enmo.pol" ~ "White (ENMO Polynomial)",
+    "white.enmo.pol" ~ "White (ENMO Poly)",
     "white.hpfvm.lin" ~ "White (HPFVM Linear)",
-    "white.hpfvm.pol" ~ "White (HPFVM Polynomial)"
+    "white.hpfvm.pol" ~ "White (HPFVM Poly)"
   )
   ## step ----
   tbl_agr_step <- make_table_agr.cor(
@@ -916,14 +1039,14 @@ summarize_metrics_main <- function(lst_yaml,
     "palv" = if (vct_ref["pal"]) "activPAL Event" else NULL,
     "pass" = if (vct_ref["pass"]) "ActiPass" else NULL,
     "actinet"               = "Actinet",
-    "bakrania.enmo.average" = "Bakrania (ENMO Average)",
-    "bakrania.enmo.simple"  = "Bakrania (ENMO Simple)",
-    "bakrania.mad.average"  = "Bakrania (MAD Average)",
-    "bakrania.mad.simple"   = "Bakrania (MAD Simple)",
+    "bakrania.enmo.average" = "Bakrania (ENMO Avg)",
+    "bakrania.enmo.simple"  = "Bakrania (ENMO Simp)",
+    "bakrania.mad.average"  = "Bakrania (MAD Avg)",
+    "bakrania.mad.simple"   = "Bakrania (MAD Simp)",
     "ellis"                 = "Ellis",
     "esliger"               = "Esliger",
     "fraysee"               = "Fraysee",
-    "hildebrand"            = "Hildrebrand",
+    "hildebrand"            = "Hildebrand",
     "ggir"                  = "GGIR Default",
     "mielke"                = "Mielke",
     "montoye.dt"            = "Montoye (DT)",
@@ -933,9 +1056,9 @@ summarize_metrics_main <- function(lst_yaml,
     "trost"                 = "Trost",
     "walmsley"              = "Walmsley",
     "white.enmo.lin"        = "White (ENMO Linear)",
-    "white.enmo.pol"        = "White (ENMO Polynomial)",
+    "white.enmo.pol"        = "White (ENMO Poly)",
     "white.hpfvm.lin"       = "White (HPFVM Linear)",
-    "white.hpfvm.pol"       = "White (HPFVM Polynomial)"
+    "white.hpfvm.pol"       = "White (HPFVM Poly)"
   )
   tbl_sed <-
     rbindlist(lst_sed) |>
@@ -968,7 +1091,7 @@ summarize_metrics_main <- function(lst_yaml,
     "ellis"           = "Ellis",
     "esliger"         = "Esliger",
     "fraysee"         = "Fraysee",
-    "hildebrand"      = "Hildrebrand",
+    "hildebrand"      = "Hildebrand",
     "ggir"            = "GGIR Default",
     "mielke"          = "Mielke",
     "montoye.dt"      = "Montoye (DT)",
@@ -978,9 +1101,9 @@ summarize_metrics_main <- function(lst_yaml,
     "trost"           = "Trost",
     "walmsley"        = "Walmsley",
     "white.enmo.lin"  = "White (ENMO Linear)",
-    "white.enmo.pol"  = "White (ENMO Polynomial)",
+    "white.enmo.pol"  = "White (ENMO Poly)",
     "white.hpfvm.lin" = "White (HPFVM Linear)",
-    "white.hpfvm.pol" = "White (HPFVM Polynomial)"
+    "white.hpfvm.pol" = "White (HPFVM Poly)"
   )
   tbl_mvpa <-
     rbindlist(lst_mvpa) |>

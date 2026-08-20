@@ -6,6 +6,7 @@ format:
     page-layout: full
   typst: 
     toc: true
+    pdf-standard: ua-1
 editor: source
 editor_options: 
   chunk_output_type: console
