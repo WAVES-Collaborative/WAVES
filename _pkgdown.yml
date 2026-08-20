@@ -9,8 +9,16 @@ articles:
     Guiding documents for WAVES project.
   navbar: ~
   contents:
+  - articles/program-of-work
   - articles/authorship-guidelines
   - articles/reference-codebook
+
+- title: Technical
+  desc: >
+    Guidance for when errors appear or when updates are made to the pipeline.
+  navbar: Technical
+  contents:
+  - articles/python-methods
 
 - title: Testing
   desc: >

@@ -25,11 +25,15 @@ The proposed flow diagram outlines the process for how the validation data and d
 
 ![Flow Diagram](man/figures/WAVES%20Diagram.png)
 
-**Full description of the flow diagram coming soon** \## Setup
+**Full description of the flow diagram coming soon**
+
+## Preliminary Setup
+
+For the following steps, administrator access should not be needed.
 
 1.  Install R
 
-    1.  From [this link](https://cran.r-project.org/mirrors.html), click on the mirror from the location closest to you.
+    1.  From this [CRAN mirrors webpage](https://cran.r-project.org/mirrors.html), click on the mirror from the location closest to you.
 
     2.  On the following page, download and install R for your operating system. So far, only Windows and macOS have been tested.
 
@@ -37,14 +41,14 @@ The proposed flow diagram outlines the process for how the validation data and d
 
 2.  Install RStudio
 
-    1.  From [this link](https://posit.co/download/rstudio-desktop/), click on the "DOWNLOAD RSTUDIO DESKTOP FOR WINDOWS/MACOS"
+    1.  From this [POSIT RStudio webpage](https://posit.co/download/rstudio-desktop/), click on the "DOWNLOAD RSTUDIO DESKTOP FOR WINDOWS/MACOS"
     2.  A version from 2023 onwards should be okay.
 
 3.  Install compilation tools (platform-specific)
 
     **Windows:**
 
-    1.  From [this link](https://cran.r-project.org/bin/windows/Rtools/), download the RTools version specific to the R version being used (i.e. Rtools 4.4 for R v4.4.1, RTools 4.5 for R v4.5.2)
+    1.  From the [CRAN RTools webpage](https://cran.r-project.org/bin/windows/Rtools/), download the RTools version specific to the R version being used (i.e. Rtools 4.4 for R v4.4.1, RTools 4.5 for R v4.5.2)
 
     **macOS:**
 
@@ -75,224 +79,38 @@ The proposed flow diagram outlines the process for how the validation data and d
 
     This tells the package to download a pre-built Arrow C++ library instead of compiling against the system version.
 
-4.  Download WAVES repository.
+4.  Install Git by going to [git install webpage](https://git-scm.com/install/). There, select your operating system and follow the instructions on the webpage.
 
-    1.  The location of the WAVES repository can be downloaded anywhere on your system, but it is generally recommended to keep it on the same drive of the raw accelerometer data.
+    a.  In the git setup wizard, select all the default options.
 
-## Instructions
+5.  Open the RStudio application. In the Navigation bar at the top left corner, click File -\> New Project...
 
-### Configuration Pipeline
+    ![](man/figures/rstudio_new_project.png)
 
-1.  Open WAVES.RProj
+6.  In the New Project wizard pop-up, click "Version Control".
 
-    1.  This will automatically open the RStudio IDE.
+    ![](man/figures/rstudio_version_control.png)
 
-2.  In Console, run `renv::restore()`
+7.  Then, click "Git".
 
-    1.  This command will download all the R software packages needed for the WAVES repository. It will take a while.
+    ![](man/figures/rstudio_version_control2.png)
 
-3.  Open "\_targets_config.R"
+8.  Go to the WAVES github page, Click on the green "Code" button, and click the "Copy to Clipboard" button.
 
-    1.  Navigate to the "Files" tab within Rstudio (located either in the bottom left or top left pane of the RStudio window IF you haven't changed the pane layout in "Global Settings"). Click on "\_targets*\_*config.R"
+    ![](man/figures/github_link.png)
 
-    2.  Alternatively, open "\_targets*\_*config.R" with the system File Explorer. It should open the script within RStudio.
+9.  Go back to the RStudio New Project pop-up and paste the WAVES Github link in the Repository URL section. The "Project directory name" will automatically appear as WAVES.
 
-4.  Within "INPUT" section, check the following:
+    ![](man/figures/rstudio_version_control3.png)
 
-    1.  `RETICULATE_MINICONDA_PATH`: The path to an existing conda installation or where you want a new minconda distribution to be installed.
-        1.  If this is changed, please ensure there are no spaces within the file path
-        2.  Note that if the WAVES directory is located under another directory with the names `bash`, `data`, `logs`, `media`, `models`, `quarto`, `R`, `renv` or `reports`, the config pipeline will install miniconda underneath the corresponding folder *in the WAVES directory*.
-            1.  For example, if the WAVES directory was installed under "/data/martinez/", then miniconda will be installed in "/data/martinez/WAVES/data/martinez/r-miniconda"
-    2.  `n_workers`: The default is 2 workers, meaning 2 processes of the pipeline will run in parallel of each other.
-        1.  `n_workers` should always be at least 2!
-        2.  If your operating system has more RAM and cores available, feel free to increase the number of workers, with the max being one less than the number of cores available of your system (`future::availableCores() - 1`)
+10. Choose location of WAVES repository in the "Create project as subdirectory of" section.
 
-5.  Run all code within the "INPUT" section (Line 8 - Line 26) and save the script.
+    a.  The location of the WAVES repository can generally be downloaded anywhere on your system. However, it is ***HIGHLY*** recommended to:
+        i.  Download the repository on a mapped network drive or on the actual computer system itself, ***NOT*** on the cloud such as OneDrive.
+        ii. Not save it directly under a directory with the following names: `bash`, `data`, `logs`, `media`, `models`, `quarto`, `R`, `renv` or `reports.`
+        iii. Keep it on the same drive where the raw accelerometer data is located.
 
-6.  In Console, run `tar_make().`The "configuration" pipeline is now running, which will print messages out in the Console like the below image.
-
-    ![](man/figures/Screenshot%202026-01-17%20173935.png)
-
-    The "configuration" pipeline is:
-
-    1.  Downloading and installing non-R software
-
-    2.  Running the code against "configuration" data included within the WAVES repository to ensure code is running properly
-
-    3.  This will take awhile! On a potato computer, it took 15-24 hours!
-
-    4.  If the repository is being ran on a local computer, it is almost mandatory that no other work be done while the pipeline is running.
-
-7.  Once the pipeline is complete the console should say "ended pipeline" with how long it took.
-
-    ![](man/figures/Screenshot%202026-01-20%20234701.png)
-
-    Or it may error like so:
-
-    ![](man/figures/Screenshot%202026-01-20%20000733.png)
-
-    At least `config_miniconda` should be completed, allowing you to move on to step 8.
-
-8.  A "summary_miniconda.html" will have been created under the "reports" folder of the main WAVES repository. Within the html file:
-
-    1.  Check Miniconda configuration is good, where status is not "Unsuccessful installation".
-
-    2.  No packages/modules are highlighted red for each environment.
-
-        1.  For a environment, the Modules message may say "Modules installated do not completely match WAVES configuration". This is expected with slight changes in package/module versions within each environment, and are highlighted yellow. This shouldn't impact pipeline processes or computations, but are still noted to assist with diagnosing potential problems.
-
-9.  If the config pipeline errored, please post on issue on Github following the convention set forth under [Posting an Issue on GitHub] section of the README.
-
-10. If the pipeline successfully completed, a "summary_pipeline_config.html" file will have been created under the "reports" folder of the main WAVES repository. Open the file and follow the directions stated within the report.
-
-11. If the "summary_pipeline_config.html" indicates no warnings or errors, then the WAVES code is working properly on your computer! Woo.
-
-12. If the "summary_pipeline_config" report is red for any reason, please post the issue with the title as "Config - Summary Report - [Quick Description]" with the html attached to the issue.
-
-### Main Pipeline
-
-1.  Open "\_targets.R"
-
-    1.  Navigate to the "Files" tab within Rstudio (located either in the bottom left or top left pane of the RStudio window IF you haven't changed the pane layout in "Global Settings"). Click on "\_targets.R"
-
-    2.  Alternatively, open "\_targets.R" with the system File Explorer. It should open the script within RStudio.
-
-2.  Within "INPUT" section, check the following:
-
-    1.  `RETICULATE_MINICONDA_PATH`: The path to the conda installation specified within the configuration pipeline.
-    2.  `study_timezone`: Change from `Sys.timezone()` if data was collected in another timezone. Supply it as country/city (e.g. `America/Los Angeles`, `Europe/London`, etc.)
-    3.  `sampling_frequency`: The sampling frequency set for accelerometers during data collection. If using .bin/.cwa/.gt3x data then this doesn't matter, but does for .csv data.
-    4.  `n_workers`: The default is 2 workers, meaning 2 processes of the pipeline will run in parallel of each other.
-        1.  `n_workers` should always be at least 2!
-        2.  If your operating system has more RAM and cores available, feel free to increase the number of workers, with the max being one less than the number of cores available of your system (`future::availableCores() - 1`)
-    5.  `vct_raw_fpa`: Change vct_raw_fpa such that it creates a character vector that points towards your raw files.
-        1.  We provide an example of how to do so using the `list.files` function, where the `file.path` function is used to list multiple directories at once.
-        2.  We suggest putting a "[1]" at the end of `list.files` to make sure pipeline works with one file. (image below)
-
-    ![](man/figures/Screenshot%202026-03-02%20114951.png)
-
-3.  Save the "\_targets.R" script.
-
-4.  Run the code within "INPUT" section.
-
-5.  In Console, run "tar_make()". For one file that is a whole day, it can take anywhere between 15-30 minutes on a potato computer. For one file that is a whole week, it may take up to 24 hours.
-
-6.  Once the pipeline has completed, a .html file should have been created under the "reports" folder called "summary_pipeline_main.html". Open the file and double-check file went through entire pipeline successfully under the "By Major Steps" section.
-
-7.  If pipeline works successfully, close the "summary_pipeline_main.html" file and run pipeline on all files available by removing the the "[1]" at the end of the `list.files` function.
-
-    1.  Make sure to save the "\_targets.R" script and rerun the code within "INPUT" section.
-
-    2.  This WILL take multiple days if the repository is not being ran on a high performance cluster.
-
-    3.  If the repository is being ran on a local computer, it is almost mandatory that no other work be done while the pipeline is running.
-
-        1.  If the pipeline is interrupted due to an unexpected restart, the progress should be saved for major steps within the pipeline. Re-follow steps 12-13 the pipeline will pick up from the last major step.
-
-8.  Open "summary_pipeline_main.html" once again and check to see what files have made it through. If all files have made it through, or at least the file's you would've expected to be successfully processed, share the "3_MERGED" folder with WAVES data team, where "3_MERGED" is renamed with the study acronym.
-
-## Notes
-
--   Even if a pipeline finishes successfully, you may see in the console "There were XX warnings (use warnings() to see them)". This is normal if working on an R version that is not 4.5.2., as the messages will be warnings that the packages are meant to work on the latest R version. As long as the R version being used is R 4.4 or beyond, everything should still work. We have not tested the WAVES repository on R versions below 4.4.
-
--   If working on a high performance cluster...TODO (work with Hayden, Ben on swarm and batch scripts)
-
--   If the pipeline appears "stuck" after 24hrs, as in it looks like there has been no change in the processing time or the console messages have been the same for quite awhile, its most likely that your computer does not have enough computing resources to do parallel processing. In that case:
-
-    -   Stop the pipeline by clicking the "STOP" button that appears in the top right corner of the Console pane.
-
-    ![](man/figures/Screenshot%202026-01-17%20132513.png)
-
-    -   Change the `n_workers` object to 1, which will remove parallel processing.
-
--   **Resetting conda environments:** Once the WAVES repository has been installed, major version changes to the pipeline may result in prior conda environment installations to be outdated. Unfortunately, re-running the configuration pipeline by itself may not be sufficient, which will require removing the existing environments entirely before rerunning the configuration pipeline. To do so, first run the code within the INPUT section of `_targets_config.R`. Then, run the following code within the R console:
-
-    ```         
-    library(reticulate)
-    conda_remove("WHO_WAVES_stepcount")
-    conda_remove("WHO_WAVES_accelerometer")
-    conda_remove("WHO_WAVES_actinet")
-    conda_remove("WHO_WAVES_oak_1.0")
-    conda_remove("WHO_WAVES_oak_pre")
-    ```
-
-    After removal, re-run the config pipeline (`tar_make()`) and it will recreate the missing environments.
-
-## Posting an Issue on GitHub
-
-After navigating to the Issues tab of WAVES, please use the following naming convention for the title of the issue:
-
-```         
-[Pipeline] - [Target/Report] - [Quick Description]
-```
-
-where:
-
--   Pipeline: `Config` or `Main`
-
-    -   If the error occurred while running the `Config` pipeline or `Main` pipeline.
-
--   Target/Report: any of the targets within a pipeline or a report such as `summary_pipeline_main` or `summary_miniconda`
-
-    -   A "target" is another name for a step within the pipeline.
-
-    -   The target that errored is usually what appears after an ❌. So in Step 7 of the Configuration pipeline instructions, the target was `fpa_merged`
-
-    -   The following is a list of targets within the pipelines where errors may occur:
-
-        -   vct_raw
-
-        -   vct_raw_type
-
-        -   vct_basic
-
-        -   lst_out.cut
-
-        -   vct_ox_input
-
-        -   vct_ox_step
-
-        -   vct_ox_wlms
-
-        -   vct_ox_acti
-
-        -   lst_ox
-
-        -   vct_cal
-
-        -   lst_out.raw
-
-        -   lst_out.oak.pre
-
-        -   fpa_merged
-
-        -   pipeline_summary
-
-    -   The below only appear within the `config` pipeline:
-
-        -   lst_miniconda
-
-        -   minconda_summary
-
--   Quick Description: The error itself if it is ≤ 10 words or a summary
-
-Within the description of the issue, please either:
-
--   screenshot your console that includes the pipeline output and the error itself (example below)
-
-![](man/figures/example_issue_screenshot.png)
-
--   Copy the output from the console into a codeblock
-
-    -   With the description box highlighted, enter a forward slash `/` and then select "Code Block"
-
-    ![](man/figures/example_issue_pasting_code.png)
-
-    -   For language, select "R"
-
-    -   Within the code block, paste the console output
-
-Additionally, if the error occured at `lst_out.raw` , `vct_ox_step` , `vct_ox_wlms` , `vct_ox_acti` `lst_out.raw` or `lst_out.oak.pre` , then please also attach the "summary_miniconda.html" report.
+11. Click the "Create Project" button.
 
 ## Methods Implemented
 
@@ -317,10 +135,10 @@ Additionally, if the error occured at `lst_out.raw` , `vct_ox_step` , `vct_ox_wl
 
 ## TODO
 
--   Test WAVES_10006 CSV file against OxWearable methods.
+- Test WAVES_10006 CSV file against OxWearable methods.
 
-    -   Stepcount
-    -   Walmsley
-    -   Actinet
+  - Stepcount
+  - Walmsley
+  - Actinet
 
 ## References for Methods
