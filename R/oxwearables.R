@@ -131,7 +131,17 @@ apply_ox_stepcount <- function(ox_input,
     )
   }
 
-  if (file.exists(fpa_write)) {return(fpa_write)} else {return(NULL)}
+  if (file.exists(fpa_write)) {
+    return(fpa_write)
+  } else {
+    cli::cli_abort(c(
+      paste0(fnm_write, " did not produce output."),
+      "i" = paste0(
+        "Please check ", file.path(fdr_log, paste0(log_prefix, "stepcount_", fnm_write, "_err.txt")),
+        " and report to WAVES team."
+      )
+    ))
+  }
 
 }
 apply_ox_walmsley <- function(ox_input,
@@ -199,7 +209,17 @@ apply_ox_walmsley <- function(ox_input,
     )
   }
 
-  if (file.exists(fpa_write)) {return(fpa_write)} else {return(NULL)}
+  if (file.exists(fpa_write)) {
+    return(fpa_write)
+  } else {
+    cli::cli_abort(c(
+      paste0(fnm_write, " did not produce output."),
+      "i" = paste0(
+        "Please check ", file.path(fdr_log, paste0(log_prefix, "stepcount_", fnm_write, "_err.txt")),
+        " and report to WAVES team."
+      )
+    ))
+  }
 
 }
 apply_ox_actinet <- function(ox_input,
@@ -267,7 +287,17 @@ apply_ox_actinet <- function(ox_input,
     )
   }
 
-  if (file.exists(fpa_write)) {return(fpa_write)} else {return(NULL)}
+  if (file.exists(fpa_write)) {
+    return(fpa_write)
+  } else {
+    cli::cli_abort(c(
+      paste0(fnm_write, " did not produce output."),
+      "i" = paste0(
+        "Please check ", file.path(fdr_log, paste0(log_prefix, "stepcount_", fnm_write, "_err.txt")),
+        " and report to WAVES team."
+      )
+    ))
+  }
 
 }
 merge_ox <- function(vct_ox_step,

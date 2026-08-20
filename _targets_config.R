@@ -403,7 +403,8 @@ tar_plan(
       lst_miniconda = lst_miniconda
     ),
     pattern   = map(vct_ox_input),
-    iteration = "vector"
+    iteration = "vector",
+    error = "null"
   ),
   tar_file(
     name    = vct_ox_wlms,
@@ -415,7 +416,8 @@ tar_plan(
       lst_miniconda = lst_miniconda
     ),
     pattern   = map(vct_ox_input),
-    iteration = "vector"
+    iteration = "vector",
+    error = "null"
   ),
   tar_file(
     name    = vct_ox_acti,
@@ -427,7 +429,8 @@ tar_plan(
       lst_miniconda = lst_miniconda
     ),
     pattern   = map(vct_ox_input),
-    iteration = "vector"
+    iteration = "vector",
+    error = "null"
   ),
   tar_file(
     name    = vct_ox,
