@@ -8,3 +8,5 @@
 ^pkgdown$
 ^\.github$
 ^vignettes/articles$
+^vignettes/articles/\.quarto$
+^vignettes/articles/*_files$
