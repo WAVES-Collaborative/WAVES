@@ -23,9 +23,9 @@ df_test <- read_parquet("data/0_CONFIG/MERGED/WAVES_ALL_TEST.parquet")
 # total -----
 df_test_sed <-
   df_test |>
-  select(id, starts_with("intensity")) |>
+  select(id, starts_with("intensity3")) |>
   rename_with(.cols = !id,
-              .fn = ~sub(x = .x, pattern = "intensity_", replacement = "")) |>
+              .fn = ~sub(x = .x, pattern = "intensity3_", replacement = "")) |>
   summarise(across(
     .cols = everything(),
     .fns = ~sum(.x == "sedentary", na.rm = TRUE) / 60
@@ -35,9 +35,9 @@ df_test_sed <- df_test_sed[
 ]
 df_test_mvpa <-
   df_test |>
-  select(id, starts_with("intensity")) |>
+  select(id, starts_with("intensity3")) |>
   rename_with(.cols = !id,
-              .fn = ~sub(x = .x, pattern = "intensity_", replacement = "")) |>
+              .fn = ~sub(x = .x, pattern = "intensity3_", replacement = "")) |>
   select(id, !starts_with("bakrania")) |>
   summarise(across(
     .cols = everything(),
@@ -63,9 +63,9 @@ df_test_step <- df_test_step[
 ## sed ----
 df_test_agr <-
   df_test |>
-  select(starts_with("intensity")) |>
+  select(starts_with("intensity3")) |>
   rename_with(.cols = everything(),
-              .fn = ~sub(x = .x, pattern = "intensity_", replacement = "")) |>
+              .fn = ~sub(x = .x, pattern = "intensity3_", replacement = "")) |>
   mutate(across(
     .cols = everything(),
     .fns =
@@ -101,9 +101,9 @@ diag(mtx_test_sed) <- 1
 ## mvpa ----
 df_test_agr <-
   df_test |>
-  select(starts_with("intensity")) |>
+  select(starts_with("intensity3")) |>
   rename_with(.cols = everything(),
-              .fn = ~sub(x = .x, pattern = "intensity_", replacement = "")) |>
+              .fn = ~sub(x = .x, pattern = "intensity3_", replacement = "")) |>
   select(!starts_with("bakrania")) |>
   mutate(across(
     .cols = everything(),
