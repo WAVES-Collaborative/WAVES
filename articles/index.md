@@ -4,7 +4,10 @@
 
 Guiding documents for WAVES project.
 
-- [WAVES Authorship
+- [Program of
+  Work](https://waves-collaborative.github.io/WAVES/articles/program-of-work.md):
+
+- [Authorship
   Guidelines](https://waves-collaborative.github.io/WAVES/articles/authorship-guidelines.md):
 
   Transparent definitions and procedures for authorship on WAVES-related
@@ -15,6 +18,14 @@ Guiding documents for WAVES project.
 
   Description of variables required from some ground-truth data and
   variables from processing other ground-truth data.
+
+### Technical
+
+Guidance for when errors appear or when updates are made to the
+pipeline.
+
+- [Python
+  Methods](https://waves-collaborative.github.io/WAVES/articles/python-methods.md):
 
 ### Testing
 

@@ -31,12 +31,17 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="articles/WAVES.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/authorship-guidelines.html">WAVES Authorship Guidelines</a></li>
+<li><a class="dropdown-item" href="articles/program-of-work.html">Program of Work</a></li>
+    <li><a class="dropdown-item" href="articles/authorship-guidelines.html">Authorship Guidelines</a></li>
     <li><a class="dropdown-item" href="articles/reference-codebook.html">Reference Data Codebook</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Technical</h6></li>
+    <li><a class="dropdown-item" href="articles/python-methods.html">Python Methods</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="articles/index.html">More articles...</a></li>
   </ul>
@@ -69,14 +74,19 @@
 <h2 id="proposed-flow-diagram">Proposed Flow Diagram<a class="anchor" aria-label="anchor" href="#proposed-flow-diagram"></a>
 </h2>
 <p>The proposed flow diagram outlines the process for how the validation data and data pipeline will work with the WAVES team and groups who have potentially available validation data.</p>
-<figure><img src="reference/figures/WAVES%20Diagram.png" alt="Flow Diagram"><figcaption aria-hidden="true">
+<figure><img src="reference/figures/WAVES_Diagram.png" alt="Flow Diagram"><figcaption aria-hidden="true">
 Flow Diagram
-</figcaption></figure><p><strong>Full description of the flow diagram coming soon</strong> ## Setup</p>
+</figcaption></figure><p><strong>Full description of the flow diagram coming soon</strong></p>
+</div>
+<div class="section level2">
+<h2 id="preliminary-setup">Preliminary Setup<a class="anchor" aria-label="anchor" href="#preliminary-setup"></a>
+</h2>
+<p>For the following steps, administrator access should not be needed.</p>
 <ol style="list-style-type: decimal">
 <li>
 <p>Install R</p>
 <ol style="list-style-type: decimal">
-<li><p>From <a href="https://cran.r-project.org/mirrors.html" class="external-link">this link</a>, click on the mirror from the location closest to you.</p></li>
+<li><p>From this <a href="https://cran.r-project.org/mirrors.html" class="external-link">CRAN mirrors webpage</a>, click on the mirror from the location closest to you.</p></li>
 <li><p>On the following page, download and install R for your operating system. So far, only Windows and macOS have been tested.</p></li>
 <li><p>The code has been tested on v4.4.1 and v4.5.2. We recommend the latest v4.5.2. but earlier versions down to 4.4.0 should work. Just note you will get warning messages that the packages were developed for 4.5.2.</p></li>
 </ol>
@@ -84,7 +94,7 @@ Flow Diagram
 <li>
 <p>Install RStudio</p>
 <ol style="list-style-type: decimal">
-<li>From <a href="https://posit.co/download/rstudio-desktop/" class="external-link">this link</a>, click on the “DOWNLOAD RSTUDIO DESKTOP FOR WINDOWS/MACOS”</li>
+<li>From this <a href="https://posit.co/download/rstudio-desktop/" class="external-link">POSIT RStudio webpage</a>, click on the “DOWNLOAD RSTUDIO DESKTOP FOR WINDOWS/MACOS”</li>
 <li>A version from 2023 onwards should be okay.</li>
 </ol>
 </li>
@@ -92,7 +102,7 @@ Flow Diagram
 <p>Install compilation tools (platform-specific)</p>
 <p><strong>Windows:</strong></p>
 <ol style="list-style-type: decimal">
-<li>From <a href="https://cran.r-project.org/bin/windows/Rtools/" class="external-link">this link</a>, download the RTools version specific to the R version being used (i.e. Rtools 4.4 for R v4.4.1, RTools 4.5 for R v4.5.2)</li>
+<li>From the <a href="https://cran.r-project.org/bin/windows/Rtools/" class="external-link">CRAN RTools webpage</a>, download the RTools version specific to the R version being used (i.e. Rtools 4.4 for R v4.4.1, RTools 4.5 for R v4.5.2)</li>
 </ol>
 <p><strong>macOS:</strong></p>
 <p>Several R packages need to be compiled from source. Install the following dependencies via <a href="https://brew.sh/" class="external-link">Homebrew</a> by running the following command within the system shell (Terminal):</p>
@@ -111,254 +121,46 @@ Flow Diagram
 <p>This tells the package to download a pre-built Arrow C++ library instead of compiling against the system version.</p>
 </li>
 <li>
-<p>Download WAVES repository.</p>
+<p>Install Git by going to <a href="https://git-scm.com/install/" class="external-link">git install webpage</a>. There, select your operating system and follow the instructions on the webpage.</p>
 <ol style="list-style-type: decimal">
-<li>The location of the WAVES repository can be downloaded anywhere on your system, but it is generally recommended to keep it on the same drive of the raw accelerometer data.</li>
+<li>In the git setup wizard, select all the default options.</li>
 </ol>
 </li>
-</ol>
-</div>
-<div class="section level2">
-<h2 id="instructions">Instructions<a class="anchor" aria-label="anchor" href="#instructions"></a>
-</h2>
-<div class="section level3">
-<h3 id="configuration-pipeline">Configuration Pipeline<a class="anchor" aria-label="anchor" href="#configuration-pipeline"></a>
-</h3>
+<li>
+<p>Open the RStudio application. In the Navigation bar at the top left corner, click File -&gt; New Project…</p>
+<p><img src="reference/figures/rstudio_new_project.png"></p>
+</li>
+<li>
+<p>In the New Project wizard pop-up, click “Version Control”.</p>
+<p><img src="reference/figures/rstudio_version_control.png"></p>
+</li>
+<li>
+<p>Then, click “Git”.</p>
+<p><img src="reference/figures/rstudio_version_control2.png"></p>
+</li>
+<li>
+<p>Go to the WAVES github page, Click on the green “Code” button, and click the “Copy to Clipboard” button.</p>
+<p><img src="reference/figures/github_link.png"></p>
+</li>
+<li>
+<p>Go back to the RStudio New Project pop-up and paste the WAVES Github link in the Repository URL section. The “Project directory name” will automatically appear as WAVES.</p>
+<p><img src="reference/figures/rstudio_version_control3.png"></p>
+</li>
+<li>
+<p>Choose location of WAVES repository in the “Create project as subdirectory of” section.</p>
 <ol style="list-style-type: decimal">
-<li>
-<p>Open WAVES.RProj</p>
+<li>The location of the WAVES repository can generally be downloaded anywhere on your system. However, it is <strong><em>HIGHLY</em></strong> recommended to:
 <ol style="list-style-type: decimal">
-<li>This will automatically open the RStudio IDE.</li>
-</ol>
+<li>Download the repository on a mapped network drive or on the actual computer system itself, <strong><em>NOT</em></strong> on the cloud such as OneDrive.</li>
+<li>Not save it directly under a directory with the following names: <code>bash</code>, <code>data</code>, <code>logs</code>, <code>media</code>, <code>models</code>, <code>quarto</code>, <code>R</code>, <code>renv</code> or <code>reports.</code>
 </li>
-<li>
-<p>In Console, run <code><a href="https://rstudio.github.io/renv/reference/restore.html" class="external-link">renv::restore()</a></code></p>
-<ol style="list-style-type: decimal">
-<li>This command will download all the R software packages needed for the WAVES repository. It will take a while.</li>
-</ol>
-</li>
-<li>
-<p>Open “_targets_config.R”</p>
-<ol style="list-style-type: decimal">
-<li><p>Navigate to the “Files” tab within Rstudio (located either in the bottom left or top left pane of the RStudio window IF you haven’t changed the pane layout in “Global Settings”). Click on “_targets<em>_</em>config.R”</p></li>
-<li><p>Alternatively, open “_targets<em>_</em>config.R” with the system File Explorer. It should open the script within RStudio.</p></li>
-</ol>
-</li>
-<li>
-<p>Within “INPUT” section, check the following:</p>
-<ol style="list-style-type: decimal">
-<li>
-<code>RETICULATE_MINICONDA_PATH</code>: The path to an existing conda installation or where you want a new minconda distribution to be installed.
-<ol style="list-style-type: decimal">
-<li>If this is changed, please ensure there are no spaces within the file path</li>
-<li>Note that if the WAVES directory is located under another directory with the names <code>bash</code>, <code>data</code>, <code>logs</code>, <code>media</code>, <code>models</code>, <code>quarto</code>, <code>R</code>, <code>renv</code> or <code>reports</code>, the config pipeline will install miniconda underneath the corresponding folder <em>in the WAVES directory</em>.
-<ol style="list-style-type: decimal">
-<li>For example, if the WAVES directory was installed under “/data/martinez/”, then miniconda will be installed in “/data/martinez/WAVES/data/martinez/r-miniconda”</li>
+<li>Keep it on the same drive where the raw accelerometer data is located.</li>
 </ol>
 </li>
 </ol>
 </li>
-<li>
-<code>n_workers</code>: The default is 2 workers, meaning 2 processes of the pipeline will run in parallel of each other.
-<ol style="list-style-type: decimal">
-<li>
-<code>n_workers</code> should always be at least 2!</li>
-<li>If your operating system has more RAM and cores available, feel free to increase the number of workers, with the max being one less than the number of cores available of your system (<code>future::availableCores() - 1</code>)</li>
+<li><p>Click the “Create Project” button.</p></li>
 </ol>
-</li>
-</ol>
-</li>
-<li><p>Run all code within the “INPUT” section (Line 8 - Line 26) and save the script.</p></li>
-<li>
-<p>In Console, run <code>tar_make().</code>The “configuration” pipeline is now running, which will print messages out in the Console like the below image.</p>
-<p><img src="reference/figures/Screenshot%202026-01-17%20173935.png"></p>
-<p>The “configuration” pipeline is:</p>
-<ol style="list-style-type: decimal">
-<li><p>Downloading and installing non-R software</p></li>
-<li><p>Running the code against “configuration” data included within the WAVES repository to ensure code is running properly</p></li>
-<li><p>This will take awhile! On a potato computer, it took 15-24 hours!</p></li>
-<li><p>If the repository is being ran on a local computer, it is almost mandatory that no other work be done while the pipeline is running.</p></li>
-</ol>
-</li>
-<li>
-<p>Once the pipeline is complete the console should say “ended pipeline” with how long it took.</p>
-<p><img src="reference/figures/Screenshot%202026-01-20%20234701.png"></p>
-<p>Or it may error like so:</p>
-<p><img src="reference/figures/Screenshot%202026-01-20%20000733.png"></p>
-<p>At least <code>config_miniconda</code> should be completed, allowing you to move on to step 8.</p>
-</li>
-<li>
-<p>A “summary_miniconda.html” will have been created under the “reports” folder of the main WAVES repository. Within the html file:</p>
-<ol style="list-style-type: decimal">
-<li><p>Check Miniconda configuration is good, where status is not “Unsuccessful installation”.</p></li>
-<li>
-<p>No packages/modules are highlighted red for each environment.</p>
-<ol style="list-style-type: decimal">
-<li>For a environment, the Modules message may say “Modules installated do not completely match WAVES configuration”. This is expected with slight changes in package/module versions within each environment, and are highlighted yellow. This shouldn’t impact pipeline processes or computations, but are still noted to assist with diagnosing potential problems.</li>
-</ol>
-</li>
-</ol>
-</li>
-<li><p>If the config pipeline errored, please post on issue on Github following the convention set forth under <a href="#posting-an-issue-on-github">Posting an Issue on GitHub</a> section of the README.</p></li>
-<li><p>If the pipeline successfully completed, a “summary_pipeline_config.html” file will have been created under the “reports” folder of the main WAVES repository. Open the file and follow the directions stated within the report.</p></li>
-<li><p>If the “summary_pipeline_config.html” indicates no warnings or errors, then the WAVES code is working properly on your computer! Woo.</p></li>
-<li><p>If the “summary_pipeline_config” report is red for any reason, please post the issue with the title as “Config - Summary Report - [Quick Description]” with the html attached to the issue.</p></li>
-</ol>
-</div>
-<div class="section level3">
-<h3 id="main-pipeline">Main Pipeline<a class="anchor" aria-label="anchor" href="#main-pipeline"></a>
-</h3>
-<ol style="list-style-type: decimal">
-<li>
-<p>Open “_targets.R”</p>
-<ol style="list-style-type: decimal">
-<li><p>Navigate to the “Files” tab within Rstudio (located either in the bottom left or top left pane of the RStudio window IF you haven’t changed the pane layout in “Global Settings”). Click on “_targets.R”</p></li>
-<li><p>Alternatively, open “_targets.R” with the system File Explorer. It should open the script within RStudio.</p></li>
-</ol>
-</li>
-<li>
-<p>Within “INPUT” section, check the following:</p>
-<ol style="list-style-type: decimal">
-<li>
-<code>RETICULATE_MINICONDA_PATH</code>: The path to the conda installation specified within the configuration pipeline.</li>
-<li>
-<code>study_timezone</code>: Change from <code><a href="https://rdrr.io/r/base/timezones.html" class="external-link">Sys.timezone()</a></code> if data was collected in another timezone. Supply it as country/city (e.g. <code>America/Los Angeles</code>, <code>Europe/London</code>, etc.)</li>
-<li>
-<code>sampling_frequency</code>: The sampling frequency set for accelerometers during data collection. If using .bin/.cwa/.gt3x data then this doesn’t matter, but does for .csv data.</li>
-<li>
-<code>n_workers</code>: The default is 2 workers, meaning 2 processes of the pipeline will run in parallel of each other.
-<ol style="list-style-type: decimal">
-<li>
-<code>n_workers</code> should always be at least 2!</li>
-<li>If your operating system has more RAM and cores available, feel free to increase the number of workers, with the max being one less than the number of cores available of your system (<code>future::availableCores() - 1</code>)</li>
-</ol>
-</li>
-<li>
-<code>vct_raw_fpa</code>: Change vct_raw_fpa such that it creates a character vector that points towards your raw files.
-<ol style="list-style-type: decimal">
-<li>We provide an example of how to do so using the <code>list.files</code> function, where the <code>file.path</code> function is used to list multiple directories at once.</li>
-<li>We suggest putting a “[1]” at the end of <code>list.files</code> to make sure pipeline works with one file. (image below)</li>
-</ol>
-</li>
-</ol>
-<p><img src="reference/figures/Screenshot%202026-03-02%20114951.png"></p>
-</li>
-<li><p>Save the “_targets.R” script.</p></li>
-<li><p>Run the code within “INPUT” section.</p></li>
-<li><p>In Console, run “tar_make()”. For one file that is a whole day, it can take anywhere between 15-30 minutes on a potato computer. For one file that is a whole week, it may take up to 24 hours.</p></li>
-<li><p>Once the pipeline has completed, a .html file should have been created under the “reports” folder called “summary_pipeline_main.html”. Open the file and double-check file went through entire pipeline successfully under the “By Major Steps” section.</p></li>
-<li>
-<p>If pipeline works successfully, close the “summary_pipeline_main.html” file and run pipeline on all files available by removing the the “[1]” at the end of the <code>list.files</code> function.</p>
-<ol style="list-style-type: decimal">
-<li><p>Make sure to save the “_targets.R” script and rerun the code within “INPUT” section.</p></li>
-<li><p>This WILL take multiple days if the repository is not being ran on a high performance cluster.</p></li>
-<li>
-<p>If the repository is being ran on a local computer, it is almost mandatory that no other work be done while the pipeline is running.</p>
-<ol style="list-style-type: decimal">
-<li>If the pipeline is interrupted due to an unexpected restart, the progress should be saved for major steps within the pipeline. Re-follow steps 12-13 the pipeline will pick up from the last major step.</li>
-</ol>
-</li>
-</ol>
-</li>
-<li><p>Open “summary_pipeline_main.html” once again and check to see what files have made it through. If all files have made it through, or at least the file’s you would’ve expected to be successfully processed, share the “3_MERGED” folder with WAVES data team, where “3_MERGED” is renamed with the study acronym.</p></li>
-</ol>
-</div>
-</div>
-<div class="section level2">
-<h2 id="notes">Notes<a class="anchor" aria-label="anchor" href="#notes"></a>
-</h2>
-<ul>
-<li><p>Even if a pipeline finishes successfully, you may see in the console “There were XX warnings (use warnings() to see them)”. This is normal if working on an R version that is not 4.5.2., as the messages will be warnings that the packages are meant to work on the latest R version. As long as the R version being used is R 4.4 or beyond, everything should still work. We have not tested the WAVES repository on R versions below 4.4.</p></li>
-<li><p>If working on a high performance cluster…TODO (work with Hayden, Ben on swarm and batch scripts)</p></li>
-<li>
-<p>If the pipeline appears “stuck” after 24hrs, as in it looks like there has been no change in the processing time or the console messages have been the same for quite awhile, its most likely that your computer does not have enough computing resources to do parallel processing. In that case:</p>
-<ul>
-<li>Stop the pipeline by clicking the “STOP” button that appears in the top right corner of the Console pane.</li>
-</ul>
-<p><img src="reference/figures/Screenshot%202026-01-17%20132513.png"></p>
-<ul>
-<li>Change the <code>n_workers</code> object to 1, which will remove parallel processing.</li>
-</ul>
-</li>
-<li>
-<p><strong>Resetting conda environments:</strong> Once the WAVES repository has been installed, major version changes to the pipeline may result in prior conda environment installations to be outdated. Unfortunately, re-running the configuration pipeline by itself may not be sufficient, which will require removing the existing environments entirely before rerunning the configuration pipeline. To do so, first run the code within the INPUT section of <code>_targets_config.R</code>. Then, run the following code within the R console:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">library</span>(reticulate)</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">conda_remove</span>(<span class="st">"WHO_WAVES_stepcount"</span>)</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="fu">conda_remove</span>(<span class="st">"WHO_WAVES_accelerometer"</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="fu">conda_remove</span>(<span class="st">"WHO_WAVES_actinet"</span>)</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="fu">conda_remove</span>(<span class="st">"WHO_WAVES_oak_1.0"</span>)</span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="fu">conda_remove</span>(<span class="st">"WHO_WAVES_oak_pre"</span>)</span></code></pre></div>
-<p>After removal, re-run the config pipeline (<code>tar_make()</code>) and it will recreate the missing environments.</p>
-</li>
-</ul>
-</div>
-<div class="section level2">
-<h2 id="posting-an-issue-on-github">Posting an Issue on GitHub<a class="anchor" aria-label="anchor" href="#posting-an-issue-on-github"></a>
-</h2>
-<p>After navigating to the Issues tab of WAVES, please use the following naming convention for the title of the issue:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>[Pipeline] <span class="sc">-</span> [Target<span class="sc">/</span>Report] <span class="sc">-</span> [Quick Description]</span></code></pre></div>
-<p>where:</p>
-<ul>
-<li>
-<p>Pipeline: <code>Config</code> or <code>Main</code></p>
-<ul>
-<li>If the error occurred while running the <code>Config</code> pipeline or <code>Main</code> pipeline.</li>
-</ul>
-</li>
-<li>
-<p>Target/Report: any of the targets within a pipeline or a report such as <code>summary_pipeline_main</code> or <code>summary_miniconda</code></p>
-<ul>
-<li><p>A “target” is another name for a step within the pipeline.</p></li>
-<li><p>The target that errored is usually what appears after an ❌. So in Step 7 of the Configuration pipeline instructions, the target was <code>fpa_merged</code></p></li>
-<li>
-<p>The following is a list of targets within the pipelines where errors may occur:</p>
-<ul>
-<li><p>vct_raw</p></li>
-<li><p>vct_raw_type</p></li>
-<li><p>vct_basic</p></li>
-<li><p>lst_out.cut</p></li>
-<li><p>vct_ox_input</p></li>
-<li><p>vct_ox_step</p></li>
-<li><p>vct_ox_wlms</p></li>
-<li><p>vct_ox_acti</p></li>
-<li><p>lst_ox</p></li>
-<li><p>vct_cal</p></li>
-<li><p>lst_out.raw</p></li>
-<li><p>lst_out.oak.pre</p></li>
-<li><p>fpa_merged</p></li>
-<li><p>pipeline_summary</p></li>
-</ul>
-</li>
-<li>
-<p>The below only appear within the <code>config</code> pipeline:</p>
-<ul>
-<li><p>lst_miniconda</p></li>
-<li><p>minconda_summary</p></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Quick Description: The error itself if it is ≤ 10 words or a summary</p></li>
-</ul>
-<p>Within the description of the issue, please either:</p>
-<ul>
-<li>screenshot your console that includes the pipeline output and the error itself (example below)</li>
-</ul>
-<p><img src="reference/figures/example_issue_screenshot.png"></p>
-<ul>
-<li>
-<p>Copy the output from the console into a codeblock</p>
-<ul>
-<li>With the description box highlighted, enter a forward slash <code>/</code> and then select “Code Block”</li>
-</ul>
-<p><img src="reference/figures/example_issue_pasting_code.png"></p>
-<ul>
-<li><p>For language, select “R”</p></li>
-<li><p>Within the code block, paste the console output</p></li>
-</ul>
-</li>
-</ul>
-<p>Additionally, if the error occured at <code>lst_out.raw</code> , <code>vct_ox_step</code> , <code>vct_ox_wlms</code> , <code>vct_ox_acti</code> <code>lst_out.raw</code> or <code>lst_out.oak.pre</code> , then please also attach the “summary_miniconda.html” report.</p>
 </div>
 <div class="section level2">
 <h2 id="methods-implemented">Methods Implemented<a class="anchor" aria-label="anchor" href="#methods-implemented"></a>
@@ -505,7 +307,7 @@ Flow Diagram
 <div id="refs" class="references csl-bib-body">
 <div id="ref-bakrania2016" class="csl-entry">
 <div class="csl-left-margin">1. </div>
-<div class="csl-right-inline">Bakrania K, Yates T, Rowlands AV, et al. <a href="https://doi.org/10.1371/journal.pone.0164045" class="external-link">Intensity Thresholds on Raw Acceleration Data: Euclidean Norm Minus One (ENMO) and Mean Amplitude Deviation (MAD) Approaches</a>. <em>PLOS ONE</em> 2016; 11: e0164045.</div>
+<div class="csl-right-inline">Bakrania K, Yates T, Rowlands AV, et al. <a href="https://doi.org/10.1371/journal.pone.0164045" class="external-link">Intensity thresholds on raw acceleration data: Euclidean norm minus one (ENMO) and mean amplitude deviation (MAD) approaches</a>. <em>PLOS ONE</em> 2016; 11: e0164045.</div>
 </div>
 <div id="ref-ellis2016" class="csl-entry">
 <div class="csl-left-margin">2. </div>
@@ -549,7 +351,7 @@ Flow Diagram
 </div>
 <div id="ref-white2016" class="csl-entry">
 <div class="csl-left-margin">12. </div>
-<div class="csl-right-inline">White T, Westgate K, Wareham NJ, et al. <a href="https://doi.org/10.1371/journal.pone.0167472" class="external-link">Estimation of Physical Activity Energy Expenditure during Free-Living from Wrist Accelerometry in UK Adults</a>. <em>PLOS ONE</em> 2016; 11: e0167472.</div>
+<div class="csl-right-inline">White T, Westgate K, Wareham NJ, et al. <a href="https://doi.org/10.1371/journal.pone.0167472" class="external-link">Estimation of physical activity energy expenditure during free-living from wrist accelerometry in UK adults</a>. <em>PLOS ONE</em> 2016; 11: e0167472.</div>
 </div>
 <div id="ref-yuan2024" class="csl-entry">
 <div class="csl-left-margin">13. </div>
@@ -569,7 +371,7 @@ Flow Diagram
 </div>
 <div id="ref-ducharme2021" class="csl-entry">
 <div class="csl-left-margin">17. </div>
-<div class="csl-right-inline">Ducharme SW, Lim J, Busa MA, et al. A Transparent Method for Step Detection Using an Acceleration Threshold. Epub ahead of print 25 October 2021. DOI: <a href="https://doi.org/10.1123/jmpb.2021-0011" class="external-link">10.1123/jmpb.2021-0011</a>.</div>
+<div class="csl-right-inline">Ducharme SW, Lim J, Busa MA, et al. A transparent method for step detection using an acceleration threshold. Epub ahead of print 25 October 2021. DOI: <a href="https://doi.org/10.1123/jmpb.2021-0011" class="external-link">10.1123/jmpb.2021-0011</a>.</div>
 </div>
 <div id="ref-gu2017" class="csl-entry">
 <div class="csl-left-margin">18. </div>
@@ -577,7 +379,7 @@ Flow Diagram
 </div>
 <div id="ref-maylor2022" class="csl-entry">
 <div class="csl-left-margin">19. </div>
-<div class="csl-right-inline">Maylor BD, Edwardson CL, Dempsey PC, et al. Stepping towards More Intuitive Physical Activity Metrics with Wrist-Worn Accelerometry: Validity of an Open-Source Step-Count Algorithm. <em>Sensors</em>; 22. Epub ahead of print 18 December 2022. DOI: <a href="https://doi.org/10.3390/s22249984" class="external-link">10.3390/s22249984</a>.</div>
+<div class="csl-right-inline">Maylor BD, Edwardson CL, Dempsey PC, et al. Stepping towards more intuitive physical activity metrics with wrist-worn accelerometry: Validity of an open-source step-count algorithm. <em>Sensors</em>; 22. Epub ahead of print 18 December 2022. DOI: <a href="https://doi.org/10.3390/s22249984" class="external-link">10.3390/s22249984</a>.</div>
 </div>
 </div>
 </div>

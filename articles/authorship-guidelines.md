@@ -1,4 +1,4 @@
-# WAVES Authorship Guidelines
+# Authorship Guidelines
 
 This document provides all contributors to WAVES research activities
 with transparent definitions and procedures regarding standards for

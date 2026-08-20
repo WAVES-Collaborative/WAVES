@@ -1,0 +1,19 @@
+# Python Methods
+
+## Miniconda
+
+If changes have been made to how the miniconda environments are setup,
+then the environments will have to be deleted and then be recreated in
+the config pipeline. Run the following code within the `CONSOLE`:
+
+``` r
+
+reticulate::conda_remove("WAVES_accelerometer")
+reticulate::conda_remove("WAVES_actinet")
+reticulate::conda_remove("WAVES_oak_1.0")
+reticulate::conda_remove("WAVES_oak_pre")
+reticulate::conda_remove("WAVES_stepcount")
+```
+
+Then, re-run the config pipeline using `_targets_config.R`, following
+Step 2.3 onwards in the Getting Started page.

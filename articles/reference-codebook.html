@@ -10,11 +10,9 @@
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Reference Data Codebook">
-<meta name="description" content="Description of variables required from some ground-truth data and variables from processing other ground-truth data.
-">
-<meta property="og:description" content="Description of variables required from some ground-truth data and variables from processing other ground-truth data.
-">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="reference-codebook_files/libs/quarto-html/popper.min.js"></script><script src="reference-codebook_files/libs/quarto-html/tippy.umd.min.js"></script><link href="reference-codebook_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="reference-codebook_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Reference Data Codebook">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -33,12 +31,17 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="../articles/WAVES.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/authorship-guidelines.html">WAVES Authorship Guidelines</a></li>
+<li><a class="dropdown-item" href="../articles/program-of-work.html">Program of Work</a></li>
+    <li><a class="dropdown-item" href="../articles/authorship-guidelines.html">Authorship Guidelines</a></li>
     <li><a class="dropdown-item" href="../articles/reference-codebook.html">Reference Data Codebook</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Technical</h6></li>
+    <li><a class="dropdown-item" href="../articles/python-methods.html">Python Methods</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul>
@@ -61,120 +64,543 @@
 
 
   </div>
-</nav><div class="container template-article">
-
-
-
-
+</nav><div class="container template-quarto">
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Reference Data Codebook</h1>
-            
-      
 
-      <div class="d-none name"><code>reference-codebook.Rmd</code></div>
+
+
+
+
+      <div class="d-none name"><code></code></div>
     </div>
 
-    
-    
-<p>Last Update: May 7, 2026</p>
-<p><strong>Purpose</strong>: Describe the variables for meta data and
-ground truth format for studies contributing data to the WAVES analysis.
-Designed to align with analysis plan below.</p>
-<p>Of note, the expectation is for WAVES studies to map their existing
-labeled data to this codebook where possible. The expectation is not to
-relabel data for this analysis. In the excel appendix, studies should
-provide their labels, operational definitions and mappings.</p>
-<div class="section level2">
-<h2 id="analysis-plan---aim-1-primary-reference-video-recorded-do">Analysis Plan - Aim 1 (primary reference video recorded DO)<a class="anchor" aria-label="anchor" href="#analysis-plan---aim-1-primary-reference-video-recorded-do"></a>
+
+
+
+
+
+    <p>Last Update: May 7, 2026</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"poop"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; poop</span></span></code></pre></div>
+</div>
+<p><strong>Purpose</strong>: Describe the variables for meta data and ground truth format for studies contributing data to the WAVES analysis. Designed to align with analysis plan below.</p>
+<p>Of note, the expectation is for WAVES studies to map their existing labeled data to this codebook where possible. The expectation is not to relabel data for this analysis. In the excel appendix, studies should provide their labels, operational definitions and mappings.</p>
+<section class="level2"><h2 id="analysis-plan---aim-1-primary-reference-video-recorded-do">Analysis Plan - Aim 1 (primary reference video recorded DO)<a class="anchor" aria-label="anchor" href="#analysis-plan---aim-1-primary-reference-video-recorded-do"></a>
 </h2>
-<p>Performance evaluation of three core metrics (sedentary time, step
-counting, moderate-vigorous physical activity) compared to a primary
-reference measure collected for a fixed amount of time, at least 1-hour
-hours within a free-living environment (i.e., naturalistic conditions,
-not laboratory or scripted).</p>
-<p>Identify primary outcome of interest and propose a priori sensitivity
-analyses to examine accuracy across different domains and movement that
-are important for public health and/or may have a unique movement signal
-that should be considered.</p>
-<ol style="list-style-type: decimal">
+<p>Performance evaluation of three core metrics (sedentary time, step counting, moderate-vigorous physical activity) compared to a primary reference measure collected for a fixed amount of time, at least 1-hour hours within a free-living environment (i.e., naturalistic conditions, not laboratory or scripted).</p>
+<p>Identify primary outcome of interest and propose a priori sensitivity analyses to examine accuracy across different domains and movement that are important for public health and/or may have a unique movement signal that should be considered.</p>
+<ol type="1">
 <li>Sedentary TIme
-<ol style="list-style-type: lower-alpha">
+<ol type="a">
 <li>
-<strong>*Total sedentary time</strong>: Comparison of algorithms and
-ground-truth across all labeled data in final datasets.</li>
+<strong>*Total sedentary time</strong>: Comparison of algorithms and ground-truth across all labeled data in final datasets.</li>
 <li>
-<strong>Broad domain</strong>: Stratified by 5-class consistent with
-GPAQ where possible (household, occupation, travel, leisure, other)</li>
+<strong>Broad domain</strong>: Stratified by 5-class consistent with GPAQ where possible (household, occupation, travel, leisure, other)</li>
 <li>
-<strong>Sedentary types</strong>: Stratified by 4-class:
-non-sedentary, sitting/reclining, lying, sedentary driving.</li>
+<strong>Sedentary types</strong>: Stratified by 4-class: non-sedentary, sitting/reclining, lying, sedentary driving.</li>
 </ol>
 </li>
 <li>Step Counting
-<ol style="list-style-type: lower-alpha">
+<ol type="a">
 <li>
-<strong>*Total steps</strong>: Comparison of algorithms and
-ground-truth across all labeled data in final datasets.</li>
+<strong>*Total steps</strong>: Comparison of algorithms and ground-truth across all labeled data in final datasets.</li>
 <li>
-<strong>Broad domain</strong>: Stratified by 5-class consistent with
-GPAQ where possible (household, occupation, travel, leisure,
-other).</li>
+<strong>Broad domain</strong>: Stratified by 5-class consistent with GPAQ where possible (household, occupation, travel, leisure, other).</li>
 <li>
-<strong>Whole-body movement</strong>: Stratified by 5-class
-(sedentary, mixed movement, walking, running, biking).</li>
+<strong>Whole-body movement</strong>: Stratified by 5-class (sedentary, mixed movement, walking, running, biking).</li>
 </ol>
 </li>
 <li>Moderate-vigorous physical activity (MVPA)
-<ol style="list-style-type: lower-alpha">
+<ol type="a">
 <li>
-<strong>*Total MVPA</strong>: Comparison of algorithms and
-ground-truth across all labeled data in final datasets.</li>
+<strong>*Total MVPA</strong>: Comparison of algorithms and ground-truth across all labeled data in final datasets.</li>
 <li>
-<strong>Broad domain</strong>: Stratified by 5-class consistent with
-GPAQ where possible (household, occupation, travel, leisure, other)</li>
+<strong>Broad domain</strong>: Stratified by 5-class consistent with GPAQ where possible (household, occupation, travel, leisure, other)</li>
 <li>
-<strong>Whole-body movement</strong>: Stratified by 5-class
-(sedentary, mixed movement, walking, running, biking).</li>
+<strong>Whole-body movement</strong>: Stratified by 5-class (sedentary, mixed movement, walking, running, biking).</li>
 </ol>
 </li>
 </ol>
 <p><em>*Indicates primary analysis</em></p>
-</div>
-<div class="section level2">
-<h2 id="analysis-plan-aim-2-day-level-secondary-comparisons">Analysis Plan – Aim 2 (Day-level secondary comparisons)<a class="anchor" aria-label="anchor" href="#analysis-plan-aim-2-day-level-secondary-comparisons"></a>
+</section><section class="level2"><h2 id="analysis-plan-aim-2-day-level-secondary-comparisons">Analysis Plan – Aim 2 (Day-level secondary comparisons)<a class="anchor" aria-label="anchor" href="#analysis-plan-aim-2-day-level-secondary-comparisons"></a>
 </h2>
-<p>Performance evaluation of three core metrics (sedentary time, step
-counting, MVPA) compared to a field-based secondary reference measure
-collected over one or more 24-hour periods in free-living
-conditions.</p>
+<p>Performance evaluation of three core metrics (sedentary time, step counting, MVPA) compared to a field-based secondary reference measure collected over one or more 24-hour periods in free-living conditions.</p>
 <p><strong>Study Requirements</strong>:</p>
 <ul>
-<li><p>Protocol that includes minimum of 16-hour wear protocol for wrist
-worn device and field-based reference measure.</p></li>
-<li><p>Simultaneous raw wrist-worn device AND a reference measure
-traceable to a primary reference method with acceptable accuracy and
-precision in field-based testing</p></li>
-</ul>
-</div>
-<div class="section level2">
-<h2 id="metadata">Metadata<a class="anchor" aria-label="anchor" href="#metadata"></a>
+<li><p>Protocol that includes minimum of 16-hour wear protocol for wrist worn device and field-based reference measure.</p></li>
+<li><p>Simultaneous raw wrist-worn device AND a reference measure traceable to a primary reference method with acceptable accuracy and precision in field-based testing</p></li>
+</ul></section><section class="level2"><h2 id="metadata">Metadata<a class="anchor" aria-label="anchor" href="#metadata"></a>
 </h2>
 <p>Notes:</p>
 <ul>
-<li>• Variables indicated as <strong>required</strong> must be included
-for a study’s data to be used in this analysis.</li>
+<li>• Variables indicated as <strong>required</strong> must be included for a study’s data to be used in this analysis.</li>
 </ul>
-<div class="section level3">
-<h3 id="data-dictionary">Data Dictionary<a class="anchor" aria-label="anchor" href="#data-dictionary"></a>
+<section class="level3"><h3 id="data-dictionary">Data Dictionary<a class="anchor" aria-label="anchor" href="#data-dictionary"></a>
 </h3>
-</div>
-</div>
-  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+<table class="table caption-top" style="width:98%;">
+<colgroup>
+<col style="width: 5%">
+<col style="width: 37%">
+<col style="width: 10%">
+<col style="width: 4%">
+<col style="width: 21%">
+<col style="width: 19%">
+</colgroup>
+<thead><tr class="header">
+<th>variable</th>
+<th>definition</th>
+<th>type</th>
+<th>levels</th>
+<th>specific labels/notes</th>
+<th>missingness</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>site</td>
+<td>Study site identifier</td>
+<td>character (nominal)</td>
+<td>
+<p>CP</p>
+<p>UWM</p>
+</td>
+<td>
+<p>California Polytechnic State University</p>
+<p>University of Wisconsin-Milwaukee</p>
+</td>
+<td>none (required for each included file)</td>
+</tr>
+<tr class="even">
+<td>pid</td>
+<td>Unique participant identifier used to link observation data with device data.</td>
+<td>alphanumeric</td>
+<td>-</td>
+<td>Used to link with device and reference data.</td>
+<td>none</td>
+</tr>
+<tr class="odd">
+<td>age</td>
+<td>Age of participant in years</td>
+<td>numeric</td>
+<td>-</td>
+<td>round to years</td>
+<td>allowed (missing value = NA)</td>
+</tr>
+<tr class="even">
+<td>bmi</td>
+<td>Participant’s BMI (kg/m2)</td>
+<td>numeric</td>
+<td>-</td>
+<td>-</td>
+<td>allowed</td>
+</tr>
+<tr class="odd">
+<td>gender</td>
+<td>Participant’s gender</td>
+<td>character (nominal)</td>
+<td>
+<p>M</p>
+<p>F</p>
+<p>OTH</p>
+</td>
+<td>
+<p>Male</p>
+<p>Female</p>
+<p>Non-binary or any other categories</p>
+</td>
+<td>allowed</td>
+</tr>
+<tr class="even">
+<td>device</td>
+<td>Wrist-worn device that was used in this study</td>
+<td>character (nominal)</td>
+<td>
+<p>AG3X</p>
+<p>AXIV</p>
+<p>GA</p>
+</td>
+<td>
+<p>ActiGraph GT3X+</p>
+<p>Axivity</p>
+<p>Geneactiv</p>
+</td>
+<td>none</td>
+</tr>
+<tr class="odd">
+<td>sampling</td>
+<td>Sampling frequency of device in Hz</td>
+<td>numeric</td>
+<td>-</td>
+<td>Value in Hz that data was set to sample</td>
+<td>none</td>
+</tr>
+<tr class="even">
+<td>location</td>
+<td>Wear location for device (non-dominant or dominant wrist)</td>
+<td>character (nominal)</td>
+<td>
+<p>dom</p>
+<p>non_dom</p>
+</td>
+<td>
+<p>dominant</p>
+<p>non_dominant</p>
+</td>
+<td>none</td>
+</tr>
+</tbody>
+</table></section><section class="level3"><h3 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
+</h3>
+<table class="table caption-top">
+<thead><tr class="header">
+<th>site</th>
+<th>pid</th>
+<th>age</th>
+<th>bmi</th>
+<th>gender</th>
+<th>device</th>
+<th>sampling</th>
+<th>location</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td>CP</td>
+<td>CP001</td>
+<td>21</td>
+<td>23.4</td>
+<td>F</td>
+<td>AG3X</td>
+<td>30</td>
+<td>non_dom</td>
+</tr></tbody>
+</table></section></section><section class="level2"><h2 id="primary-reference-video-recorded-direct-observation">
+<u>Primary Reference: Video-Recorded Direct Observation</u><a class="anchor" aria-label="anchor" href="#primary-reference-video-recorded-direct-observation"></a>
+</h2>
+<p>Notes:</p>
+<ul>
+<li><p>Reference measure for sedentary time, step counts and MVPA.</p></li>
+<li><p>Row unit: one record per 1-second epoch of direct observation.</p></li>
+<li><p>Variables listed as required must be provided for the study’s data to be included in the analysis.</p></li>
+<li><p>The data provided to the team should be “clean” with all rows removed for observations that were non-codable/missing.</p></li>
+<li>
+<p>intensity3_do and intensity4_do are MET-based classifications and should be internally consistent:</p>
+<ul>
+<li>“mvpa” in intensity3_do corresponds to “moderate” or “vigorous” in intensity4_do.</li>
+</ul>
+</li>
+<li>
+<p>Sedtype_do provides a sedentary subtype classification and should align with:</p>
+<ul>
+<li><p>posture_do = “sedentary”</p></li>
+<li><p>intensity_do = “sedentary”</p></li>
+<li><p>“non-sed” in Sedtype_do corresponds to all non-sedentary posture/intensity combinations.</p></li>
+</ul>
+</li>
+<li><p>A study must have sedentary time, MVPA or steps labeled in a way consistent with operational definitions to be included in the analysis. The study does not need to have all three to be included, should provide NAs for metrics that aren’t labeled.</p></li>
+</ul>
+<section class="level3"><h3 id="data-dictionary-1">Data Dictionary<a class="anchor" aria-label="anchor" href="#data-dictionary-1"></a>
+</h3>
+<table class="table caption-top">
+<thead><tr class="header">
+<th><strong>variable</strong></th>
+<th>definition</th>
+<th>type</th>
+<th>levels</th>
+<th>labels/notes</th>
+<th>missingness</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td rowspan="2"> <strong>site</strong>
+</td>
+<td rowspan="2"> Study site identifier</td>
+<td rowspan="2"> character (nominal)</td>
+<td>CP</td>
+<td>California Polytechnic State University</td>
+<td rowspan="2"> none (required for each included file)</td>
+</tr>
+<tr class="even">
+<td>UWM</td>
+<td>University of Wisconsin–Milwaukee</td>
+</tr>
+<tr class="odd">
+<td><strong>pid</strong></td>
+<td>Unique participant identifier</td>
+<td>alphanumeric</td>
+<td>-</td>
+<td>unique identifier variable that identifies participant and can be used to link with device data</td>
+<td>none</td>
+</tr>
+<tr class="even">
+<td><strong>observation</strong></td>
+<td>Observation session identifier</td>
+<td>numeric (count)</td>
+<td>-</td>
+<td>If a participant is only observed once, then default to 1</td>
+<td>none</td>
+</tr>
+<tr class="odd">
+<td><strong>datetime</strong></td>
+<td>Timestamp of observation in UTC timezone</td>
+<td>POSIXct</td>
+<td>-</td>
+<td>Timestamp in coordinated universal time (UTC), YYYY-mm-dd HH:MM:SS format</td>
+<td>none</td>
+</tr>
+<tr class="even">
+<td><strong>date</strong></td>
+<td>Local calendar date at the observation site</td>
+<td>date</td>
+<td>-</td>
+<td>In year-month-day format (i.e. YYYY-MM-DD)</td>
+<td>none</td>
+</tr>
+<tr class="odd">
+<td><strong>time</strong></td>
+<td>Local wall-clock time at the observation site</td>
+<td>character</td>
+<td>-</td>
+<td>In 24-hour hour:minute:second format (i.e. HH:MM:SS)</td>
+<td>none</td>
+</tr>
+<tr class="even">
+<td rowspan="5"> <strong>domain_do</strong>
+</td>
+<td rowspan="5"> Behavioral domain classification</td>
+<td rowspan="5"> character (nominal)</td>
+<td>leisure</td>
+<td>Discretionary time activities including social activities, sports, fitness, recreation, and screen-based leisure activities</td>
+<td rowspan="5"> allowed</td>
+</tr>
+<tr class="odd">
+<td>household</td>
+<td>Personal care, housework, lawn and garden work, exterior maintenance</td>
+</tr>
+<tr class="even">
+<td>transportation</td>
+<td>Traveling to and from places (e.g., work, shopping, place of worship). Includes driving or riding in a car, public motorized transport (bus, train), and active transport</td>
+</tr>
+<tr class="odd">
+<td>occupation</td>
+<td>Work or school-related activities including paid or unpaid work, study, and seeking employment</td>
+</tr>
+<tr class="even">
+<td>other</td>
+<td>Behaviors not categorized above (e.g., purchasing goods, volunteering, other uncategorized activities)</td>
+</tr>
+<tr class="odd">
+<td rowspan="5"> <strong>posture_do</strong>
+</td>
+<td rowspan="5"> Observed posture or movement type</td>
+<td rowspan="5"> character (nominal)</td>
+<td>sedentary</td>
+<td>Sitting or lying</td>
+<td rowspan="5"> allowed</td>
+</tr>
+<tr class="even">
+<td>mixed_movement</td>
+<td>Includes standing, stand_move, sport_movement, stretching, crouching/kneeling/squatting, ascending/descending stairs</td>
+</tr>
+<tr class="odd">
+<td>walking</td>
+<td>L-R-L-R pattern including walking with load</td>
+</tr>
+<tr class="even">
+<td>running</td>
+<td>Running</td>
+</tr>
+<tr class="odd">
+<td>biking</td>
+<td>Cycling</td>
+</tr>
+<tr class="even">
+<td rowspan="4"> <strong>sedtype_do</strong>
+</td>
+<td rowspan="4"> Sedentary subtype classification</td>
+<td rowspan="4"> character (nominal)</td>
+<td>non_sed</td>
+<td>All non-sedentary/active behaviors</td>
+<td rowspan="4"> allowed</td>
+</tr>
+<tr class="odd">
+<td>sitting</td>
+<td>sitting/reclining not in a motor vehicle as a driver/passenger</td>
+</tr>
+<tr class="even">
+<td>lying</td>
+<td>lying</td>
+</tr>
+<tr class="odd">
+<td>vehicle</td>
+<td>Driving a personal motor vehicle or as a passenger in any land-based motor vehicle</td>
+</tr>
+<tr class="even">
+<td rowspan="3"> intensity3_do</td>
+<td rowspan="3"> 3-level intensity classification based on METs</td>
+<td rowspan="3"> character (ordinal)</td>
+<td>sedentary</td>
+<td>sedentary posture with low energy expenditure</td>
+<td rowspan="3"> allowed</td>
+</tr>
+<tr class="odd">
+<td>light</td>
+<td>non sedentary posture 1.50 - 2.99 METS</td>
+</tr>
+<tr class="even">
+<td>mvpa</td>
+<td>3.00+ METS</td>
+</tr>
+<tr class="odd">
+<td rowspan="4"> intensity4_do</td>
+<td rowspan="4"> 4-level intensity classification based on METs</td>
+<td rowspan="4"> character (ordinal)</td>
+<td>sedentary</td>
+<td>sedentary posture with low energy expenditure</td>
+<td rowspan="4"> allowed</td>
+</tr>
+<tr class="even">
+<td>light</td>
+<td>non sedentary posture 1.50 - 2.99 METS</td>
+</tr>
+<tr class="odd">
+<td>moderate</td>
+<td>3.00 - 5.99 METS</td>
+</tr>
+<tr class="even">
+<td>vigorous</td>
+<td>6.00+ METS</td>
+</tr>
+<tr class="odd">
+<td>steps_do</td>
+<td>Number of steps recorded during the 1-second epoch</td>
+<td>count</td>
+<td>-</td>
+<td>-</td>
+<td>allowed</td>
+</tr>
+</tbody>
+</table></section><section class="level3"><h3 id="example-1">Example<a class="anchor" aria-label="anchor" href="#example-1"></a>
+</h3>
+<table class="table caption-top">
+<thead><tr class="header">
+<th>site</th>
+<th>pid</th>
+<th>observation</th>
+<th>datetime</th>
+<th>date</th>
+<th>time</th>
+<th>domain_do</th>
+<th>posture_do</th>
+<th>sedtype_do</th>
+<th>intensity3_do</th>
+<th>intensity4_do</th>
+<th>steps_do</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td>CP</td>
+<td>CP001</td>
+<td>1</td>
+<td>1990-01-01T18:36:10</td>
+<td>1990-01-01</td>
+<td>10:42:10</td>
+<td>transportation</td>
+<td>walking</td>
+<td>non_sed</td>
+<td>mvpa</td>
+<td>moderate</td>
+<td>2</td>
+</tr></tbody>
+</table></section></section><section class="level2"><h2 id="thigh-worn-device-data-dictionary">Thigh-worn device data dictionary<a class="anchor" aria-label="anchor" href="#thigh-worn-device-data-dictionary"></a>
+</h2>
+</section><script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'light-border',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config);
+    }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script></main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
-
 
 
     <footer><div class="pkgdown-footer-left">
