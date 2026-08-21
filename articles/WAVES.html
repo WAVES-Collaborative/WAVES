@@ -99,7 +99,7 @@
 <li><p>Type <code><a href="https://rstudio.github.io/renv/reference/restore.html" class="external-link">renv::restore()</a></code> in the Console pane and then press the “Enter” key. This will run the <code><a href="https://rstudio.github.io/renv/reference/restore.html" class="external-link">renv::restore()</a></code> function.</p></li>
 <li>
 <p>In the <strong>Console</strong> pane, you will see a bunch of text appear. At the bottom it will ask if “Do you want to proceed?”. Type “Y” and press the “Enter” key.</p>
-<p><img src="reference/figures/renv_restore_proceed.png"></p>
+<p><img src="images/renv_restore_proceed.png"></p>
 <ol type="a">
 <li>This will download all the R software packages needed for the WAVES repository. It will take a while.</li>
 </ol>
@@ -109,14 +109,14 @@
 <ol start="5" type="1">
 <li>
 <p>Navigate to the <strong>Files</strong> pane within Rstudio (located either in the bottom right area of the RStudio window <em>if</em> you haven’t changed the pane layout in “Global Settings”). Click on “_targets<em>_</em>config.R” to open it. This will open the “_targets_config.R” script within the <strong>Source</strong> pane in the top left area of your RStudio window.</p>
-<p><img src="reference/figures/files_pane.png"></p>
+<p><img src="images/files_pane.png"></p>
 <ol type="1">
 <li>Alternatively, open “_targets<em>_</em>config.R” script with the system File Explorer. It should open within the <strong>Source</strong> pane of RStudio.</li>
 </ol>
 </li>
 <li>
 <p>Within the “INPUT” section of the “_targets_config.R” script, check the following:</p>
-<p><img src="reference/figures/section_input.png"></p>
+<p><img src="images/section_input.png"></p>
 <ol type="1">
 <li>
 <code>RETICULATE_MINICONDA_PATH</code>: The path to an existing conda installation or where you want a new minconda distribution to be installed.
@@ -147,7 +147,7 @@
 <li><p>Run all the code within the “INPUT” section (Line 8 - Line 17) by highlighting these lines and then pressing the “Enter” key. Save the script with the keyboard shortcut “Ctrl + s”.</p></li>
 <li>
 <p>Bring the blinking cursor to the <strong>Console</strong> pane and run <code>tar_make()</code>. The “configuration” pipeline is now running, which will print messages out in the Console like the below image.</p>
-<p><img src="reference/figures/tar_make.png"></p>
+<p><img src="images/tar_make.png"></p>
 <p>The “configuration” pipeline is:</p>
 <ol type="1">
 <li><p>Downloading and installing non-R software</p></li>
@@ -158,7 +158,7 @@
 </li>
 <li>
 <p>Once the pipeline is complete the console should say “ended pipeline” with how long it took.</p>
-<p><img src="reference/figures/tar_make2.png"></p>
+<p><img src="images/tar_make2.png"></p>
 <p>Or it may error like so:</p>
 <p><img src="images/tar_make3.png"></p>
 <p>At least <code>miniconda_summary_file</code> should be completed, allowing you to move on to step 11.</p>
@@ -249,7 +249,7 @@
 <ul>
 <li>Stop the pipeline by clicking the “STOP” button that appears in the top right corner of the Console pane.</li>
 </ul>
-<p><img src="reference/figures/console_stop.png"></p>
+<p><img src="images/console_stop.png"></p>
 <ul>
 <li>Change the <code>n_workers</code> object to 1, which will remove parallel processing.</li>
 </ul>
@@ -315,14 +315,14 @@
 <ul>
 <li>screenshot your console that includes the pipeline output and the error itself (example below)</li>
 </ul>
-<p><img src="reference/figures/example_issue_screenshot.png"></p>
+<p><img src="images/example_issue_screenshot.png"></p>
 <ul>
 <li>
 <p>Copy the output from the console into a codeblock</p>
 <ul>
 <li>With the description box highlighted, enter a forward slash <code>/</code> and then select “Code Block”</li>
 </ul>
-<p><img src="reference/figures/example_issue_pasting_code.png"></p>
+<p><img src="images/example_issue_pasting_code.png"></p>
 <ul>
 <li><p>For language, select “R”</p></li>
 <li><p>Within the code block, paste the console output</p></li>

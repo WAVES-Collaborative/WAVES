@@ -30,7 +30,7 @@ to the “Preliminary Setup” section of the README.
     bottom it will ask if “Do you want to proceed?”. Type “Y” and press
     the “Enter” key.
 
-    ![](reference/figures/renv_restore_proceed.png)
+    ![](images/renv_restore_proceed.png)
 
     1.  This will download all the R software packages needed for the
         WAVES repository. It will take a while.
@@ -43,7 +43,7 @@ to the “Preliminary Setup” section of the README.
     to open it. This will open the “\_targets_config.R” script within
     the **Source** pane in the top left area of your RStudio window.
 
-    ![](reference/figures/files_pane.png)
+    ![](images/files_pane.png)
 
     1.  Alternatively, open “\_targets*\_*config.R” script with the
         system File Explorer. It should open within the **Source** pane
@@ -52,7 +52,7 @@ to the “Preliminary Setup” section of the README.
 6.  Within the “INPUT” section of the “\_targets_config.R” script, check
     the following:
 
-    ![](reference/figures/section_input.png)
+    ![](images/section_input.png)
 
     1.  `RETICULATE_MINICONDA_PATH`: The path to an existing conda
         installation or where you want a new minconda distribution to be
@@ -89,7 +89,7 @@ to the “Preliminary Setup” section of the README.
     `tar_make()`. The “configuration” pipeline is now running, which
     will print messages out in the Console like the below image.
 
-    ![](reference/figures/tar_make.png)
+    ![](images/tar_make.png)
 
     The “configuration” pipeline is:
 
@@ -108,7 +108,7 @@ to the “Preliminary Setup” section of the README.
 10. Once the pipeline is complete the console should say “ended
     pipeline” with how long it took.
 
-    ![](reference/figures/tar_make2.png)
+    ![](images/tar_make2.png)
 
     Or it may error like so:
 
@@ -261,7 +261,7 @@ to the “Preliminary Setup” section of the README.
   - Stop the pipeline by clicking the “STOP” button that appears in the
     top right corner of the Console pane.
 
-  ![](reference/figures/console_stop.png)
+  ![](images/console_stop.png)
 
   - Change the `n_workers` object to 1, which will remove parallel
     processing.
@@ -352,14 +352,14 @@ Within the description of the issue, please either:
 - screenshot your console that includes the pipeline output and the
   error itself (example below)
 
-![](reference/figures/example_issue_screenshot.png)
+![](images/example_issue_screenshot.png)
 
 - Copy the output from the console into a codeblock
 
   - With the description box highlighted, enter a forward slash `/` and
     then select “Code Block”
 
-  ![](reference/figures/example_issue_pasting_code.png)
+  ![](images/example_issue_pasting_code.png)
 
   - For language, select “R”
 
