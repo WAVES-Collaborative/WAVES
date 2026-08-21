@@ -270,13 +270,13 @@ print_agree_gt <- function(lst_summary,
         matches("Method") ~ pct(20),
         everything()      ~ pct(16)
       )
-    for (i in seq_len(nrow(le_styles))) {
+    for (ii in seq_len(nrow(le_styles))) {
       le_gt <-
         le_gt |>
         tab_style(
-          style = cell_fill(color = le_styles$styles[[i]]$cell_fill$color),
-          locations = cells_body(columns = le_styles$colname[i],
-                                 rows = le_styles$rownum[i])
+          style = cell_fill(color = le_styles$styles[[ii]]$cell_fill$color),
+          locations = cells_body(columns = le_styles$colname[ii],
+                                 rows = le_styles$rownum[ii])
         )
     }
     cat(
