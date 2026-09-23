@@ -444,13 +444,13 @@ tar_plan(
   if (reticulate:::is_linux()) {
     tar_render(
       name = pipeline_summary,
-      path = "quarto/pipeline_main.qmd",
+      path = "quarto/summary_pipeline_main.qmd",
       output_file = file.path(getwd(), fdr_reports, "summary_pipeline_main.html")
     )
   } else {
     tar_quarto(
       name = pipeline_summary,
-      path = "quarto/pipeline_main.qmd",
+      path = "quarto/summary_pipeline_main.qmd",
       output_file = file.path(getwd(), fdr_reports, "summary_pipeline_main.html")
     )
   }
