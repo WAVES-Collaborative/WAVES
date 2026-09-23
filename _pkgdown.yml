@@ -3,22 +3,39 @@ template:
   bootstrap: 5
   light-switch: true
 
+# instructions:
+# - title: Instructions
+#   desc: >
+#     Running the configuration, main, and analysis pipelines.
+#   navbar: ~
+#   contents:
+#   - instructions-config
+#   - instructions-main
+
 articles:
+- title: Instructions
+  desc: >
+    Running the configuration, main, and analysis pipelines.
+  navbar: Instructions
+  contents:
+  - instructions-config
+  - instructions-main
+
 - title: WAVES Project
   desc: >
     Guiding documents for WAVES project.
-  navbar: ~
+  navbar: Guiding Documents
   contents:
-  - articles/program-of-work
-  - articles/authorship-guidelines
-  - articles/reference-codebook
+  - program-of-work
+  - authorship-guidelines
+  - reference-codebook
 
 - title: Technical
   desc: >
     Guidance for when errors appear or when updates are made to the pipeline.
   navbar: Technical
   contents:
-  - articles/python-methods
+  - python-methods
 
 - title: Testing
   desc: >
@@ -26,3 +43,16 @@ articles:
     menu but should appear when clicking More Articles...
   contents:
   - articles/test
+
+# navbar:
+#   components:
+#     instructions:
+#       text: Instructions
+#       menu:
+#         - text: "Configuration Pipeline"
+#           href: instructions-config.html
+#         - text: "Main Pipeline"
+#           href: instructions-main.html
+#   structure:
+#     left: [intro, instructions, reference, articles]
+#     right: [search, github, lightswitch]

@@ -20,115 +20,13 @@ potentially available validation data.
 
 **Full description of the flow diagram coming soon**
 
-## Preliminary Setup
+## Getting Started
 
-For the following steps, administrator access should not be needed.
+Visit the [Github Pages for
+WAVES](https://waves-collaborative.github.io/WAVES/) and click on the
+“Get Started” tab.
 
-1.  Install R
-
-    1.  From this [CRAN mirrors
-        webpage](https://cran.r-project.org/mirrors.html), click on the
-        mirror from the location closest to you.
-
-    2.  On the following page, download and install R for your operating
-        system. So far, only Windows and macOS have been tested.
-
-    3.  The code has been tested on v4.4.1 and v4.5.2. We recommend the
-        latest v4.5.2. but earlier versions down to 4.4.0 should work.
-        Just note you will get warning messages that the packages were
-        developed for 4.5.2.
-
-2.  Install RStudio
-
-    1.  From this [POSIT RStudio
-        webpage](https://posit.co/download/rstudio-desktop/), click on
-        the “DOWNLOAD RSTUDIO DESKTOP FOR WINDOWS/MACOS”
-    2.  A version from 2023 onwards should be okay.
-
-3.  Install compilation tools (platform-specific)
-
-    **Windows:**
-
-    1.  From the [CRAN RTools
-        webpage](https://cran.r-project.org/bin/windows/Rtools/),
-        download the RTools version specific to the R version being used
-        (i.e. Rtools 4.4 for R v4.4.1, RTools 4.5 for R v4.5.2)
-
-    **macOS:**
-
-    Several R packages need to be compiled from source. Install the
-    following dependencies via [Homebrew](https://brew.sh/) by running
-    the following command within the system shell (Terminal):
-
-        brew install cmake gcc gettext
-
-    Then create `~/.R/Makevars` so R can find the installed libraries by
-    running the following code within the system shell (Terminal):
-
-        mkdir -p ~/.R
-        cat > ~/.R/Makevars << 'EOF'
-        CPPFLAGS += -I/opt/homebrew/opt/gettext/include
-        LDFLAGS += -L/opt/homebrew/opt/gettext/lib -lintl -L/opt/homebrew/opt/gcc/lib/gcc/current
-        FLIBS = -L/opt/homebrew/opt/gcc/lib/gcc/current -lgfortran -lquadmath
-        FC = /opt/homebrew/bin/gfortran
-        F77 = /opt/homebrew/bin/gfortran
-        EOF
-
-    Additionally, the `arrow` R package requires setting an environment
-    variable before running `renv::restore()`. Run the following within
-    the system shell (Terminal):
-
-        export LIBARROW_BINARY=true
-
-    This tells the package to download a pre-built Arrow C++ library
-    instead of compiling against the system version.
-
-4.  Install Git by going to [git install
-    webpage](https://git-scm.com/install/). There, select your operating
-    system and follow the instructions on the webpage.
-
-    1.  In the git setup wizard, select all the default options.
-
-5.  Open the RStudio application. In the Navigation bar at the top left
-    corner, click File -\> New Project…
-
-    ![](man/figures/rstudio_new_project.png)
-
-6.  In the New Project wizard pop-up, click “Version Control”.
-
-    ![](man/figures/rstudio_version_control.png)
-
-7.  Then, click “Git”.
-
-    ![](man/figures/rstudio_version_control2.png)
-
-8.  Go to the WAVES github page, Click on the green “Code” button, and
-    click the “Copy to Clipboard” button.
-
-    ![](man/figures/github_link.png)
-
-9.  Go back to the RStudio New Project pop-up and paste the WAVES Github
-    link in the Repository URL section. The “Project directory name”
-    will automatically appear as WAVES.
-
-    ![](man/figures/rstudio_version_control3.png)
-
-10. Choose location of WAVES repository in the “Create project as
-    subdirectory of” section.
-
-    1.  The location of the WAVES repository can generally be downloaded
-        anywhere on your system. However, it is ***HIGHLY*** recommended
-        to:
-        1.  Download the repository on a mapped network drive or on the
-            actual computer system itself, ***NOT*** on the cloud such
-            as OneDrive.
-        2.  Not save it directly under a directory with the following
-            names: `bash`, `data`, `logs`, `media`, `models`, `quarto`,
-            `R`, `renv` or `reports.`
-        3.  Keep it on the same drive where the raw accelerometer data
-            is located.
-
-11. Click the “Create Project” button.
+FIGURE showing the “Get Started” page
 
 ## Methods Implemented
 

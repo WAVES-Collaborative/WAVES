@@ -16,11 +16,6 @@ editor: source
 
 Last Update: May 7, 2026
 
-```{r}
-cat("poop")
-```
-
-
 **Purpose**: Describe the variables for meta data and ground truth format for studies contributing data to the WAVES analysis. Designed to align with analysis plan below.
 
 Of note, the expectation is for WAVES studies to map their existing labeled data to this codebook where possible. The expectation is not to relabel data for this analysis. In the excel appendix, studies should provide their labels, operational definitions and mappings.
