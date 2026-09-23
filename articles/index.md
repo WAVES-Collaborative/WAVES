@@ -1,5 +1,19 @@
 # Articles
 
+### Instructions
+
+Running the configuration, main, and analysis pipelines.
+
+- [Running the Configuration
+  Pipeline](https://waves-collaborative.github.io/WAVES/articles/instructions-config.md):
+
+  Instructions for running \_targets_config.R.
+
+- [Running the Main
+  Pipeline](https://waves-collaborative.github.io/WAVES/articles/instructions-main.md):
+
+  Instructions for \_WAVES.yml and running \_targets.R.
+
 ### WAVES Project
 
 Guiding documents for WAVES project.

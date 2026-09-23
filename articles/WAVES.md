@@ -1,243 +1,119 @@
 # Introduction to WAVES
 
-Before continuing, please ensure you have set up your computer according
-to the “Preliminary Setup” section of the README.
+## Preliminary Setup
 
-## Configuration Pipeline
+For the following steps, administrator access should not be needed.
 
-### renv
+1.  Install R
 
-1.  If you are continuing from “Preliminary Steps” in the README, then
-    go to Step 2.
+    1.  From this [CRAN mirrors
+        webpage](https://cran.r-project.org/mirrors.html), click on the
+        mirror from the location closest to you.
 
-    1.  If not, Open your FIle Explorer application and navigate to
-        where you downloaded the WAVES repository.
+    2.  On the following page, download and install R for your operating
+        system. So far, only Windows and macOS have been tested.
 
-    2.  In the WAVES repository, open the “WAVES.RProj” file. This will
-        automatically open the RStudio IDE.
+    3.  The code has been tested on v4.4.1 and v4.5.2. We recommend the
+        latest v4.5.2. but earlier versions down to 4.4.0 should work.
+        Just note you will get warning messages that the packages were
+        developed for 4.5.2.
 
-2.  Click anywhere within the **Console** pane. The blinking cursor
-    should now appear in the **Console** pane.
+2.  Install RStudio
 
-3.  Type
-    [`renv::restore()`](https://rstudio.github.io/renv/reference/restore.html)
-    in the Console pane and then press the “Enter” key. This will run
-    the
-    [`renv::restore()`](https://rstudio.github.io/renv/reference/restore.html)
-    function.
+    1.  From this [POSIT RStudio
+        webpage](https://posit.co/download/rstudio-desktop/), click on
+        the “DOWNLOAD RSTUDIO DESKTOP FOR WINDOWS/MACOS”
+    2.  A version from 2023 onwards should be okay.
 
-4.  In the **Console** pane, you will see a bunch of text appear. At the
-    bottom it will ask if “Do you want to proceed?”. Type “Y” and press
-    the “Enter” key.
+3.  Install compilation tools (platform-specific)
 
-    ![](images/renv_restore_proceed.png)
+    **Windows:**
 
-    1.  This will download all the R software packages needed for the
-        WAVES repository. It will take a while.
+    1.  From the [CRAN RTools
+        webpage](https://cran.r-project.org/bin/windows/Rtools/),
+        download the RTools version specific to the R version being used
+        (i.e. Rtools 4.4 for R v4.4.1, RTools 4.5 for R v4.5.2)
 
-### \_targets_config.R
+    **macOS:**
 
-5.  Navigate to the **Files** pane within Rstudio (located either in the
-    bottom right area of the RStudio window *if* you haven’t changed the
-    pane layout in “Global Settings”). Click on “\_targets*\_*config.R”
-    to open it. This will open the “\_targets_config.R” script within
-    the **Source** pane in the top left area of your RStudio window.
+    Several R packages need to be compiled from source. Install the
+    following dependencies via [Homebrew](https://brew.sh/) by running
+    the following command within the system shell (Terminal):
 
-    ![](images/files_pane.png)
+        brew install cmake gcc gettext
 
-    1.  Alternatively, open “\_targets*\_*config.R” script with the
-        system File Explorer. It should open within the **Source** pane
-        of RStudio.
+    Then create `~/.R/Makevars` so R can find the installed libraries by
+    running the following code within the system shell (Terminal):
 
-6.  Within the “INPUT” section of the “\_targets_config.R” script, check
-    the following:
+        mkdir -p ~/.R
+        cat > ~/.R/Makevars << 'EOF'
+        CPPFLAGS += -I/opt/homebrew/opt/gettext/include
+        LDFLAGS += -L/opt/homebrew/opt/gettext/lib -lintl -L/opt/homebrew/opt/gcc/lib/gcc/current
+        FLIBS = -L/opt/homebrew/opt/gcc/lib/gcc/current -lgfortran -lquadmath
+        FC = /opt/homebrew/bin/gfortran
+        F77 = /opt/homebrew/bin/gfortran
+        EOF
 
-    ![](images/section_input.png)
+    Additionally, the `arrow` R package requires setting an environment
+    variable before running
+    [`renv::restore()`](https://rstudio.github.io/renv/reference/restore.html).
+    Run the following within the system shell (Terminal):
 
-    1.  `RETICULATE_MINICONDA_PATH`: The path to an existing conda
-        installation or where you want a new minconda distribution to be
-        installed.
-        1.  If this is changed, please ensure there are no spaces within
-            the file path
-        2.  **NOTE**: that if the WAVES directory is located under
-            another directory with the names `bash`, `data`, `logs`,
-            `media`, `models`, `quarto`, `R`, `renv` or `reports`, the
-            config pipeline will install miniconda underneath the
-            corresponding folder *in the WAVES directory*.
-            1.  For example, if the WAVES directory was installed under
-                “/data/martinez/”, then miniconda will be installed in
-                “/data/martinez/WAVES/data/martinez/r-miniconda”
-    2.  `n_workers`: The default is 2 workers, meaning 2 processes of
-        the pipeline will run in parallel of each other.
-        1.  `n_workers` should always be at least 2!
-        2.  If your operating system has more RAM and cores available,
-            feel free to increase the number of workers, with the max
-            being one less than the number of cores available of your
-            system (`future::availableCores() - 1`). In testing, each
-            worker typically requires 2-3GB of memory.
+        export LIBARROW_BINARY=true
 
-### Running the pipeline
+    This tells the package to download a pre-built Arrow C++ library
+    instead of compiling against the system version.
 
-7.  If any changes were made to the script, save the script with the
-    keyboard shortcut “Ctrl + s”.
+4.  Install Git by going to [git install
+    webpage](https://git-scm.com/install/). There, select your operating
+    system and follow the instructions on the webpage.
 
-8.  Run all the code within the “INPUT” section (Line 8 - Line 17) by
-    highlighting these lines and then pressing the “Enter” key. Save the
-    script with the keyboard shortcut “Ctrl + s”.
+    1.  In the git setup wizard, select all the default options.
 
-9.  Bring the blinking cursor to the **Console** pane and run
-    `tar_make()`. The “configuration” pipeline is now running, which
-    will print messages out in the Console like the below image.
+5.  Open the RStudio application. In the Navigation bar at the top left
+    corner, click File -\> New Project…
 
-    ![](images/tar_make.png)
+    ![](images/rstudio_new_project.png)
 
-    The “configuration” pipeline is:
+6.  In the New Project wizard pop-up, click “Version Control”.
 
-    1.  Downloading and installing non-R software
+    ![](images/rstudio_version_control.png)
 
-    2.  Running the code against “configuration” data included within
-        the WAVES repository to ensure code is running properly
+7.  Then, click “Git”.
 
-    3.  This will take awhile! On a potato computer, it took 15-24
-        hours!
+    ![](images/rstudio_version_control2.png)
 
-    4.  If the repository is being ran on a local computer, it is almost
-        mandatory that no other work be done while the pipeline is
-        running.
+8.  Go to the WAVES github page, Click on the green “Code” button, and
+    click the “Copy to Clipboard” button.
 
-10. Once the pipeline is complete the console should say “ended
-    pipeline” with how long it took.
+    ![](images/github_link.png)
 
-    ![](images/tar_make2.png)
+9.  Go back to the RStudio New Project pop-up and paste the WAVES Github
+    link in the Repository URL section. The “Project directory name”
+    will automatically appear as WAVES.
 
-    Or it may error like so:
+    ![](images/rstudio_version_control3.png)
 
-    ![](images/tar_make3.png)
+10. Choose location of WAVES repository in the “Create project as
+    subdirectory of” section.
 
-    At least `miniconda_summary_file` should be completed, allowing you
-    to move on to step 11.
+    1.  The location of the WAVES repository can generally be downloaded
+        anywhere on your system. However, it is ***HIGHLY*** recommended
+        to:
+        1.  Download the repository on a mapped network drive or on the
+            actual computer system itself, ***NOT*** on the cloud such
+            as OneDrive.
+        2.  Not save it directly under a directory with the following
+            names: `bash`, `data`, `logs`, `media`, `models`, `quarto`,
+            `R`, `renv` or `reports.`
+        3.  Keep it on the same drive where the raw accelerometer data
+            is located.
 
-11. A “summary_miniconda_config.html” will have been created under the
-    “reports” folder of the main WAVES repository. Open the .html file
-    and check:
+11. Click the “Create Project” button.
 
-    1.  The Miniconda configuration is good, where status is not
-        “Unsuccessful installation”.
-
-    2.  No packages/modules are highlighted red for each environment.
-
-        1.  For a environment, the Modules message may say “Modules
-            installated do not completely match WAVES configuration”.
-            This is expected with slight changes in package/module
-            versions within each environment, and are highlighted
-            yellow. This shouldn’t impact pipeline processes or
-            computations, but are still noted to assist with diagnosing
-            potential problems.
-
-    3.  If any red appears, please open a Github issue and attach the
-        .pdf of “summary_miniconda_config” or screenshots of which
-        methods/installations are red.
-
-12. If the config pipeline errored, please post on issue on Github
-    following the convention set forth under Posting an Issue on GitHub
-    TODO article.
-
-13. If the pipeline successfully completed, a
-    “summary_pipeline_config.html” file will have been created under the
-    “reports” folder of the main WAVES repository. Open the file and
-    follow the directions stated within the report.
-
-14. If the “summary_pipeline_config.html” indicates no warnings or
-    errors, then the WAVES code is working properly on your computer!
-    Woo.
-
-15. If the “summary_pipeline_config” report is red for any reason,
-    please post the issue with the title as “Config - Summary Report -
-    \[Quick Description\]” with the .pdf or screenshots attached to the
-    issue.
-
-## YAML File (TODO)
-
-## Main Pipeline (TODO)
-
-1.  Open “\_targets.R”
-
-    1.  Navigate to the “Files” tab within Rstudio (located either in
-        the bottom left or top left pane of the RStudio window IF you
-        haven’t changed the pane layout in “Global Settings”). Click on
-        “\_targets.R”
-
-    2.  Alternatively, open “\_targets.R” with the system File Explorer.
-        It should open the script within RStudio.
-
-2.  Within “INPUT” section, check the following:
-
-    1.  `RETICULATE_MINICONDA_PATH`: The path to the conda installation
-        specified within the configuration pipeline.
-    2.  `study_timezone`: Change from
-        [`Sys.timezone()`](https://rdrr.io/r/base/timezones.html) if
-        data was collected in another timezone. Supply it as
-        country/city (e.g. `America/Los Angeles`, `Europe/London`, etc.)
-    3.  `sampling_frequency`: The sampling frequency set for
-        accelerometers during data collection. If using .bin/.cwa/.gt3x
-        data then this doesn’t matter, but does for .csv data.
-    4.  `n_workers`: The default is 2 workers, meaning 2 processes of
-        the pipeline will run in parallel of each other.
-        1.  `n_workers` should always be at least 2!
-        2.  If your operating system has more RAM and cores available,
-            feel free to increase the number of workers, with the max
-            being one less than the number of cores available of your
-            system (`future::availableCores() - 1`)
-    5.  `vct_raw_fpa`: Change vct_raw_fpa such that it creates a
-        character vector that points towards your raw files.
-        1.  We provide an example of how to do so using the `list.files`
-            function, where the `file.path` function is used to list
-            multiple directories at once.
-
-        2.  We suggest putting a “\[1\]” at the end of `list.files` to
-            make sure pipeline works with one file. (image below)
-
-            ![](images/vct_raw_fpa.png)
-
-3.  Save the “\_targets.R” script.
-
-4.  Run the code within “INPUT” section.
-
-5.  In Console, run “tar_make()”. For one file that is a whole day, it
-    can take anywhere between 15-30 minutes on a potato computer. For
-    one file that is a whole week, it may take up to 24 hours.
-
-6.  Once the pipeline has completed, a .html file should have been
-    created under the “reports” folder called
-    “summary_pipeline_main.html”. Open the file and double-check file
-    went through entire pipeline successfully under the “By Major Steps”
-    section.
-
-7.  If pipeline works successfully, close the
-    “summary_pipeline_main.html” file and run pipeline on all files
-    available by removing the the “\[1\]” at the end of the `list.files`
-    function.
-
-    1.  Make sure to save the “\_targets.R” script and rerun the code
-        within “INPUT” section.
-
-    2.  This WILL take multiple days if the repository is not being ran
-        on a high performance cluster.
-
-    3.  If the repository is being ran on a local computer, it is almost
-        mandatory that no other work be done while the pipeline is
-        running.
-
-        1.  If the pipeline is interrupted due to an unexpected restart,
-            the progress should be saved for major steps within the
-            pipeline. Re-follow steps 12-13 the pipeline will pick up
-            from the last major step.
-
-8.  Open “summary_pipeline_main.html” once again and check to see what
-    files have made it through. If all files have made it through, or at
-    least the file’s you would’ve expected to be successfully processed,
-    share the “3_MERGED” folder with WAVES data team, where “3_MERGED”
-    is renamed with the study acronym.
+You are now ready to start running the configuration pipeline! See
+[`vignette("instructions-config")`](https://waves-collaborative.github.io/WAVES/articles/instructions-config.md)
+to continue.
 
 ## Notes
 
@@ -263,8 +139,10 @@ to the “Preliminary Setup” section of the README.
 
   ![](images/console_stop.png)
 
-  - Change the `n_workers` object to 1, which will remove parallel
-    processing.
+  - Change the `n_workers` object to 2. If `n_workers` is already set to
+    2, then please run the WAVES repository on a computer system with
+    better specifications, or reach out to the WAVES team for further
+    discussion.
 
 - **Resetting conda environments:** Once the WAVES repository has been
   installed, major version changes to the pipeline may result in prior

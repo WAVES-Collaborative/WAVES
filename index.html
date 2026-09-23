@@ -36,7 +36,13 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/program-of-work.html">Program of Work</a></li>
+<li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Instructions</h6></li>
+    <li><a class="dropdown-item" href="articles/instructions-config.html">Running the Configuration Pipeline</a></li>
+    <li><a class="dropdown-item" href="articles/instructions-main.html">Running the Main Pipeline</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Guiding Documents</h6></li>
+    <li><a class="dropdown-item" href="articles/program-of-work.html">Program of Work</a></li>
     <li><a class="dropdown-item" href="articles/authorship-guidelines.html">Authorship Guidelines</a></li>
     <li><a class="dropdown-item" href="articles/reference-codebook.html">Reference Data Codebook</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -80,88 +86,10 @@ Flow Diagram
 </figcaption></figure><p><strong>Full description of the flow diagram coming soon</strong></p>
 </div>
 <div class="section level2">
-<h2 id="preliminary-setup">Preliminary Setup<a class="anchor" aria-label="anchor" href="#preliminary-setup"></a>
+<h2 id="getting-started">Getting Started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
 </h2>
-<p>For the following steps, administrator access should not be needed.</p>
-<ol style="list-style-type: decimal">
-<li>
-<p>Install R</p>
-<ol style="list-style-type: decimal">
-<li><p>From this <a href="https://cran.r-project.org/mirrors.html" class="external-link">CRAN mirrors webpage</a>, click on the mirror from the location closest to you.</p></li>
-<li><p>On the following page, download and install R for your operating system. So far, only Windows and macOS have been tested.</p></li>
-<li><p>The code has been tested on v4.4.1 and v4.5.2. We recommend the latest v4.5.2. but earlier versions down to 4.4.0 should work. Just note you will get warning messages that the packages were developed for 4.5.2.</p></li>
-</ol>
-</li>
-<li>
-<p>Install RStudio</p>
-<ol style="list-style-type: decimal">
-<li>From this <a href="https://posit.co/download/rstudio-desktop/" class="external-link">POSIT RStudio webpage</a>, click on the “DOWNLOAD RSTUDIO DESKTOP FOR WINDOWS/MACOS”</li>
-<li>A version from 2023 onwards should be okay.</li>
-</ol>
-</li>
-<li>
-<p>Install compilation tools (platform-specific)</p>
-<p><strong>Windows:</strong></p>
-<ol style="list-style-type: decimal">
-<li>From the <a href="https://cran.r-project.org/bin/windows/Rtools/" class="external-link">CRAN RTools webpage</a>, download the RTools version specific to the R version being used (i.e. Rtools 4.4 for R v4.4.1, RTools 4.5 for R v4.5.2)</li>
-</ol>
-<p><strong>macOS:</strong></p>
-<p>Several R packages need to be compiled from source. Install the following dependencies via <a href="https://brew.sh/" class="external-link">Homebrew</a> by running the following command within the system shell (Terminal):</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>brew install cmake gcc gettext</span></code></pre></div>
-<p>Then create <code>~/.R/Makevars</code> so R can find the installed libraries by running the following code within the system shell (Terminal):</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>mkdir <span class="sc">-</span>p <span class="sc">~</span><span class="er">/</span>.R</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>cat <span class="sc">&gt;</span> <span class="er">~/</span>.R<span class="sc">/</span>Makevars <span class="sc">&lt;</span><span class="er">&lt;</span> <span class="st">'EOF'</span></span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>CPPFLAGS <span class="sc">+</span><span class="er">=</span> <span class="sc">-</span>I<span class="sc">/</span>opt<span class="sc">/</span>homebrew<span class="sc">/</span>opt<span class="sc">/</span>gettext<span class="sc">/</span>include</span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>LDFLAGS <span class="sc">+</span><span class="er">=</span> <span class="sc">-</span>L<span class="sc">/</span>opt<span class="sc">/</span>homebrew<span class="sc">/</span>opt<span class="sc">/</span>gettext<span class="sc">/</span>lib <span class="sc">-</span>lintl <span class="sc">-</span>L<span class="sc">/</span>opt<span class="sc">/</span>homebrew<span class="sc">/</span>opt<span class="sc">/</span>gcc<span class="sc">/</span>lib<span class="sc">/</span>gcc<span class="sc">/</span>current</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>FLIBS <span class="ot">=</span> <span class="sc">-</span>L<span class="sc">/</span>opt<span class="sc">/</span>homebrew<span class="sc">/</span>opt<span class="sc">/</span>gcc<span class="sc">/</span>lib<span class="sc">/</span>gcc<span class="sc">/</span>current <span class="sc">-</span>lgfortran <span class="sc">-</span>lquadmath</span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>FC <span class="ot">=</span> <span class="er">/</span>opt<span class="sc">/</span>homebrew<span class="sc">/</span>bin<span class="sc">/</span>gfortran</span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>F77 <span class="ot">=</span> <span class="er">/</span>opt<span class="sc">/</span>homebrew<span class="sc">/</span>bin<span class="sc">/</span>gfortran</span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>EOF</span></code></pre></div>
-<p>Additionally, the <code>arrow</code> R package requires setting an environment variable before running <code><a href="https://rstudio.github.io/renv/reference/restore.html" class="external-link">renv::restore()</a></code>. Run the following within the system shell (Terminal):</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>export LIBARROW_BINARY<span class="ot">=</span>true</span></code></pre></div>
-<p>This tells the package to download a pre-built Arrow C++ library instead of compiling against the system version.</p>
-</li>
-<li>
-<p>Install Git by going to <a href="https://git-scm.com/install/" class="external-link">git install webpage</a>. There, select your operating system and follow the instructions on the webpage.</p>
-<ol style="list-style-type: decimal">
-<li>In the git setup wizard, select all the default options.</li>
-</ol>
-</li>
-<li>
-<p>Open the RStudio application. In the Navigation bar at the top left corner, click File -&gt; New Project…</p>
-<p><img src="reference/figures/rstudio_new_project.png"></p>
-</li>
-<li>
-<p>In the New Project wizard pop-up, click “Version Control”.</p>
-<p><img src="reference/figures/rstudio_version_control.png"></p>
-</li>
-<li>
-<p>Then, click “Git”.</p>
-<p><img src="reference/figures/rstudio_version_control2.png"></p>
-</li>
-<li>
-<p>Go to the WAVES github page, Click on the green “Code” button, and click the “Copy to Clipboard” button.</p>
-<p><img src="reference/figures/github_link.png"></p>
-</li>
-<li>
-<p>Go back to the RStudio New Project pop-up and paste the WAVES Github link in the Repository URL section. The “Project directory name” will automatically appear as WAVES.</p>
-<p><img src="reference/figures/rstudio_version_control3.png"></p>
-</li>
-<li>
-<p>Choose location of WAVES repository in the “Create project as subdirectory of” section.</p>
-<ol style="list-style-type: decimal">
-<li>The location of the WAVES repository can generally be downloaded anywhere on your system. However, it is <strong><em>HIGHLY</em></strong> recommended to:
-<ol style="list-style-type: decimal">
-<li>Download the repository on a mapped network drive or on the actual computer system itself, <strong><em>NOT</em></strong> on the cloud such as OneDrive.</li>
-<li>Not save it directly under a directory with the following names: <code>bash</code>, <code>data</code>, <code>logs</code>, <code>media</code>, <code>models</code>, <code>quarto</code>, <code>R</code>, <code>renv</code> or <code>reports.</code>
-</li>
-<li>Keep it on the same drive where the raw accelerometer data is located.</li>
-</ol>
-</li>
-</ol>
-</li>
-<li><p>Click the “Create Project” button.</p></li>
-</ol>
+<p>Visit the <a href="https://waves-collaborative.github.io/WAVES/">Github Pages for WAVES</a> and click on the “Get Started” tab.</p>
+<p>FIGURE showing the “Get Started” page</p>
 </div>
 <div class="section level2">
 <h2 id="methods-implemented">Methods Implemented<a class="anchor" aria-label="anchor" href="#methods-implemented"></a>

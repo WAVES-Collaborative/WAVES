@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Python Methods • WAVES</title>
+<title>Running the Main Pipeline • WAVES</title>
 <script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="python-methods_files/libs/quarto-html/popper.min.js"></script><script src="python-methods_files/libs/quarto-html/tippy.umd.min.js"></script><link href="python-methods_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="python-methods_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Python Methods">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="instructions-main_files/libs/quarto-html/popper.min.js"></script><script src="instructions-main_files/libs/quarto-html/tippy.umd.min.js"></script><link href="instructions-main_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="instructions-main_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Running the Main Pipeline">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -75,12 +75,12 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Python Methods</h1>
+      <h1>Running the Main Pipeline</h1>
 
 
 
 
-      <small class="dont-index">Source: <a href="https://github.com/WAVES-Collaborative/WAVES/blob/main/vignettes/python-methods.qmd" class="external-link"><code>vignettes/python-methods.qmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/WAVES-Collaborative/WAVES/blob/main/vignettes/instructions-main.qmd" class="external-link"><code>vignettes/instructions-main.qmd</code></a></small>
       <div class="d-none name"><code></code></div>
     </div>
 
@@ -89,19 +89,84 @@
 
 
 
-    <section class="level2"><h2 id="miniconda">Miniconda<a class="anchor" aria-label="anchor" href="#miniconda"></a>
+    <p>Last Update: 2026-09-23</p>
+<section class="level2"><h2 id="yaml-file-todo">YAML File (TODO)<a class="anchor" aria-label="anchor" href="#yaml-file-todo"></a>
 </h2>
-<p>If changes have been made to how the miniconda environments are setup, then the environments will have to be deleted and then be recreated in the config pipeline. Run the following code within the <code>CONSOLE</code>:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu">conda_remove</span><span class="op">(</span><span class="st">"WAVES_accelerometer"</span><span class="op">)</span></span>
-<span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu">conda_remove</span><span class="op">(</span><span class="st">"WAVES_actinet"</span><span class="op">)</span></span>
-<span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu">conda_remove</span><span class="op">(</span><span class="st">"WAVES_oak_1.0"</span><span class="op">)</span></span>
-<span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu">conda_remove</span><span class="op">(</span><span class="st">"WAVES_oak_pre"</span><span class="op">)</span></span>
-<span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu">conda_remove</span><span class="op">(</span><span class="st">"WAVES_stepcount"</span><span class="op">)</span></span></code></pre></div>
-</div>
-<p>Then, re-run the config pipeline using <code>_targets_config.R</code>, following Step 2.3 onwards in the Getting Started page.</p>
-</section><script id="quarto-html-after-body" type="application/javascript">
+</section><section class="level2"><h2 id="main-pipeline-todo">Main Pipeline (TODO)<a class="anchor" aria-label="anchor" href="#main-pipeline-todo"></a>
+</h2>
+<ol type="1">
+<li>
+<p>Open “_targets.R”</p>
+<ol type="1">
+<li><p>Navigate to the “Files” tab within Rstudio (located either in the bottom left or top left pane of the RStudio window IF you haven’t changed the pane layout in “Global Settings”). Click on “_targets.R”</p></li>
+<li><p>Alternatively, open “_targets.R” with the system File Explorer. It should open the script within RStudio.</p></li>
+</ol>
+</li>
+<li>
+<p>Within “INPUT” section, check the following:</p>
+<ol type="1">
+<li>
+<code>RETICULATE_MINICONDA_PATH</code>: The path to the conda installation specified within the configuration pipeline.</li>
+<li>
+<code>study_timezone</code>: Change from <code><a href="https://rdrr.io/r/base/timezones.html" class="external-link">Sys.timezone()</a></code> if data was collected in another timezone. Supply it as country/city (e.g. <code>America/Los Angeles</code>, <code>Europe/London</code>, etc.)</li>
+<li>
+<code>sampling_frequency</code>: The sampling frequency set for accelerometers during data collection. If using .bin/.cwa/.gt3x data then this doesn’t matter, but does for .csv data.</li>
+<li>
+<code>n_workers</code>: The default is 2 workers, meaning 2 processes of the pipeline will run in parallel of each other.
+<ol type="1">
+<li>
+<code>n_workers</code> should always be at least 2!</li>
+<li>If your operating system has more RAM and cores available, feel free to increase the number of workers, with the max being one less than the number of cores available of your system (<code>future::availableCores() - 1</code>)</li>
+</ol>
+</li>
+<li>
+<code>vct_raw_fpa</code>: Change vct_raw_fpa such that it creates a character vector that points towards your raw files.
+<ol type="1">
+<li><p>We provide an example of how to do so using the <code>list.files</code> function, where the <code>file.path</code> function is used to list multiple directories at once.</p></li>
+<li>
+<p>We suggest putting a “[1]” at the end of <code>list.files</code> to make sure pipeline works with one file. (image below)</p>
+<p><img src="images/vct_raw_fpa.png"></p>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>Save the “_targets.R” script.</p></li>
+<li><p>Run the code within “INPUT” section.</p></li>
+<li><p>In Console, run “tar_make()”. For one file that is a whole day, it can take anywhere between 15-30 minutes on a potato computer. For one file that is a whole week, it may take up to 24 hours.</p></li>
+<li><p>Once the pipeline has completed, a .html file should have been created under the “reports” folder called “summary_pipeline_main.html”. Open the file and double-check file went through entire pipeline successfully under the “By Major Steps” section.</p></li>
+<li>
+<p>If pipeline works successfully, close the “summary_pipeline_main.html” file and run pipeline on all files available by removing the the “[1]” at the end of the <code>list.files</code> function.</p>
+<ol type="1">
+<li><p>Make sure to save the “_targets.R” script and rerun the code within “INPUT” section.</p></li>
+<li><p>This WILL take multiple days if the repository is not being ran on a high performance cluster.</p></li>
+<li>
+<p>If the repository is being ran on a local computer, it is almost mandatory that no other work be done while the pipeline is running.</p>
+<ol type="1">
+<li>If the pipeline is interrupted due to an unexpected restart, the progress should be saved for major steps within the pipeline. Re-follow steps 12-13 the pipeline will pick up from the last major step.</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>Open “summary_pipeline_main.html” once again and check to see what files have made it through. If all files have made it through, or at least the file’s you would’ve expected to be successfully processed, share the “3_MERGED” folder with WAVES data team, where “3_MERGED” is renamed with the study acronym.</p></li>
+</ol>
+<p>From step 14, if there are no errors, you are ready to run the main pipeline(LINK ME).</p>
+</section><section class="level2"><h2 id="notes">Notes<a class="anchor" aria-label="anchor" href="#notes"></a>
+</h2>
+<ul>
+<li><p>Even if a pipeline finishes successfully, you may see in the console “There were XX warnings (use warnings() to see them)”. This is normal if working on an R version that is not 4.5.2., as the messages will be warnings that the packages are meant to work on the latest R version. As long as the R version being used is R 4.4 or beyond, everything should still work. We have not tested the WAVES repository on R versions below 4.4.</p></li>
+<li><p>If working on a high performance cluster…TODO (work with Hayden, Ben on swarm and batch scripts)</p></li>
+<li>
+<p>If the pipeline appears “stuck” after 24hrs, as in it looks like there has been no change in the processing time or the console messages have been the same for quite awhile, its most likely that your computer does not have enough computing resources to do parallel processing. In that case:</p>
+<ul>
+<li>Stop the pipeline by clicking the “STOP” button that appears in the top right corner of the Console pane.</li>
+</ul>
+<p><img src="images/console_stop.png"></p>
+<ul>
+<li>Change the <code>n_workers</code> object to 2. If <code>n_workers</code> is already set to 2, then please run the WAVES repository on a computer system with better specifications, or reach out to the WAVES team for further discussion.</li>
+</ul>
+</li>
+</ul></section><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
@@ -184,7 +249,8 @@
       }
     }
   });
-  </script></main>
+  </script></main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 

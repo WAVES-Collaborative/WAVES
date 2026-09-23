@@ -2,12 +2,6 @@
 
 Last Update: May 7, 2026
 
-``` r
-
-cat("poop")
-#> poop
-```
-
 **Purpose**: Describe the variables for meta data and ground truth
 format for studies contributing data to the WAVES analysis. Designed to
 align with analysis plan below.
