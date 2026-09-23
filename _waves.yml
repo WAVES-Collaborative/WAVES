@@ -6,11 +6,11 @@ vct_raw_filepaths:
   - ~
 reference:
   direct_observation:
-    directories:
+    filepath:
     - ~
-    id_pattern:
+  still_image:
+    filepath:
     - ~
-    mapping_filepath: ~
   activPAL:
     1secEpochs_directories:
     - ~

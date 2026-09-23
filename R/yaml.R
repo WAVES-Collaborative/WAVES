@@ -55,13 +55,15 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
   )
   names(lst_yaml$ref) <- c(
     "do",
+    "img",
     "pal",
     "pass"
   )
   names(lst_yaml$ref$do) <- c(
-    "fdr",
-    "id_pt",
-    "map_fpa"
+    "fpa"
+  )
+  names(lst_yaml$ref$img) <- c(
+    "fpa"
   )
   names(lst_yaml$ref$pal) <- c(
     "palp_fdr",
@@ -85,11 +87,12 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
     lst_yaml["vct_raw_fpa"] <- list(NULL)
   }
   # do
-  if (all(simplify_is_null(lst_yaml$ref$do$fdr))) {
-    lst_yaml$ref$do["fdr"] <- list(NULL)
+  if (all(simplify_is_null(lst_yaml$ref$do$fpa))) {
+    lst_yaml$ref$do["fpa"] <- list(NULL)
   }
-  if (all(simplify_is_null(lst_yaml$ref$do$id_pt))) {
-    lst_yaml$ref$do["id_pt"] <- list(NULL)
+  # img
+  if (all(simplify_is_null(lst_yaml$ref$img$fpa))) {
+    lst_yaml$ref$do["img"] <- list(NULL)
   }
   # pal
   if (all(simplify_is_null(lst_yaml$ref$pal$palp_fdr))) {
@@ -125,8 +128,12 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
     lst_yaml$vct_raw_fpa <- simplify_post_expr(lst_yaml$vct_raw_fpa)
   }
   # do
-  if (length(lst_yaml$ref$do$fdr) != 0) {
-    lst_yaml$ref$do$fdr <- simplify_post_expr(lst_yaml$ref$do$fdr)
+  if (length(lst_yaml$ref$do$fpa) != 0) {
+    lst_yaml$ref$do$fpa <- simplify_post_expr(lst_yaml$ref$do$fpa)
+  }
+  # img
+  if (length(lst_yaml$ref$img$fpa) != 0) {
+    lst_yaml$ref$img$fpa <- simplify_post_expr(lst_yaml$ref$img$fpa)
   }
   # pal
   if (length(lst_yaml$ref$pal$palp_fdr) != 0) {
@@ -258,6 +265,7 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
   # Make sure values are present for at least one reference.
   chk_ref <- all(
     simplify_is_null(lst_yaml$ref$do),
+    simplify_is_null(lst_yaml$ref$img),
     simplify_is_null(lst_yaml$ref$pal),
     simplify_is_null(lst_yaml$ref$pass)
   )
@@ -272,47 +280,34 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
     ### do ----------------------------------------
     if (!all(simplify_is_null(lst_yaml$ref$do))) {
       #### directories
-      if (length(lst_yaml$ref$do$fdr) == 0) {
-        lst_msg[["ref_do_fdr"]] <-
-          "Direct observation `directories` is not defined."
-      } else if (!any(fs::is_dir(lst_yaml$ref$do$fdr))) {
-        lst_msg[["ref_do_fdr"]] <-
-          "Direct observation `directories` contains a string that is NOT a file directory."
+      if (length(lst_yaml$ref$do$fpa) == 0) {
+        lst_msg[["ref_do_fpa"]] <-
+          "Direct observation `filepath` is not defined."
+      } else if (!any(fs::is_file(lst_yaml$ref$do$fpa))) {
+        lst_msg[["ref_do_fpa"]] <-
+          "Direct observation `filepath` contains a string that is NOT a file path."
       }
-      lst_msg[["ref_do_fdr"]] <- format_abort_message(
-        lst_msg[["ref_do_fdr"]],
+      lst_msg[["ref_do_fpa"]] <- format_abort_message(
+        lst_msg[["ref_do_fpa"]],
         msg_info =
-          "Please define as one or more strings corresponding to directories."
+          "Please define as one or more strings corresponding to filepaths."
       )
+    }
 
-      #### id_pattern
-      if (length(lst_yaml$ref$do$id_pt) == 0) {
-        lst_msg[["ref_do_id_pat"]] <-
-          "Direct observation `id_pattern` is not defined."
-      } else if (!any(stri_detect(lst_yaml$ref$do$id_pt, regex = "0"))) {
-        lst_msg[["ref_do_id_pat"]] <-
-          "Direct observation `id_pattern` contains a string that does not have any number placeholders."
+    ### img ----------------------------------------
+    if (!all(simplify_is_null(lst_yaml$ref$img))) {
+      #### directories
+      if (length(lst_yaml$ref$img$fpa) == 0) {
+        lst_msg[["ref_img_fpa"]] <-
+          "Still-image `filepath` is not defined."
+      } else if (!any(fs::is_file(lst_yaml$ref$img$fpa))) {
+        lst_msg[["ref_img_fpa"]] <-
+          "Still-image `filepath` contains a string that is NOT a file path."
       }
-      lst_msg[["ref_do_id_pat"]] <- format_abort_message(
-        lst_msg[["ref_do_id_pat"]],
+      lst_msg[["ref_img_fpa"]] <- format_abort_message(
+        lst_msg[["ref_img_fpa"]],
         msg_info =
-          "Please define as one or more strings with '0' as a placeholder for numbers."
-      )
-
-      lst_yaml$ref$do$id_pt <- get_id_regex(lst_yaml$ref$do$id_pt)
-
-      #### mapping_filepath
-      if (length(lst_yaml$ref$do$map_fpa) == 0) {
-        lst_msg[["ref_do_map_fpa"]] <-
-          "Direct observation `mapping_filepath` is not defined."
-      } else if (!fs::is_file(lst_yaml$ref$do$map_fpa)) {
-        lst_msg[["ref_do_map_fpa"]] <-
-          "Direct observation `mapping_filepath` is a string that is NOT a filepath."
-      }
-      lst_msg[["ref_do_map_fpa"]] <- format_abort_message(
-        lst_msg[["ref_do_map_fpa"]],
-        msg_info =
-          "Please define one filepath to mapping csv."
+          "Please define as one or more strings corresponding to filepaths."
       )
     }
 
