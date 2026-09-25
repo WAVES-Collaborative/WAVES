@@ -23,7 +23,7 @@ Before continuing, please ensure you have set up your computer according to `vig
 
 <!-- 1.  If you are continuing straight from BLANK, then go to Step 2. -->
 
-1.  If you are continuing straight from `vignette("WAVES#preliminary-setup)`, then go to Step 2.
+1.  If you are continuing straight from `vignette("WAVES#preliminary-setup")`, then go to Step 2.
 
     a.  If not, Open your FIle Explorer application and navigate to where you downloaded the WAVES repository.
 

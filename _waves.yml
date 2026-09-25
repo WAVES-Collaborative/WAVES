@@ -1,8 +1,9 @@
 study_timezone: ~
 sampling_frequency: ~
-vct_raw_directories:
+wrist_accelerometer:
+  directories:
   - ~
-vct_raw_filepaths:
+  filepaths:
   - ~
 reference:
   direct_observation:
@@ -24,6 +25,8 @@ reference:
     - ~
   actiPASS:
     directories:
+    - ~
+    filepaths:
     - ~
     id_pattern:
     - ~
