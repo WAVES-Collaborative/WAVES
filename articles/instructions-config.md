@@ -1,6 +1,6 @@
 # Running the Configuration Pipeline
 
-Last Update: 2026-09-23
+Last Update: 2026-09-25
 
 Before continuing, please ensure you have set up your computer according
 to `vignette("WAVES#preliminary-setup")`.
@@ -10,7 +10,7 @@ to `vignette("WAVES#preliminary-setup")`.
 ### renv
 
 1.  If you are continuing straight from
-    `vignette("WAVES#preliminary-setup)`, then go to Step 2.
+    `vignette("WAVES#preliminary-setup")`, then go to Step 2.
 
     1.  If not, Open your FIle Explorer application and navigate to
         where you downloaded the WAVES repository.

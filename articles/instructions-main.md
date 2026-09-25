@@ -1,10 +1,197 @@
 # Running the Main Pipeline
 
-Last Update: 2026-09-23
+Last Update: 2026-09-25
 
 ## YAML File (TODO)
 
-## Main Pipeline (TODO)
+WAVES uses a YAML file (`_waves.yml`) to define parameters needed for
+the main pipeline. For more information on what YAML is, reference
+[`vignette("yaml-2-minute-intro", package = "yaml12")`](https://posit-dev.github.io/r-yaml12/articles/yaml-2-minute-intro.html).
+It is not a necessary need, but may help with troubleshooting if the
+pipeline is erroring at `lst_yaml`.
+
+### Keys
+
+The `_waves.yml` file has 4 top-level keys. Below are descriptions and
+examples for each top-level key:
+
+#### study_timezone
+
+A string scalar that corresponds to the timezone the study data was
+collected in. It should be a location in IANA “Olson” format. That is,
+in:
+
+- “\[CONTINENT -or- OCEAN\]/\[CITY\]” format
+
+- “Etc/GMT\[INVERSE OFFSET\]” format
+
+- “UTC” or “GMT”
+
+See either:
+
+- The output from running
+  [`Sys.timezone()`](https://rdrr.io/r/base/timezones.html) within the R
+  Console to see the timezone of your computer system in Olson format,
+  which you can use if you are in the same timezone that the data was
+  collected in. Or…
+
+- Reference “TZ identifier” column in the [tz
+  database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+  to find the the correct timezone. Prefer to use the rows that are
+  highlighted green.
+
+| Acceptable                     | Unacceptable   |
+|--------------------------------|----------------|
+| America/Chicago, Etc/GMT+6     | CST            |
+| America/New_York, Etc/GMT+5    | EDT            |
+| America/Los_Angeles, Etc/GMT+8 | PST            |
+| Asia/Hong_Kong                 | Asia/Hong Kong |
+| Asia/Katmandu                  | Katmandu       |
+| Australia/Sydney               | NPT            |
+| Europe/London                  | BST            |
+| Europe/Paris                   | CET            |
+
+#### sampling_frequency
+
+A integer scalar corresponding to the sampling frequency of the wrist
+activity monitors. If sampling_frequency changed during data collection,
+then a sequence of integers should be entered.
+
+| Acceptable | Unacceptable |
+|------------|--------------|
+| 100        | 100Hz        |
+| 30         | 29.9         |
+
+#### wrist_accelerometer
+
+Sequence of mappings that define where raw wrist accelerometer files are
+in your computer system. Only the `directories` key or `filepaths` key
+should be defined, not both.
+
+##### directories
+
+One or more directories where the raw accelerometer files are being
+held. The directories should only hold raw files that are all the same
+extension (.gt3x, .cwa, .bin, .csv). Additionally, the directories:
+
+- ***can*** hold sub-directories or files that do not end in .gt3x,
+  .cwa, .bin or .csv.
+
+- ***should not*** hold multiple formats of the same recording/session
+
+  - For example, if MYFILE_001.gt3x is in the directory, there should
+    not be a MYFILE_001.csv (raw csv export from ActiLife) in the
+    directory as well.
+
+- ***should not*** hold raw files from monitors not worn at the wrist
+
+If the directory contains multiple formats of the same recording/session
+or contains raw files from different wear locations, then the
+`filepaths` key should be defined instead.
+
+##### filepaths
+
+One or more filepaths that point directly to the raw files. Users will
+most likely define the filepaths by using the `!expr` tag to directly
+use R code. See the [values as an Expression section](#expr) for more
+information.
+
+#### reference
+
+Sequence of mappings that define the reference measures being used and
+where they are located in your computer system.
+
+##### direct_observation
+
+asdf
+
+###### filepath
+
+##### still_image
+
+asdf
+
+###### filepath
+
+##### activpal
+
+###### 1secEpochs_directories
+
+###### 1secEpochs_filepaths
+
+###### events_directories
+
+###### events_filepaths
+
+###### id_pattern
+
+##### actipass
+
+asdf
+
+###### directories
+
+###### filepaths
+
+###### id_pattern
+
+### Values as an Expression
+
+YAML values can have a tag before defining a value, as noted in
+[`vignette("yaml-tags-and-advanced-features", package = "yaml12")`](https://posit-dev.github.io/r-yaml12/articles/yaml-tags-and-advanced-features.html)
+. In WAVES, the `!expr` tag has been defined to evaluate text after the
+`!expr` tag as an R expression. For example, the following key: value
+pair
+
+`my_number: !expr 6 * 7`
+
+is equivalent to the following code in R
+
+`list(my_number = 6 * 7)`
+
+For any keys that have the word “filepath”, it is recommended to use the
+`!expr` tag along with an R expression to easily define all filepaths
+instead of manually typing out every single filepath. This will
+typically be done using the
+[`list.files()`](https://rdrr.io/r/base/list.files.html) function.
+
+For example, if I wanted to list files that only had the `.csv.gz`
+extension within the WAVES repository, then the following would work in
+the YAML file:
+
+    filepaths: !expr list.files(path = "data/0_CONFIG/RAW", pattern = "$\\.csv\\.gz", full.names = TRUE)
+
+Note that the code is all kept on the same line, and the `full.names`
+argument is set to `TRUE`.
+
+If you were to write
+[`list.files()`](https://rdrr.io/r/base/list.files.html) across multiple
+lines, it would have to be written like so:
+
+    filepaths:
+      - !expr list.files(
+          path = "data/0_CONFIG/RAW",
+          pattern = "$\\.csv\\.gz",
+          full.names = TRUE
+        )
+
+Note, in YAML language indentation matters, as it is essential for
+determining which sequences/mappings are within others. So the following
+would NOT work and return an error.
+
+    filepaths:
+      - list.files(
+      path = "data/0_CONFIG/RAW",
+      pattern = "$\\.csv\\.gz",
+      full.names = TRUE
+    )
+
+This usually happens if you were to directly copy and paste the R code
+directly from a script or from the Console. If you do so, make sure to
+appropriately indent the code such that the `)` parenthesis is directly
+under the `!` in `!expr` tag.
+
+## Main Pipeline (TO UPDATE)
 
 1.  Open “\_targets.R”
 

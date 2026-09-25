@@ -89,10 +89,163 @@
 
 
 
-    <p>Last Update: 2026-09-23</p>
-<section class="level2"><h2 id="yaml-file-todo">YAML File (TODO)<a class="anchor" aria-label="anchor" href="#yaml-file-todo"></a>
+    <p>Last Update: 2026-09-25</p>
+<section class="section level2"><h2 id="yaml-file-todo">YAML File (TODO)<a class="anchor" aria-label="anchor" href="#yaml-file-todo"></a>
 </h2>
-</section><section class="level2"><h2 id="main-pipeline-todo">Main Pipeline (TODO)<a class="anchor" aria-label="anchor" href="#main-pipeline-todo"></a>
+<p>WAVES uses a YAML file (<code>_waves.yml</code>) to define parameters needed for the main pipeline. For more information on what YAML is, reference <code><a href="https://posit-dev.github.io/r-yaml12/articles/yaml-2-minute-intro.html" class="external-link">vignette("yaml-2-minute-intro", package = "yaml12")</a></code>. It is not a necessary need, but may help with troubleshooting if the pipeline is erroring at <code>lst_yaml</code>.</p>
+<section class="level2"><h3 id="keys">Keys<a class="anchor" aria-label="anchor" href="#keys"></a>
+</h3>
+<p>The <code>_waves.yml</code> file has 4 top-level keys. Below are descriptions and examples for each top-level key:</p>
+<section class="level3"><h4 id="study_timezone">study_timezone<a class="anchor" aria-label="anchor" href="#study_timezone"></a>
+</h4>
+<p>A string scalar that corresponds to the timezone the study data was collected in. It should be a location in IANA “Olson” format. That is, in:</p>
+<ul>
+<li><p>“[CONTINENT -or- OCEAN]/[CITY]” format</p></li>
+<li><p>“Etc/GMT[INVERSE OFFSET]” format</p></li>
+<li><p>“UTC” or “GMT”</p></li>
+</ul>
+<p>See either:</p>
+<ul>
+<li><p>The output from running <code><a href="https://rdrr.io/r/base/timezones.html" class="external-link">Sys.timezone()</a></code> within the R Console to see the timezone of your computer system in Olson format, which you can use if you are in the same timezone that the data was collected in. Or…</p></li>
+<li><p>Reference “TZ identifier” column in the <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones" class="external-link">tz database</a> to find the the correct timezone. Prefer to use the rows that are highlighted green.</p></li>
+</ul>
+<table class="table caption-top">
+<thead><tr class="header">
+<th>Acceptable</th>
+<th>Unacceptable</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>America/Chicago, Etc/GMT+6</td>
+<td>CST</td>
+</tr>
+<tr class="even">
+<td>America/New_York, Etc/GMT+5</td>
+<td>EDT</td>
+</tr>
+<tr class="odd">
+<td>America/Los_Angeles, Etc/GMT+8</td>
+<td>PST</td>
+</tr>
+<tr class="even">
+<td>Asia/Hong_Kong</td>
+<td>Asia/Hong Kong</td>
+</tr>
+<tr class="odd">
+<td>Asia/Katmandu</td>
+<td>Katmandu</td>
+</tr>
+<tr class="even">
+<td>Australia/Sydney</td>
+<td>NPT</td>
+</tr>
+<tr class="odd">
+<td>Europe/London</td>
+<td>BST</td>
+</tr>
+<tr class="even">
+<td>Europe/Paris</td>
+<td>CET</td>
+</tr>
+</tbody>
+</table></section><section class="level3"><h4 id="sampling_frequency">sampling_frequency<a class="anchor" aria-label="anchor" href="#sampling_frequency"></a>
+</h4>
+<p>A integer scalar corresponding to the sampling frequency of the wrist activity monitors. If sampling_frequency changed during data collection, then a sequence of integers should be entered.</p>
+<table class="table caption-top">
+<thead><tr class="header">
+<th>Acceptable</th>
+<th>Unacceptable</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>100</td>
+<td>100Hz</td>
+</tr>
+<tr class="even">
+<td>30</td>
+<td>29.9</td>
+</tr>
+</tbody>
+</table></section><section class="level3"><h4 id="wrist_accelerometer">wrist_accelerometer<a class="anchor" aria-label="anchor" href="#wrist_accelerometer"></a>
+</h4>
+<p>Sequence of mappings that define where raw wrist accelerometer files are in your computer system. Only the <code>directories</code> key or <code>filepaths</code> key should be defined, not both.</p>
+<section class="level4"><h5 id="directories">directories<a class="anchor" aria-label="anchor" href="#directories"></a>
+</h5>
+<p>One or more directories where the raw accelerometer files are being held. The directories should only hold raw files that are all the same extension (.gt3x, .cwa, .bin, .csv). Additionally, the directories:</p>
+<ul>
+<li><p><strong><em>can</em></strong> hold sub-directories or files that do not end in .gt3x, .cwa, .bin or .csv.</p></li>
+<li>
+<p><strong><em>should not</em></strong> hold multiple formats of the same recording/session</p>
+<ul>
+<li>For example, if MYFILE_001.gt3x is in the directory, there should not be a MYFILE_001.csv (raw csv export from ActiLife) in the directory as well.</li>
+</ul>
+</li>
+<li><p><strong><em>should not</em></strong> hold raw files from monitors not worn at the wrist</p></li>
+</ul>
+<p>If the directory contains multiple formats of the same recording/session or contains raw files from different wear locations, then the <code>filepaths</code> key should be defined instead.</p>
+</section><section class="level4"><h5 id="filepaths">filepaths<a class="anchor" aria-label="anchor" href="#filepaths"></a>
+</h5>
+<p>One or more filepaths that point directly to the raw files. Users will most likely define the filepaths by using the <code>!expr</code> tag to directly use R code. See the <a href="#expr">values as an Expression section</a> for more information.</p>
+</section></section><section class="level3"><h4 id="reference">reference<a class="anchor" aria-label="anchor" href="#reference"></a>
+</h4>
+<p>Sequence of mappings that define the reference measures being used and where they are located in your computer system.</p>
+<section class="level4"><h5 id="direct_observation">direct_observation<a class="anchor" aria-label="anchor" href="#direct_observation"></a>
+</h5>
+<p>asdf</p>
+<section class="level5"><h6 id="filepath">filepath<a class="anchor" aria-label="anchor" href="#filepath"></a>
+</h6>
+</section></section><section class="level4"><h5 id="still_image">still_image<a class="anchor" aria-label="anchor" href="#still_image"></a>
+</h5>
+<p>asdf</p>
+<section class="level5"><h6 id="filepath-1">filepath<a class="anchor" aria-label="anchor" href="#filepath-1"></a>
+</h6>
+</section></section><section class="level4"><h5 id="activpal">activpal<a class="anchor" aria-label="anchor" href="#activpal"></a>
+</h5>
+<section class="level5"><h6 id="secepochs_directories">1secEpochs_directories<a class="anchor" aria-label="anchor" href="#secepochs_directories"></a>
+</h6>
+</section><section class="level5"><h6 id="secepochs_filepaths">1secEpochs_filepaths<a class="anchor" aria-label="anchor" href="#secepochs_filepaths"></a>
+</h6>
+</section><section class="level5"><h6 id="events_directories">events_directories<a class="anchor" aria-label="anchor" href="#events_directories"></a>
+</h6>
+</section><section class="level5"><h6 id="events_filepaths">events_filepaths<a class="anchor" aria-label="anchor" href="#events_filepaths"></a>
+</h6>
+</section><section class="level5"><h6 id="id_pattern">id_pattern<a class="anchor" aria-label="anchor" href="#id_pattern"></a>
+</h6>
+</section></section><section class="level4"><h5 id="actipass">actipass<a class="anchor" aria-label="anchor" href="#actipass"></a>
+</h5>
+<p>asdf</p>
+<section class="level5"><h6 id="directories-1">directories<a class="anchor" aria-label="anchor" href="#directories-1"></a>
+</h6>
+</section><section class="level5"><h6 id="filepaths-1">filepaths<a class="anchor" aria-label="anchor" href="#filepaths-1"></a>
+</h6>
+</section><section class="level5"><h6 id="id_pattern-1">id_pattern<a class="anchor" aria-label="anchor" href="#id_pattern-1"></a>
+</h6>
+</section></section></section></section><section class="level2"><h3 id="expr">Values as an Expression<a class="anchor" aria-label="anchor" href="#expr"></a>
+</h3>
+<p>YAML values can have a tag before defining a value, as noted in <code><a href="https://posit-dev.github.io/r-yaml12/articles/yaml-tags-and-advanced-features.html" class="external-link">vignette("yaml-tags-and-advanced-features", package = "yaml12")</a></code> . In WAVES, the <code>!expr</code> tag has been defined to evaluate text after the <code>!expr</code> tag as an R expression. For example, the following key: value pair</p>
+<p><code>my_number: !expr 6 * 7</code></p>
+<p>is equivalent to the following code in R</p>
+<p><code>list(my_number = 6 * 7)</code></p>
+<p>For any keys that have the word “filepath”, it is recommended to use the <code>!expr</code> tag along with an R expression to easily define all filepaths instead of manually typing out every single filepath. This will typically be done using the <code><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files()</a></code> function.</p>
+<p>For example, if I wanted to list files that only had the <code>.csv.gz</code> extension within the WAVES repository, then the following would work in the YAML file:</p>
+<pre><code>filepaths: !expr list.files(path = "data/0_CONFIG/RAW", pattern = "$\\.csv\\.gz", full.names = TRUE)</code></pre>
+<p>Note that the code is all kept on the same line, and the <code>full.names</code> argument is set to <code>TRUE</code>.</p>
+<p>If you were to write <code><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files()</a></code> across multiple lines, it would have to be written like so:</p>
+<pre><code>filepaths:
+  - !expr list.files(
+      path = "data/0_CONFIG/RAW",
+      pattern = "$\\.csv\\.gz",
+      full.names = TRUE
+    )</code></pre>
+<p>Note, in YAML language indentation matters, as it is essential for determining which sequences/mappings are within others. So the following would NOT work and return an error.</p>
+<pre><code><span><span class="va">filepaths</span><span class="op">:</span></span>
+<span>  <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span></span>
+<span>  path <span class="op">=</span> <span class="st">"data/0_CONFIG/RAW"</span>,</span>
+<span>  pattern <span class="op">=</span> <span class="st">"$\\.csv\\.gz"</span>,</span>
+<span>  full.names <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre>
+<p>This usually happens if you were to directly copy and paste the R code directly from a script or from the Console. If you do so, make sure to appropriately indent the code such that the <code>)</code> parenthesis is directly under the <code>!</code> in <code>!expr</code> tag.</p>
+</section></section><section class="section level2"><h2 id="main-pipeline-to-update">Main Pipeline (TO UPDATE)<a class="anchor" aria-label="anchor" href="#main-pipeline-to-update"></a>
 </h2>
 <ol type="1">
 <li>
@@ -151,7 +304,7 @@
 <li><p>Open “summary_pipeline_main.html” once again and check to see what files have made it through. If all files have made it through, or at least the file’s you would’ve expected to be successfully processed, share the “3_MERGED” folder with WAVES data team, where “3_MERGED” is renamed with the study acronym.</p></li>
 </ol>
 <p>From step 14, if there are no errors, you are ready to run the main pipeline(LINK ME).</p>
-</section><section class="level2"><h2 id="notes">Notes<a class="anchor" aria-label="anchor" href="#notes"></a>
+</section><section class="section level2"><h2 id="notes">Notes<a class="anchor" aria-label="anchor" href="#notes"></a>
 </h2>
 <ul>
 <li><p>Even if a pipeline finishes successfully, you may see in the console “There were XX warnings (use warnings() to see them)”. This is normal if working on an R version that is not 4.5.2., as the messages will be warnings that the packages are meant to work on the latest R version. As long as the R version being used is R 4.4 or beyond, everything should still work. We have not tested the WAVES repository on R versions below 4.4.</p></li>
