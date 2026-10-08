@@ -1,6 +1,6 @@
 # Running the Configuration Pipeline
 
-Last Update: 2026-09-25
+Last Update: 2026-10-08
 
 Before continuing, please ensure you have set up your computer according
 to `vignette("WAVES#preliminary-setup")`.

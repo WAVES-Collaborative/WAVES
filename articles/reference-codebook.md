@@ -1,23 +1,22 @@
 # Reference Data Codebook
 
-Last Update: May 7, 2026
-
 **Purpose**: Describe the variables for meta data and ground truth
 format for studies contributing data to the WAVES analysis. Designed to
 align with analysis plan below.
 
 Of note, the expectation is for WAVES studies to map their existing
-labeled data to this codebook where possible. The expectation is not to
+labeled data to this codebook, or process their reference data following
+instructions listed here, where possible. The expectation is not to
 relabel data for this analysis. In the excel appendix, studies should
 provide their labels, operational definitions and mappings.
 
-## Analysis Plan - Aim 1 (primary reference video recorded DO)
+## Analysis Plan - Aim 1
 
 Performance evaluation of three core metrics (sedentary time, step
 counting, moderate-vigorous physical activity) compared to a primary
-reference measure collected for a fixed amount of time, at least 1-hour
-hours within a free-living environment (i.e., naturalistic conditions,
-not laboratory or scripted).
+reference measure video recorded direct observation collected for a
+fixed amount of time, at least 1-hour hours within a free-living
+environment (i.e., naturalistic conditions, not laboratory or scripted).
 
 Identify primary outcome of interest and propose a priori sensitivity
 analyses to examine accuracy across different domains and movement that
@@ -48,7 +47,7 @@ that should be considered.
 
 *\*Indicates primary analysis*
 
-## Analysis Plan – Aim 2 (Day-level secondary comparisons)
+## Analysis Plan – Aim 2
 
 Performance evaluation of three core metrics (sedentary time, step
 counting, MVPA) compared to a field-based secondary reference measure
@@ -76,11 +75,11 @@ Notes:
 
 ### Example
 
-| site | pid   | age | bmi  | gender | device | sampling | location |
-|------|-------|-----|------|--------|--------|----------|----------|
-| CP   | CP001 | 21  | 23.4 | F      | AG3X   | 30       | non_dom  |
+| study | subject | age | bmi  | gender | device | sampling | location |
+|-------|---------|-----|------|--------|--------|----------|----------|
+| ACT24 | 101     | 21  | 23.4 | F      | AG3X   | 30       | non_dom  |
 
-## *Primary Reference: Video-Recorded Direct Observation*
+## Video-Recorded Direct Observation
 
 Notes:
 
@@ -112,47 +111,64 @@ Notes:
 
 - A study must have sedentary time, MVPA or steps labeled in a way
   consistent with operational definitions to be included in the
-  analysis. The study does not need to have all three to be included,
-  should provide NAs for metrics that aren’t labeled.
+  analysis.
+
+- The study does not need to have all three outcomes to be included. If
+  an outcome is missing, the variable should still be included with
+  either NAs or left completely empty.
 
 ### Data Dictionary
 
-| **variable** | definition | type | levels | labels/notes | missingness |
-|----|----|----|----|----|----|
-| **site** | Study site identifier | character (nominal) | CP | California Polytechnic State University | none (required for each included file) |
-|  |  |  | UWM | University of Wisconsin–Milwaukee |  |
-| **pid** | Unique participant identifier | alphanumeric | \- | unique identifier variable that identifies participant and can be used to link with device data | none |
-| **observation** | Observation session identifier | numeric (count) | \- | If a participant is only observed once, then default to 1 | none |
-| **datetime** | Timestamp of observation in UTC timezone | POSIXct | \- | Timestamp in coordinated universal time (UTC), YYYY-mm-dd HH:MM:SS format | none |
-| **date** | Local calendar date at the observation site | date | \- | In year-month-day format (i.e. YYYY-MM-DD) | none |
-| **time** | Local wall-clock time at the observation site | character | \- | In 24-hour hour:minute:second format (i.e. HH:MM:SS) | none |
-| **domain_do** | Behavioral domain classification | character (nominal) | leisure | Discretionary time activities including social activities, sports, fitness, recreation, and screen-based leisure activities | allowed |
-|  |  |  | household | Personal care, housework, lawn and garden work, exterior maintenance |  |
-|  |  |  | transportation | Traveling to and from places (e.g., work, shopping, place of worship). Includes driving or riding in a car, public motorized transport (bus, train), and active transport |  |
-|  |  |  | occupation | Work or school-related activities including paid or unpaid work, study, and seeking employment |  |
-|  |  |  | other | Behaviors not categorized above (e.g., purchasing goods, volunteering, other uncategorized activities) |  |
-| **posture_do** | Observed posture or movement type | character (nominal) | sedentary | Sitting or lying | allowed |
-|  |  |  | mixed_movement | Includes standing, stand_move, sport_movement, stretching, crouching/kneeling/squatting, ascending/descending stairs |  |
-|  |  |  | walking | L-R-L-R pattern including walking with load |  |
-|  |  |  | running | Running |  |
-|  |  |  | biking | Cycling |  |
-| **sedtype_do** | Sedentary subtype classification | character (nominal) | non_sed | All non-sedentary/active behaviors | allowed |
-|  |  |  | sitting | sitting/reclining not in a motor vehicle as a driver/passenger |  |
-|  |  |  | lying | lying |  |
-|  |  |  | vehicle | Driving a personal motor vehicle or as a passenger in any land-based motor vehicle |  |
-| intensity3_do | 3-level intensity classification based on METs | character (ordinal) | sedentary | sedentary posture with low energy expenditure | allowed |
-|  |  |  | light | non sedentary posture 1.50 - 2.99 METS |  |
-|  |  |  | mvpa | 3.00+ METS |  |
-| intensity4_do | 4-level intensity classification based on METs | character (ordinal) | sedentary | sedentary posture with low energy expenditure | allowed |
-|  |  |  | light | non sedentary posture 1.50 - 2.99 METS |  |
-|  |  |  | moderate | 3.00 - 5.99 METS |  |
-|  |  |  | vigorous | 6.00+ METS |  |
-| steps_do | Number of steps recorded during the 1-second epoch | count | \- | \- | allowed |
+[TABLE]
 
 ### Example
 
-| site | pid | observation | datetime | date | time | domain_do | posture_do | sedtype_do | intensity3_do | intensity4_do | steps_do |
+| study | subject | observation | datetime | date | time | domain_do | posture_do | sedtype_do | intensity3_do | intensity4_do | steps_do |
 |----|----|----|----|----|----|----|----|----|----|----|----|
-| CP | CP001 | 1 | 1990-01-01T18:36:10 | 1990-01-01 | 10:42:10 | transportation | walking | non_sed | mvpa | moderate | 2 |
+| ACT24 | 101 | 1 | 1990-01-01T18:36:10Z | 1990-01-01 | 10:36:10 | transportation | walking | non_sed | mvpa | moderate | 2 |
 
-## Thigh-worn device data dictionary
+## Thigh-worn activPAL
+
+The following instructions are to create the EventsEx and 1-second epoch
+exports from PALBatch software If participants were instructed to wear a
+thigh-worn activPAL for your study.
+
+1.  Open PALbatch. Update to the most recent version if available
+
+    1.  At the time of writing (March 20, 2026), this would be PALbatch
+        v8.11.1.63
+
+2.  Within the main window, select your desired input/output folders.
+    Ideally, the output folder should be in the same drive as where you
+    download the WAVES repository.
+
+![](images/ref-ap-folders.png)
+
+3.  Ensure the Analysis Settings are the following:
+
+| Section | Option | Value |
+|----|----|----|
+| Validation algorithm | wear time protocol | 24 hour protocol (allow 4 hours non-wear) |
+|  | valid day filter | Highlight valid days |
+|  | wear correction | TRUE |
+| Classification algorithm | [CREA](https://kb.palt.com/articles/crea/) (v1.3) |  |
+|  | minimum non-upright period (s) | 10 |
+|  | minimum upright period (s) | 10 |
+
+![](images/ref-ap-analysis-settings.png)
+
+4.  Next, expand the Export Selection settings and check the following
+    options:
+
+| Section        | Option                             | Value |
+|----------------|------------------------------------|-------|
+| \-             | include analysis parameters header | TRUE  |
+| Events Exports | Events (extended)                  | TRUE  |
+| Epochs Exports | Custom duration epochs             | TRUE  |
+|                | custom duration                    | 1s    |
+
+![](images/ref-ap-export-settings.png)
+
+5.  Click “Export”
+
+## Other

@@ -1,18 +1,18 @@
 # Running the Main Pipeline
 
-Last Update: 2026-09-25
+Last Update: 2026-10-08
 
-## YAML File (TODO)
+## YAML File
 
 WAVES uses a YAML file (`_waves.yml`) to define parameters needed for
 the main pipeline. For more information on what YAML is, reference
 [`vignette("yaml-2-minute-intro", package = "yaml12")`](https://posit-dev.github.io/r-yaml12/articles/yaml-2-minute-intro.html).
-It is not a necessary need, but may help with troubleshooting if the
+It is not a necessary read, but may help with troubleshooting if the
 pipeline is erroring at `lst_yaml`.
 
 ### Keys
 
-The `_waves.yml` file has 4 top-level keys. Below are descriptions and
+The `_waves.yml` file has 6 top-level keys. Below are descriptions and
 examples for each top-level key:
 
 #### study_timezone
@@ -61,6 +61,11 @@ then a sequence of integers should be entered.
 |------------|--------------|
 | 100        | 100Hz        |
 | 30         | 29.9         |
+
+#### metadata_filepath
+
+Filepath to csv file containing metadata for each participant, as
+described in `vignette("reference-codebook.qmd")`
 
 #### wrist_accelerometer
 
@@ -119,6 +124,12 @@ asdf
 
 ###### 1secEpochs_filepaths
 
+One or more filepaths that point directly to 1-second epoch
+activPALfiles. See `vignette("reference-codebook#ref-do")` for guidance
+on exporting 1-second epoch files from PAL Batch. Users will most likely
+define the filepaths by using the `!expr` tag to directly use R code.
+See the [Values as an Expression section](#expr) for more information.
+
 ###### events_directories
 
 ###### events_filepaths
@@ -149,10 +160,10 @@ is equivalent to the following code in R
 
 `list(my_number = 6 * 7)`
 
-For any keys that have the word “filepath”, it is recommended to use the
-`!expr` tag along with an R expression to easily define all filepaths
-instead of manually typing out every single filepath. This will
-typically be done using the
+For any keys that have the word `filepaths`, it is recommended to use
+the `!expr` tag along with an R expression to easily define all
+filepaths instead of manually typing out every single filepath. This
+will typically be done using the
 [`list.files()`](https://rdrr.io/r/base/list.files.html) function.
 
 For example, if I wanted to list files that only had the `.csv.gz`
@@ -207,30 +218,20 @@ under the `!` in `!expr` tag.
 
     1.  `RETICULATE_MINICONDA_PATH`: The path to the conda installation
         specified within the configuration pipeline.
-    2.  `study_timezone`: Change from
-        [`Sys.timezone()`](https://rdrr.io/r/base/timezones.html) if
-        data was collected in another timezone. Supply it as
-        country/city (e.g. `America/Los Angeles`, `Europe/London`, etc.)
-    3.  `sampling_frequency`: The sampling frequency set for
-        accelerometers during data collection. If using .bin/.cwa/.gt3x
-        data then this doesn’t matter, but does for .csv data.
-    4.  `n_workers`: The default is 2 workers, meaning 2 processes of
+    2.  Check the object `trial_run` is set to `TRUE`. This will run one
+        of your raw files through the pipeline as one last precaution
+        to:
+        1.  Make sure your supplied reference data is set up according
+            to WAVES instructions.
+        2.  Ensure one of your raw wrist accelerometer files can safely
+            go through the pipeline.
+    3.  `n_workers`: The default is 2 workers, meaning 2 processes of
         the pipeline will run in parallel of each other.
         1.  `n_workers` should always be at least 2!
         2.  If your operating system has more RAM and cores available,
             feel free to increase the number of workers, with the max
             being one less than the number of cores available of your
             system (`future::availableCores() - 1`)
-    5.  `vct_raw_fpa`: Change vct_raw_fpa such that it creates a
-        character vector that points towards your raw files.
-        1.  We provide an example of how to do so using the `list.files`
-            function, where the `file.path` function is used to list
-            multiple directories at once.
-
-        2.  We suggest putting a “\[1\]” at the end of `list.files` to
-            make sure pipeline works with one file. (image below)
-
-            ![](images/vct_raw_fpa.png)
 
 3.  Save the “\_targets.R” script.
 
@@ -242,14 +243,13 @@ under the `!` in `!expr` tag.
 
 6.  Once the pipeline has completed, a .html file should have been
     created under the “reports” folder called
-    “summary_pipeline_main.html”. Open the file and double-check file
-    went through entire pipeline successfully under the “By Major Steps”
-    section.
+    “summary_pipeline_main.html”. Open the file and double-check the
+    file went through entire pipeline successfully under the “By Major
+    Steps” section.
 
 7.  If pipeline works successfully, close the
     “summary_pipeline_main.html” file and run pipeline on all files
-    available by removing the the “\[1\]” at the end of the `list.files`
-    function.
+    available by setting `trial_run` to `FALSE`.
 
     1.  Make sure to save the “\_targets.R” script and rerun the code
         within “INPUT” section.

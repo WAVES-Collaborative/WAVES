@@ -214,6 +214,17 @@ Running the configuration, main, and analysis pipelines.
 
   Instructions for \_WAVES.yml and running \_targets.R.
 
+### Updating Code
+
+Instructions for pulling latest version from Github and updating
+pipelines.
+
+- [Updating Conda
+  Environments](https://waves-collaborative.github.io/WAVES/articles/update-conda-environments.md):
+
+  Instructions for updating conda environments when changes have been
+  made to the WAVES repository.
+
 ### WAVES Project
 
 Guiding documents for WAVES project.
@@ -237,6 +248,17 @@ Guiding documents for WAVES project.
 
 Guidance for when errors appear or when updates are made to the
 pipeline.
+
+- [Updating Conda
+  Environments](https://waves-collaborative.github.io/WAVES/articles/update-conda-environments.md):
+
+  Instructions for updating conda environments when changes have been
+  made to the WAVES repository.
+
+- [Posting GitHub
+  Issue](https://waves-collaborative.github.io/WAVES/articles/posting-github-issue.md):
+
+  Instructions if there is an error in running WAVES pipelines and .
 
 - [Python
   Methods](https://waves-collaborative.github.io/WAVES/articles/python-methods.md):

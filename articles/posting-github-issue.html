@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Program of Work • WAVES</title>
+<title>Posting GitHub Issue • WAVES</title>
 <script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="program-of-work_files/libs/quarto-html/popper.min.js"></script><script src="program-of-work_files/libs/quarto-html/tippy.umd.min.js"></script><link href="program-of-work_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="program-of-work_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Program of Work">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="posting-github-issue_files/libs/quarto-html/popper.min.js"></script><script src="posting-github-issue_files/libs/quarto-html/tippy.umd.min.js"></script><link href="posting-github-issue_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="posting-github-issue_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Posting GitHub Issue">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -80,12 +80,12 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Program of Work</h1>
+      <h1>Posting GitHub Issue</h1>
 
 
 
 
-      <small class="dont-index">Source: <a href="https://github.com/WAVES-Collaborative/WAVES/blob/main/vignettes/program-of-work.qmd" class="external-link"><code>vignettes/program-of-work.qmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/WAVES-Collaborative/WAVES/blob/main/vignettes/posting-github-issue.qmd" class="external-link"><code>vignettes/posting-github-issue.qmd</code></a></small>
       <div class="d-none name"><code></code></div>
     </div>
 
@@ -94,6 +94,70 @@
 
 
 
+    <p>After navigating to the Issues tab of WAVES, please use the following naming convention for the title of the issue:</p>
+<pre><code>[Pipeline] - [Target/Report] - [Quick Description]</code></pre>
+<p>where:</p>
+<ul>
+<li>
+<p>Pipeline: <code>Config</code> or <code>Main</code></p>
+<ul>
+<li>If the error occurred while running the <code>Config</code> pipeline or <code>Main</code> pipeline.</li>
+</ul>
+</li>
+<li>
+<p>Target/Report: any of the targets within a pipeline or a report such as <code>summary_pipeline_main</code> or <code>summary_miniconda</code></p>
+<ul>
+<li><p>A “target” is another name for a step within the pipeline.</p></li>
+<li><p>The target that errored is usually what appears after an ❌. So in Step 7 of the Configuration pipeline instructions, the target was <code>fpa_merged</code></p></li>
+<li>
+<p>The following is a list of targets within the pipelines where errors may occur:</p>
+<ul>
+<li><p>vct_raw</p></li>
+<li><p>vct_raw_type</p></li>
+<li><p>vct_basic</p></li>
+<li><p>lst_out.cut</p></li>
+<li><p>vct_ox_input</p></li>
+<li><p>vct_ox_step</p></li>
+<li><p>vct_ox_wlms</p></li>
+<li><p>vct_ox_acti</p></li>
+<li><p>lst_ox</p></li>
+<li><p>vct_cal</p></li>
+<li><p>lst_out.raw</p></li>
+<li><p>lst_out.oak.pre</p></li>
+<li><p>fpa_merged</p></li>
+<li><p>pipeline_summary</p></li>
+</ul>
+</li>
+<li>
+<p>The below only appear within the <code>config</code> pipeline:</p>
+<ul>
+<li><p>lst_miniconda</p></li>
+<li><p>minconda_summary</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Quick Description: The error itself if it is ≤ 10 words or a summary</p></li>
+</ul>
+<p>Within the description of the issue, please either:</p>
+<ul>
+<li>screenshot your console that includes the pipeline output and the error itself (example below)</li>
+</ul>
+<p><img src="images/example_issue_screenshot.png"></p>
+<ul>
+<li>
+<p>Copy the output from the console into a codeblock</p>
+<ul>
+<li>With the description box highlighted, enter a forward slash <code>/</code> and then select “Code Block”</li>
+</ul>
+<p><img src="images/example_issue_pasting_code.png"></p>
+<ul>
+<li><p>For language, select “R”</p></li>
+<li><p>Within the code block, paste the console output</p></li>
+</ul>
+</li>
+</ul>
+<p>Additionally, if the error occured at <code>lst_out.raw</code> , <code>vct_ox_step</code> , <code>vct_ox_wlms</code> , <code>vct_ox_acti</code> <code>lst_out.raw</code> or <code>lst_out.oak.pre</code> , then please also attach the “summary_miniconda.html” report.</p>
 
 
 

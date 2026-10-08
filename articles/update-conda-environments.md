@@ -1,0 +1,19 @@
+# Updating Conda Environments
+
+Once the WAVES repository has been installed, major version changes to
+the pipeline may result in prior conda environment installations to be
+outdated. Unfortunately, re-running the configuration pipeline by itself
+will not be sufficient, which will require removing the existing
+environments entirely before rerunning the configuration pipeline. To do
+so, first run the code within the INPUT section of `_targets_config.R`.
+Then, run the following code within the R console:
+
+    library(reticulate)
+    conda_remove("WHO_WAVES_stepcount")
+    conda_remove("WHO_WAVES_accelerometer")
+    conda_remove("WHO_WAVES_actinet")
+    conda_remove("WHO_WAVES_oak_1.0")
+    conda_remove("WHO_WAVES_oak_pre")
+
+After removal, re-run the config pipeline (`tar_make()`) and it will
+recreate the missing environments.

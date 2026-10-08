@@ -5,12 +5,14 @@ articles:
   authorship-guidelines: authorship-guidelines.html
   instructions-config: instructions-config.html
   instructions-main: instructions-main.html
+  posting-github-issue: posting-github-issue.html
   program-of-work: program-of-work.html
   python-methods: python-methods.html
   reference-codebook: reference-codebook.html
   articles/test: test.html
+  update-conda-environments: update-conda-environments.html
   WAVES: WAVES.html
-last_built: 2026-09-25T13:01Z
+last_built: 2026-10-08T15:17Z
 urls:
   reference: https://waves-collaborative.github.io/WAVES/reference
   article: https://waves-collaborative.github.io/WAVES/articles

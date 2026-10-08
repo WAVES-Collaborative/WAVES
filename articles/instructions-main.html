@@ -41,12 +41,17 @@
     <li><a class="dropdown-item" href="../articles/instructions-config.html">Running the Configuration Pipeline</a></li>
     <li><a class="dropdown-item" href="../articles/instructions-main.html">Running the Main Pipeline</a></li>
     <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Updating Pipeline</h6></li>
+    <li><a class="dropdown-item" href="../articles/update-conda-environments.html">Updating Conda Environments</a></li>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guiding Documents</h6></li>
     <li><a class="dropdown-item" href="../articles/program-of-work.html">Program of Work</a></li>
     <li><a class="dropdown-item" href="../articles/authorship-guidelines.html">Authorship Guidelines</a></li>
     <li><a class="dropdown-item" href="../articles/reference-codebook.html">Reference Data Codebook</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Technical</h6></li>
+    <li><a class="dropdown-item" href="../articles/update-conda-environments.html">Updating Conda Environments</a></li>
+    <li><a class="dropdown-item" href="../articles/posting-github-issue.html">Posting GitHub Issue</a></li>
     <li><a class="dropdown-item" href="../articles/python-methods.html">Python Methods</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
@@ -89,13 +94,13 @@
 
 
 
-    <p>Last Update: 2026-09-25</p>
-<section class="section level2"><h2 id="yaml-file-todo">YAML File (TODO)<a class="anchor" aria-label="anchor" href="#yaml-file-todo"></a>
+    <p>Last Update: 2026-10-08</p>
+<section class="section level2"><h2 id="yaml-file">YAML File<a class="anchor" aria-label="anchor" href="#yaml-file"></a>
 </h2>
-<p>WAVES uses a YAML file (<code>_waves.yml</code>) to define parameters needed for the main pipeline. For more information on what YAML is, reference <code><a href="https://posit-dev.github.io/r-yaml12/articles/yaml-2-minute-intro.html" class="external-link">vignette("yaml-2-minute-intro", package = "yaml12")</a></code>. It is not a necessary need, but may help with troubleshooting if the pipeline is erroring at <code>lst_yaml</code>.</p>
+<p>WAVES uses a YAML file (<code>_waves.yml</code>) to define parameters needed for the main pipeline. For more information on what YAML is, reference <code><a href="https://posit-dev.github.io/r-yaml12/articles/yaml-2-minute-intro.html" class="external-link">vignette("yaml-2-minute-intro", package = "yaml12")</a></code>. It is not a necessary read, but may help with troubleshooting if the pipeline is erroring at <code>lst_yaml</code>.</p>
 <section class="level2"><h3 id="keys">Keys<a class="anchor" aria-label="anchor" href="#keys"></a>
 </h3>
-<p>The <code>_waves.yml</code> file has 4 top-level keys. Below are descriptions and examples for each top-level key:</p>
+<p>The <code>_waves.yml</code> file has 6 top-level keys. Below are descriptions and examples for each top-level key:</p>
 <section class="level3"><h4 id="study_timezone">study_timezone<a class="anchor" aria-label="anchor" href="#study_timezone"></a>
 </h4>
 <p>A string scalar that corresponds to the timezone the study data was collected in. It should be a location in IANA “Olson” format. That is, in:</p>
@@ -166,7 +171,10 @@
 <td>29.9</td>
 </tr>
 </tbody>
-</table></section><section class="level3"><h4 id="wrist_accelerometer">wrist_accelerometer<a class="anchor" aria-label="anchor" href="#wrist_accelerometer"></a>
+</table></section><section class="level3"><h4 id="metadata_filepath">metadata_filepath<a class="anchor" aria-label="anchor" href="#metadata_filepath"></a>
+</h4>
+<p>Filepath to csv file containing metadata for each participant, as described in <code>vignette("reference-codebook.qmd")</code></p>
+</section><section class="level3"><h4 id="wrist_accelerometer">wrist_accelerometer<a class="anchor" aria-label="anchor" href="#wrist_accelerometer"></a>
 </h4>
 <p>Sequence of mappings that define where raw wrist accelerometer files are in your computer system. Only the <code>directories</code> key or <code>filepaths</code> key should be defined, not both.</p>
 <section class="level4"><h5 id="directories">directories<a class="anchor" aria-label="anchor" href="#directories"></a>
@@ -205,6 +213,7 @@
 </h6>
 </section><section class="level5"><h6 id="secepochs_filepaths">1secEpochs_filepaths<a class="anchor" aria-label="anchor" href="#secepochs_filepaths"></a>
 </h6>
+<p>One or more filepaths that point directly to 1-second epoch activPALfiles. See <code>vignette("reference-codebook#ref-do")</code> for guidance on exporting 1-second epoch files from PAL Batch. Users will most likely define the filepaths by using the <code>!expr</code> tag to directly use R code. See the <a href="#expr">Values as an Expression section</a> for more information.</p>
 </section><section class="level5"><h6 id="events_directories">events_directories<a class="anchor" aria-label="anchor" href="#events_directories"></a>
 </h6>
 </section><section class="level5"><h6 id="events_filepaths">events_filepaths<a class="anchor" aria-label="anchor" href="#events_filepaths"></a>
@@ -226,7 +235,7 @@
 <p><code>my_number: !expr 6 * 7</code></p>
 <p>is equivalent to the following code in R</p>
 <p><code>list(my_number = 6 * 7)</code></p>
-<p>For any keys that have the word “filepath”, it is recommended to use the <code>!expr</code> tag along with an R expression to easily define all filepaths instead of manually typing out every single filepath. This will typically be done using the <code><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files()</a></code> function.</p>
+<p>For any keys that have the word <code>filepaths</code>, it is recommended to use the <code>!expr</code> tag along with an R expression to easily define all filepaths instead of manually typing out every single filepath. This will typically be done using the <code><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files()</a></code> function.</p>
 <p>For example, if I wanted to list files that only had the <code>.csv.gz</code> extension within the WAVES repository, then the following would work in the YAML file:</p>
 <pre><code>filepaths: !expr list.files(path = "data/0_CONFIG/RAW", pattern = "$\\.csv\\.gz", full.names = TRUE)</code></pre>
 <p>Note that the code is all kept on the same line, and the <code>full.names</code> argument is set to <code>TRUE</code>.</p>
@@ -260,10 +269,12 @@
 <ol type="1">
 <li>
 <code>RETICULATE_MINICONDA_PATH</code>: The path to the conda installation specified within the configuration pipeline.</li>
-<li>
-<code>study_timezone</code>: Change from <code><a href="https://rdrr.io/r/base/timezones.html" class="external-link">Sys.timezone()</a></code> if data was collected in another timezone. Supply it as country/city (e.g. <code>America/Los Angeles</code>, <code>Europe/London</code>, etc.)</li>
-<li>
-<code>sampling_frequency</code>: The sampling frequency set for accelerometers during data collection. If using .bin/.cwa/.gt3x data then this doesn’t matter, but does for .csv data.</li>
+<li>Check the object <code>trial_run</code> is set to <code>TRUE</code>. This will run one of your raw files through the pipeline as one last precaution to:
+<ol type="1">
+<li>Make sure your supplied reference data is set up according to WAVES instructions.</li>
+<li>Ensure one of your raw wrist accelerometer files can safely go through the pipeline.</li>
+</ol>
+</li>
 <li>
 <code>n_workers</code>: The default is 2 workers, meaning 2 processes of the pipeline will run in parallel of each other.
 <ol type="1">
@@ -272,24 +283,14 @@
 <li>If your operating system has more RAM and cores available, feel free to increase the number of workers, with the max being one less than the number of cores available of your system (<code>future::availableCores() - 1</code>)</li>
 </ol>
 </li>
-<li>
-<code>vct_raw_fpa</code>: Change vct_raw_fpa such that it creates a character vector that points towards your raw files.
-<ol type="1">
-<li><p>We provide an example of how to do so using the <code>list.files</code> function, where the <code>file.path</code> function is used to list multiple directories at once.</p></li>
-<li>
-<p>We suggest putting a “[1]” at the end of <code>list.files</code> to make sure pipeline works with one file. (image below)</p>
-<p><img src="images/vct_raw_fpa.png"></p>
-</li>
-</ol>
-</li>
 </ol>
 </li>
 <li><p>Save the “_targets.R” script.</p></li>
 <li><p>Run the code within “INPUT” section.</p></li>
 <li><p>In Console, run “tar_make()”. For one file that is a whole day, it can take anywhere between 15-30 minutes on a potato computer. For one file that is a whole week, it may take up to 24 hours.</p></li>
-<li><p>Once the pipeline has completed, a .html file should have been created under the “reports” folder called “summary_pipeline_main.html”. Open the file and double-check file went through entire pipeline successfully under the “By Major Steps” section.</p></li>
+<li><p>Once the pipeline has completed, a .html file should have been created under the “reports” folder called “summary_pipeline_main.html”. Open the file and double-check the file went through entire pipeline successfully under the “By Major Steps” section.</p></li>
 <li>
-<p>If pipeline works successfully, close the “summary_pipeline_main.html” file and run pipeline on all files available by removing the the “[1]” at the end of the <code>list.files</code> function.</p>
+<p>If pipeline works successfully, close the “summary_pipeline_main.html” file and run pipeline on all files available by setting <code>trial_run</code> to <code>FALSE</code>.</p>
 <ol type="1">
 <li><p>Make sure to save the “_targets.R” script and rerun the code within “INPUT” section.</p></li>
 <li><p>This WILL take multiple days if the repository is not being ran on a high performance cluster.</p></li>

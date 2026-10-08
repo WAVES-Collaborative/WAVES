@@ -41,12 +41,17 @@
     <li><a class="dropdown-item" href="../articles/instructions-config.html">Running the Configuration Pipeline</a></li>
     <li><a class="dropdown-item" href="../articles/instructions-main.html">Running the Main Pipeline</a></li>
     <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Updating Pipeline</h6></li>
+    <li><a class="dropdown-item" href="../articles/update-conda-environments.html">Updating Conda Environments</a></li>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guiding Documents</h6></li>
     <li><a class="dropdown-item" href="../articles/program-of-work.html">Program of Work</a></li>
     <li><a class="dropdown-item" href="../articles/authorship-guidelines.html">Authorship Guidelines</a></li>
     <li><a class="dropdown-item" href="../articles/reference-codebook.html">Reference Data Codebook</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Technical</h6></li>
+    <li><a class="dropdown-item" href="../articles/update-conda-environments.html">Updating Conda Environments</a></li>
+    <li><a class="dropdown-item" href="../articles/posting-github-issue.html">Posting GitHub Issue</a></li>
     <li><a class="dropdown-item" href="../articles/python-methods.html">Python Methods</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
@@ -89,12 +94,11 @@
 
 
 
-    <p>Last Update: May 7, 2026</p>
-<p><strong>Purpose</strong>: Describe the variables for meta data and ground truth format for studies contributing data to the WAVES analysis. Designed to align with analysis plan below.</p>
-<p>Of note, the expectation is for WAVES studies to map their existing labeled data to this codebook where possible. The expectation is not to relabel data for this analysis. In the excel appendix, studies should provide their labels, operational definitions and mappings.</p>
-<section class="level2"><h2 id="analysis-plan---aim-1-primary-reference-video-recorded-do">Analysis Plan - Aim 1 (primary reference video recorded DO)<a class="anchor" aria-label="anchor" href="#analysis-plan---aim-1-primary-reference-video-recorded-do"></a>
+    <p><strong>Purpose</strong>: Describe the variables for meta data and ground truth format for studies contributing data to the WAVES analysis. Designed to align with analysis plan below.</p>
+<p>Of note, the expectation is for WAVES studies to map their existing labeled data to this codebook, or process their reference data following instructions listed here, where possible. The expectation is not to relabel data for this analysis. In the excel appendix, studies should provide their labels, operational definitions and mappings.</p>
+<section class="section level2"><h2 id="analysis-plan---aim-1">Analysis Plan - Aim 1<a class="anchor" aria-label="anchor" href="#analysis-plan---aim-1"></a>
 </h2>
-<p>Performance evaluation of three core metrics (sedentary time, step counting, moderate-vigorous physical activity) compared to a primary reference measure collected for a fixed amount of time, at least 1-hour hours within a free-living environment (i.e., naturalistic conditions, not laboratory or scripted).</p>
+<p>Performance evaluation of three core metrics (sedentary time, step counting, moderate-vigorous physical activity) compared to a primary reference measure video recorded direct observation collected for a fixed amount of time, at least 1-hour hours within a free-living environment (i.e., naturalistic conditions, not laboratory or scripted).</p>
 <p>Identify primary outcome of interest and propose a priori sensitivity analyses to examine accuracy across different domains and movement that are important for public health and/or may have a unique movement signal that should be considered.</p>
 <ol type="1">
 <li>Sedentary TIme
@@ -129,60 +133,63 @@
 </li>
 </ol>
 <p><em>*Indicates primary analysis</em></p>
-</section><section class="level2"><h2 id="analysis-plan-aim-2-day-level-secondary-comparisons">Analysis Plan – Aim 2 (Day-level secondary comparisons)<a class="anchor" aria-label="anchor" href="#analysis-plan-aim-2-day-level-secondary-comparisons"></a>
+</section><section class="section level2"><h2 id="analysis-plan-aim-2">Analysis Plan – Aim 2<a class="anchor" aria-label="anchor" href="#analysis-plan-aim-2"></a>
 </h2>
 <p>Performance evaluation of three core metrics (sedentary time, step counting, MVPA) compared to a field-based secondary reference measure collected over one or more 24-hour periods in free-living conditions.</p>
 <p><strong>Study Requirements</strong>:</p>
 <ul>
 <li><p>Protocol that includes minimum of 16-hour wear protocol for wrist worn device and field-based reference measure.</p></li>
 <li><p>Simultaneous raw wrist-worn device AND a reference measure traceable to a primary reference method with acceptable accuracy and precision in field-based testing</p></li>
-</ul></section><section class="level2"><h2 id="metadata">Metadata<a class="anchor" aria-label="anchor" href="#metadata"></a>
+</ul></section><section class="section level2"><h2 id="metadata">Metadata<a class="anchor" aria-label="anchor" href="#metadata"></a>
 </h2>
 <p>Notes:</p>
 <ul>
 <li>• Variables indicated as <strong>required</strong> must be included for a study’s data to be used in this analysis.</li>
 </ul>
-<section class="level3"><h3 id="data-dictionary">Data Dictionary<a class="anchor" aria-label="anchor" href="#data-dictionary"></a>
+<section class="level2"><h3 id="data-dictionary">Data Dictionary<a class="anchor" aria-label="anchor" href="#data-dictionary"></a>
 </h3>
-<table class="table caption-top" style="width:98%;">
+<table class="table caption-top" style="width:99%;">
 <colgroup>
-<col style="width: 5%">
-<col style="width: 37%">
-<col style="width: 10%">
-<col style="width: 4%">
-<col style="width: 21%">
-<col style="width: 19%">
+<col style="width: 3%">
+<col style="width: 28%">
+<col style="width: 7%">
+<col style="width: 6%">
+<col style="width: 34%">
+<col style="width: 16%">
 </colgroup>
 <thead><tr class="header">
 <th>variable</th>
 <th>definition</th>
 <th>type</th>
-<th>levels</th>
+<th>levels/examples</th>
 <th>specific labels/notes</th>
 <th>missingness</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>site</td>
-<td>Study site identifier</td>
+<td>study</td>
+<td>Study identifier</td>
 <td>character (nominal)</td>
-<td>
-<p>CP</p>
-<p>UWM</p>
-</td>
-<td>
-<p>California Polytechnic State University</p>
-<p>University of Wisconsin-Milwaukee</p>
-</td>
-<td>none (required for each included file)</td>
+<td>ACT24<br>
+FLAC<br>
+PALS<br>
+CAPTURE24</td>
+<td>Has to be the same for every single participant.</td>
+<td>none (<strong>required</strong> for each included file)</td>
 </tr>
 <tr class="even">
-<td>pid</td>
+<td>subject</td>
 <td>Unique participant identifier used to link observation data with device data.</td>
 <td>alphanumeric</td>
-<td>-</td>
-<td>Used to link with device and reference data.</td>
-<td>none</td>
+<td>1001<br>
+001<br>
+102<br>
+42</td>
+<td>
+<p>Used to link with device and reference data.</p>
+<p>Preferably numeric but if letters were also used to identify participants, that is also okay.</p>
+</td>
+<td>none (<strong>required</strong>)</td>
 </tr>
 <tr class="odd">
 <td>age</td>
@@ -230,7 +237,7 @@
 <p>Axivity</p>
 <p>Geneactiv</p>
 </td>
-<td>none</td>
+<td>none (<strong>required</strong>)</td>
 </tr>
 <tr class="odd">
 <td>sampling</td>
@@ -238,7 +245,7 @@
 <td>numeric</td>
 <td>-</td>
 <td>Value in Hz that data was set to sample</td>
-<td>none</td>
+<td>allowed</td>
 </tr>
 <tr class="even">
 <td>location</td>
@@ -252,15 +259,15 @@
 <p>dominant</p>
 <p>non_dominant</p>
 </td>
-<td>none</td>
+<td>none (<strong>required</strong>)</td>
 </tr>
 </tbody>
-</table></section><section class="level3"><h3 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
+</table></section><section class="level2"><h3 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h3>
 <table class="table caption-top">
 <thead><tr class="header">
-<th>site</th>
-<th>pid</th>
+<th>study</th>
+<th>subject</th>
 <th>age</th>
 <th>bmi</th>
 <th>gender</th>
@@ -269,8 +276,8 @@
 <th>location</th>
 </tr></thead>
 <tbody><tr class="odd">
-<td>CP</td>
-<td>CP001</td>
+<td>ACT24</td>
+<td>101</td>
 <td>21</td>
 <td>23.4</td>
 <td>F</td>
@@ -278,8 +285,7 @@
 <td>30</td>
 <td>non_dom</td>
 </tr></tbody>
-</table></section></section><section class="level2"><h2 id="primary-reference-video-recorded-direct-observation">
-<u>Primary Reference: Video-Recorded Direct Observation</u><a class="anchor" aria-label="anchor" href="#primary-reference-video-recorded-direct-observation"></a>
+</table></section></section><section class="section level2"><h2 id="ref-do">Video-Recorded Direct Observation<a class="anchor" aria-label="anchor" href="#ref-do"></a>
 </h2>
 <p>Notes:</p>
 <ul>
@@ -301,74 +307,71 @@
 <li><p>“non-sed” in Sedtype_do corresponds to all non-sedentary posture/intensity combinations.</p></li>
 </ul>
 </li>
-<li><p>A study must have sedentary time, MVPA or steps labeled in a way consistent with operational definitions to be included in the analysis. The study does not need to have all three to be included, should provide NAs for metrics that aren’t labeled.</p></li>
+<li><p>A study must have sedentary time, MVPA or steps labeled in a way consistent with operational definitions to be included in the analysis.</p></li>
+<li><p>The study does not need to have all three outcomes to be included. If an outcome is missing, the variable should still be included with either NAs or left completely empty.</p></li>
 </ul>
-<section class="level3"><h3 id="data-dictionary-1">Data Dictionary<a class="anchor" aria-label="anchor" href="#data-dictionary-1"></a>
+<section class="level2"><h3 id="data-dictionary-1">Data Dictionary<a class="anchor" aria-label="anchor" href="#data-dictionary-1"></a>
 </h3>
 <table class="table caption-top">
 <thead><tr class="header">
 <th><strong>variable</strong></th>
 <th>definition</th>
 <th>type</th>
-<th>levels</th>
+<th>levels/examples</th>
 <th>labels/notes</th>
 <th>missingness</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td rowspan="2"> <strong>site</strong>
-</td>
-<td rowspan="2"> Study site identifier</td>
-<td rowspan="2"> character (nominal)</td>
-<td>CP</td>
-<td>California Polytechnic State University</td>
-<td rowspan="2"> none (required for each included file)</td>
+<td><strong>study</strong></td>
+<td>Study identifier</td>
+<td>character (nominal)</td>
+<td>ACT24<br>
+FLAC</td>
+<td>Has to be the same for every single participant.</td>
+<td>none (<strong>required</strong> for each included file)</td>
 </tr>
 <tr class="even">
-<td>UWM</td>
-<td>University of Wisconsin–Milwaukee</td>
-</tr>
-<tr class="odd">
-<td><strong>pid</strong></td>
+<td><strong>subject</strong></td>
 <td>Unique participant identifier</td>
 <td>alphanumeric</td>
 <td>-</td>
-<td>unique identifier variable that identifies participant and can be used to link with device data</td>
-<td>none</td>
+<td>Used to link with device data. Preferrably numeric but if letters were also used to identify participants, that is also okay.</td>
+<td>none (<strong>required</strong>)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><strong>observation</strong></td>
 <td>Observation session identifier</td>
 <td>numeric (count)</td>
 <td>-</td>
 <td>If a participant is only observed once, then default to 1</td>
-<td>none</td>
-</tr>
-<tr class="odd">
-<td><strong>datetime</strong></td>
-<td>Timestamp of observation in UTC timezone</td>
-<td>POSIXct</td>
-<td>-</td>
-<td>Timestamp in coordinated universal time (UTC), YYYY-mm-dd HH:MM:SS format</td>
-<td>none</td>
+<td>none (<strong>required</strong>)</td>
 </tr>
 <tr class="even">
+<td><strong>datetime</strong></td>
+<td>Timestamp of observation in <a href="https://en.wikipedia.org/wiki/ISO_8601" class="external-link">ISO 8601</a> format</td>
+<td>POSIXct</td>
+<td>1990-01-01T18:36:10Z</td>
+<td>Timestamp in coordinated universal time (UTC), “YYYY-mm-ddTHH:MM:SSZ” format</td>
+<td>none (<strong>required</strong>)</td>
+</tr>
+<tr class="odd">
 <td><strong>date</strong></td>
 <td>Local calendar date at the observation site</td>
 <td>date</td>
 <td>-</td>
 <td>In year-month-day format (i.e. YYYY-MM-DD)</td>
-<td>none</td>
+<td>none (<strong>required</strong>)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><strong>time</strong></td>
 <td>Local wall-clock time at the observation site</td>
 <td>character</td>
 <td>-</td>
 <td>In 24-hour hour:minute:second format (i.e. HH:MM:SS)</td>
-<td>none</td>
+<td>none (<strong>required</strong>)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td rowspan="5"> <strong>domain_do</strong>
 </td>
 <td rowspan="5"> Behavioral domain classification</td>
@@ -377,23 +380,23 @@
 <td>Discretionary time activities including social activities, sports, fitness, recreation, and screen-based leisure activities</td>
 <td rowspan="5"> allowed</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>household</td>
 <td>Personal care, housework, lawn and garden work, exterior maintenance</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>transportation</td>
 <td>Traveling to and from places (e.g., work, shopping, place of worship). Includes driving or riding in a car, public motorized transport (bus, train), and active transport</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>occupation</td>
 <td>Work or school-related activities including paid or unpaid work, study, and seeking employment</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>other</td>
 <td>Behaviors not categorized above (e.g., purchasing goods, volunteering, other uncategorized activities)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td rowspan="5"> <strong>posture_do</strong>
 </td>
 <td rowspan="5"> Observed posture or movement type</td>
@@ -402,23 +405,23 @@
 <td>Sitting or lying</td>
 <td rowspan="5"> allowed</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>mixed_movement</td>
 <td>Includes standing, stand_move, sport_movement, stretching, crouching/kneeling/squatting, ascending/descending stairs</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>walking</td>
 <td>L-R-L-R pattern including walking with load</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>running</td>
 <td>Running</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>biking</td>
 <td>Cycling</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td rowspan="4"> <strong>sedtype_do</strong>
 </td>
 <td rowspan="4"> Sedentary subtype classification</td>
@@ -427,56 +430,58 @@
 <td>All non-sedentary/active behaviors</td>
 <td rowspan="4"> allowed</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>sitting</td>
 <td>sitting/reclining not in a motor vehicle as a driver/passenger</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>lying</td>
 <td>lying</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>vehicle</td>
 <td>Driving a personal motor vehicle or as a passenger in any land-based motor vehicle</td>
 </tr>
-<tr class="even">
-<td rowspan="3"> intensity3_do</td>
+<tr class="odd">
+<td rowspan="3"> <strong>intensity3_do</strong>
+</td>
 <td rowspan="3"> 3-level intensity classification based on METs</td>
 <td rowspan="3"> character (ordinal)</td>
 <td>sedentary</td>
 <td>sedentary posture with low energy expenditure</td>
 <td rowspan="3"> allowed</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>light</td>
 <td>non sedentary posture 1.50 - 2.99 METS</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>mvpa</td>
 <td>3.00+ METS</td>
 </tr>
-<tr class="odd">
-<td rowspan="4"> intensity4_do</td>
+<tr class="even">
+<td rowspan="4"> <strong>intensity4_do</strong>
+</td>
 <td rowspan="4"> 4-level intensity classification based on METs</td>
 <td rowspan="4"> character (ordinal)</td>
 <td>sedentary</td>
 <td>sedentary posture with low energy expenditure</td>
 <td rowspan="4"> allowed</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>light</td>
 <td>non sedentary posture 1.50 - 2.99 METS</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>moderate</td>
 <td>3.00 - 5.99 METS</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>vigorous</td>
 <td>6.00+ METS</td>
 </tr>
-<tr class="odd">
-<td>steps_do</td>
+<tr class="even">
+<td><strong>steps_do</strong></td>
 <td>Number of steps recorded during the 1-second epoch</td>
 <td>count</td>
 <td>-</td>
@@ -484,12 +489,12 @@
 <td>allowed</td>
 </tr>
 </tbody>
-</table></section><section class="level3"><h3 id="example-1">Example<a class="anchor" aria-label="anchor" href="#example-1"></a>
+</table></section><section class="level2"><h3 id="example-1">Example<a class="anchor" aria-label="anchor" href="#example-1"></a>
 </h3>
 <table class="table caption-top">
 <thead><tr class="header">
-<th>site</th>
-<th>pid</th>
+<th>study</th>
+<th>subject</th>
 <th>observation</th>
 <th>datetime</th>
 <th>date</th>
@@ -502,12 +507,12 @@
 <th>steps_do</th>
 </tr></thead>
 <tbody><tr class="odd">
-<td>CP</td>
-<td>CP001</td>
+<td>ACT24</td>
+<td>101</td>
 <td>1</td>
-<td>1990-01-01T18:36:10</td>
+<td>1990-01-01T18:36:10Z</td>
 <td>1990-01-01</td>
-<td>10:42:10</td>
+<td>10:36:10</td>
 <td>transportation</td>
 <td>walking</td>
 <td>non_sed</td>
@@ -515,7 +520,94 @@
 <td>moderate</td>
 <td>2</td>
 </tr></tbody>
-</table></section></section><section class="level2"><h2 id="thigh-worn-device-data-dictionary">Thigh-worn device data dictionary<a class="anchor" aria-label="anchor" href="#thigh-worn-device-data-dictionary"></a>
+</table></section></section><section class="section level2"><h2 id="ref-ap">Thigh-worn activPAL<a class="anchor" aria-label="anchor" href="#ref-ap"></a>
+</h2>
+<p>The following instructions are to create the EventsEx and 1-second epoch exports from PALBatch software If participants were instructed to wear a thigh-worn activPAL for your study.</p>
+<ol type="1">
+<li>
+<p>Open PALbatch. Update to the most recent version if available</p>
+<ol type="a">
+<li>At the time of writing (March 20, 2026), this would be PALbatch v8.11.1.63</li>
+</ol>
+</li>
+<li><p>Within the main window, select your desired input/output folders. Ideally, the output folder should be in the same drive as where you download the WAVES repository.</p></li>
+</ol>
+<p><img src="images/ref-ap-folders.png"></p>
+<ol start="3" type="1">
+<li>Ensure the Analysis Settings are the following:</li>
+</ol>
+<table class="table caption-top">
+<thead><tr class="header">
+<th>Section</th>
+<th>Option</th>
+<th>Value</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td rowspan="3"> Validation algorithm</td>
+<td>wear time protocol</td>
+<td>24 hour protocol (allow 4 hours non-wear)</td>
+</tr>
+<tr class="even">
+<td>valid day filter</td>
+<td>Highlight valid days</td>
+</tr>
+<tr class="odd">
+<td>wear correction</td>
+<td>TRUE</td>
+</tr>
+<tr class="even">
+<td rowspan="3"> Classification algorithm</td>
+<td>
+<a href="https://kb.palt.com/articles/crea/" class="external-link">CREA</a> (v1.3)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>minimum non-upright period (s)</td>
+<td>10</td>
+</tr>
+<tr class="even">
+<td>minimum upright period (s)</td>
+<td>10</td>
+</tr>
+</tbody>
+</table>
+<p><img src="images/ref-ap-analysis-settings.png"></p>
+<ol start="4" type="1">
+<li>Next, expand the Export Selection settings and check the following options:</li>
+</ol>
+<table class="table caption-top">
+<thead><tr class="header">
+<th>Section</th>
+<th>Option</th>
+<th>Value</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>-</td>
+<td>include analysis parameters header</td>
+<td>TRUE</td>
+</tr>
+<tr class="even">
+<td>Events Exports</td>
+<td>Events (extended)</td>
+<td>TRUE</td>
+</tr>
+<tr class="odd">
+<td rowspan="2"> Epochs Exports</td>
+<td>Custom duration epochs</td>
+<td>TRUE</td>
+</tr>
+<tr class="even">
+<td>custom duration</td>
+<td>1s</td>
+</tr>
+</tbody>
+</table>
+<p><img src="images/ref-ap-export-settings.png"></p>
+<ol start="5" type="1">
+<li>Click “Export”</li>
+</ol></section><section class="section level2"><h2 id="other">Other<a class="anchor" aria-label="anchor" href="#other"></a>
 </h2>
 </section><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
