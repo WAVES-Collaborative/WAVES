@@ -21,6 +21,13 @@ articles:
   - instructions-config
   - instructions-main
 
+- title: Updating Code
+  desc: >
+    Instructions for pulling latest version from Github and updating pipelines.
+  navbar: Updating Pipeline
+  contents:
+  - update-conda-environments
+
 - title: WAVES Project
   desc: >
     Guiding documents for WAVES project.
@@ -35,6 +42,8 @@ articles:
     Guidance for when errors appear or when updates are made to the pipeline.
   navbar: Technical
   contents:
+  - update-conda-environments
+  - posting-github-issue
   - python-methods
 
 - title: Testing
