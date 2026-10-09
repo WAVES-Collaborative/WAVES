@@ -196,7 +196,7 @@ process_meta_do <- function(fpa_do) {
       chk_intensity3 = all(intensity3_do %in% c("sedentary", "light", "mvpa", "non_codable")),
       chk_intensity4 = all(intensity4_do %in% c("sedentary", "light", "moderate", "vigorous", "non_codable")),
       chk_steps      = is.integer(steps_do),
-      .by = c(study, subject, observation)
+      .by = c(site, pid, observation)
     )
     # arrow::write_parquet(sink = fpa_write)
 
