@@ -68,7 +68,7 @@ process_meta_ref <- function(lst_chk) {
     if (le_ref %in% c("do", "img", "pal", "pass")) {
       lst_meta[[le_ref]] <- switch(
         le_ref,
-        "do"  = process_meta_do(fpa_do),
+        "do"  = process_meta_do(lst_chk$do),
         "img" = {}, # TODO
         "pal" = {
           purrr::pmap(

@@ -312,12 +312,13 @@ tar_plan(
   tar_file(
     name = lst_out.ref,
     command = process_ref_file(
-      vct_meta_ref = vct_meta_ref,
-      lst_yaml     = lst_yaml,
-      dir_out.ref  = dir_out.ref
+      lst_meta    = lst_meta,
+      le_ref      = names(lst_meta),
+      lst_ref     = lst_ref,
+      dir_out.ref = dir_out.ref
     ),
-    pattern   = map(vct_meta_ref),
-    iteration = "vector",
+    pattern   = map(lst_meta, names(lst_meta)),
+    # iteration = "vector",
     error     = "null"
   ),
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -1,6 +1,11 @@
 check_input_ref <- function(lst_ref) {
 
-  lst_ref <- lst_ref[lengths(lst_ref) != 0]
+  lst_ref <- lst_ref[sapply(
+    lst_ref,
+    \(x) {
+      !all(simplify_is_null(x))
+    }
+  )]
   lst_chk <-
     vector(mode = "list",
            length = length(lst_ref)) |>

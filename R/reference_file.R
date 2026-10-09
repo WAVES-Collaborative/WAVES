@@ -1,5 +1,6 @@
-process_ref_file <- function(vct_meta_ref,
-                             lst_yaml,
+process_ref_file <- function(lst_meta,
+                             le_ref,
+                             lst_ref,
                              dir_out.ref) {
 
   le_ref <-
@@ -16,9 +17,10 @@ process_ref_file <- function(vct_meta_ref,
   if (le_ref %in% c("do", "img", "pal", "pass")) {
     switch(
       le_ref,
-      "do"  = {fread(lst_ref$do)}, # No additional processing needed for DO reference files
+      "do"  = {lst_ref$do}, # No additional processing needed for DO reference files
       "img" = {}, # No additional processing needed for IMG reference files
       "pal" = tryCatch(
+        # TODO
         process_activpal_file(
           vct_epoch   = lst_yaml$ref$pal$palp_fpa,
           vct_event   = lst_yaml$ref$pal$palv_fpa,
