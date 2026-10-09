@@ -22,10 +22,12 @@ process_meta_sup <- function(meta_fpa,
 
   if (de_id) {
 
-    df$site <- site
+    df$site_og <- df$site
+    df$site    <- site
+    df$pid_og  <- df$pid
     df$pid <-
       sample(
-        seq_along(df$subject),
+        seq_along(df$pid),
         size    = nrow(df),
         replace = FALSE
       ) |>
@@ -35,11 +37,6 @@ process_meta_sup <- function(meta_fpa,
         flag = "0"
       )
 
-  } else {
-
-    df$site <- df$study
-    df$pid <- df$subject
-
   }
 
   return(df)
@@ -47,7 +44,7 @@ process_meta_sup <- function(meta_fpa,
 }
 process_de_id <- function(df_meta) {
 
-  vct_id <- paste0(df_meta$study, "_", df_meta$subject)
+  vct_id <- paste0(df_meta$site_og, "_", df_meta$pid_og)
   names(vct_id) <- paste0(df_meta$site, "_", df_meta$pid)
 
   return(vct_id)
