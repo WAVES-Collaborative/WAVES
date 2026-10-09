@@ -17,7 +17,8 @@ simplify_post_expr <- function(x) {
     chk_type <-
       sapply(x, typeof) |>
       vctrs::vec_duplicate_detect() |>
-      all()
+      all() |
+      length(sapply(x, typeof)) == 1
     if (chk_type) unlist(x) else x
   } else {
     x
@@ -49,9 +50,15 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
   names(lst_yaml) <- c(
     "my_tz",
     "sf",
-    "vct_raw_fdr",
-    "vct_raw_fpa",
+    "meta_fpa",
+    "de_id",
+    "site",
+    "raw",
     "ref"
+  )
+  names(lst_yaml$raw) <- c(
+    "fdr",
+    "fpa"
   )
   names(lst_yaml$ref) <- c(
     "do",
@@ -74,17 +81,18 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
   )
   names(lst_yaml$ref$pass) <- c(
     "fdr",
+    "fpa",
     "id_pt"
   )
 
   # Even though "simplify = TRUE" is default in read_yaml, NULL parameters are
   # kept in list format. Truly simplify NULLs then.
-  # vct_raw
-  if (all(simplify_is_null(lst_yaml$vct_raw_fdr))) {
-    lst_yaml["vct_raw_fdr"] <- list(NULL)
+  # raw
+  if (all(simplify_is_null(lst_yaml$raw$fdr))) {
+    lst_yaml$raw["fdr"] <- list(NULL)
   }
-  if (all(simplify_is_null(lst_yaml$vct_raw_fpa))) {
-    lst_yaml["vct_raw_fpa"] <- list(NULL)
+  if (all(simplify_is_null(lst_yaml$raw$fpa))) {
+    lst_yaml$raw["fpa"] <- list(NULL)
   }
   # do
   if (all(simplify_is_null(lst_yaml$ref$do$fpa))) {
@@ -92,7 +100,7 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
   }
   # img
   if (all(simplify_is_null(lst_yaml$ref$img$fpa))) {
-    lst_yaml$ref$do["img"] <- list(NULL)
+    lst_yaml$ref$img["fpa"] <- list(NULL)
   }
   # pal
   if (all(simplify_is_null(lst_yaml$ref$pal$palp_fdr))) {
@@ -114,26 +122,21 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
   if (all(simplify_is_null(lst_yaml$ref$pass$fdr))) {
     lst_yaml$ref$pass["fdr"] <- list(NULL)
   }
+  if (all(simplify_is_null(lst_yaml$ref$pass$fpa))) {
+    lst_yaml$ref$pass["fpa"] <- list(NULL)
+  }
   if (all(simplify_is_null(lst_yaml$ref$pass$id_pt))) {
     lst_yaml$ref$pass["id_pt"] <- list(NULL)
   }
 
   # If !expr tag is used for directory/filepath, then handlers will still return
   # a list for list items that are all character.
-  # vct_raw
-  if (length(lst_yaml$vct_raw_fdr) != 0) {
-    lst_yaml$vct_raw_fdr <- simplify_post_expr(lst_yaml$vct_raw_fdr)
+  # raw
+  if (length(lst_yaml$raw$fdr) != 0) {
+    lst_yaml$raw$fdr <- simplify_post_expr(lst_yaml$raw$fdr)
   }
-  if (length(lst_yaml$vct_raw_fpa) != 0) {
-    lst_yaml$vct_raw_fpa <- simplify_post_expr(lst_yaml$vct_raw_fpa)
-  }
-  # do
-  if (length(lst_yaml$ref$do$fpa) != 0) {
-    lst_yaml$ref$do$fpa <- simplify_post_expr(lst_yaml$ref$do$fpa)
-  }
-  # img
-  if (length(lst_yaml$ref$img$fpa) != 0) {
-    lst_yaml$ref$img$fpa <- simplify_post_expr(lst_yaml$ref$img$fpa)
+  if (length(lst_yaml$raw$fpa) != 0) {
+    lst_yaml$raw$fpa <- simplify_post_expr(lst_yaml$raw$fpa)
   }
   # pal
   if (length(lst_yaml$ref$pal$palp_fdr) != 0) {
@@ -146,17 +149,22 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
     lst_yaml$ref$pal$palv_fdr <- simplify_post_expr(lst_yaml$ref$pal$palv_fdr)
   }
   if (length(lst_yaml$ref$pal$palv_fpa) != 0) {
+    lst_yaml$ref$pal$palv_fpa
     lst_yaml$ref$pal$palv_fpa <- simplify_post_expr(lst_yaml$ref$pal$palv_fpa)
   }
   # pass
   if (length(lst_yaml$ref$pass$fdr) != 0) {
     lst_yaml$ref$pass$fdr <- simplify_post_expr(lst_yaml$ref$pass$fdr)
   }
+  if (length(lst_yaml$ref$pass$fpa) != 0) {
+    lst_yaml$ref$pass$fpa <- simplify_post_expr(lst_yaml$ref$pass$fpa)
+  }
 
   if (identical(Sys.getenv("TAR_PROJECT"), "config")) {
     lst_yaml$my_tz <- "Etc/UTC"
     lst_yaml$sf <- 100
-    lst_yaml$vct_raw_fpa <- file.path(
+    lst_yaml$meta <- "DANGEROUS/MANTIPORE.csv"
+    lst_yaml$raw$fpa <- file.path(
       "data", "0_CONFIG", "RAW",
       c(
         "WAVES_10002_RAW.csv.gz",
@@ -219,42 +227,87 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
       "Please define as one number."
   )
 
-  ## vct_raw --------------------------------------
-  if (length(lst_yaml$vct_raw_fdr) == 0 &&
-      length(lst_yaml$vct_raw_fpa) == 0) {
+  ## meta_fpa -------------------------------------------
+  if (length(lst_yaml$meta_fpa) == 0) {
+    lst_msg[["meta"]] <-
+      "`metadata_filepath` is not defined."
+  } else if (length(lst_yaml$meta_fpa) > 1) {
+    lst_msg[["meta"]] <-
+      "`metadata_filepath` has more than one entry."
+  } else if (!fs::is_file(lst_yaml$meta_fpa)) {
+    lst_msg[["meta"]] <-
+      "`metadata_filepath` is not a real filepath."
+  }
+  lst_msg[["meta"]] <- format_abort_message(
+    lst_msg[["meta"]],
+    msg_info =
+      "Please define as one filepath."
+  )
+
+  ## de_id  -------------------------------------------
+  if (length(lst_yaml$de_id) == 0) {
+    lst_msg[["de_id"]] <-
+      "`deidentify` is not defined."
+  } else if (!is.logical(lst_yaml$de_id)) {
+    lst_msg[["de_id"]] <-
+      "`deidentify` is not a TRUE or FALSE value."
+  }
+  lst_msg[["de_id"]] <- format_abort_message(
+    lst_msg[["de_id"]],
+    msg_info =
+      "Please define as a boolean TRUE or FALSE."
+  )
+
+  ## site  -------------------------------------------
+  if (length(lst_yaml$site) == 0) {
+    lst_msg[["site"]] <-
+      "`site` is not defined."
+  } else if (!is.character(lst_yaml$site)) {
+    lst_msg[["site"]] <-
+      "`deidentify` is not a string."
+  }
+  lst_msg[["site"]] <- format_abort_message(
+    lst_msg[["site"]],
+    msg_info =
+      "Please define as the string. Will be given to you by WAVES team."
+  )
+
+  ## raw --------------------------------------
+  if (length(lst_yaml$raw$fdr) == 0 &&
+      length(lst_yaml$raw$fpa) == 0) {
     lst_msg[["vct_raw"]] <- c(
-      "`vct_raw_fdr` or `vct_raw_fpa` must be defined.",
-      "Please define either `vct_raw_fdr` or `vct_raw_fpa`, not both.",
+      "wrist_accelerometer `directories` or `filepaths` must be defined.",
+      "Please define either wrist_accelerometer `directories` or `filepaths`, not both.",
       ""
     )
-  } else if (length(lst_yaml$vct_raw_fdr) != 0 &&
-             length(lst_yaml$vct_raw_fpa) != 0) {
+  } else if (length(lst_yaml$raw$fdr) != 0 &&
+             length(lst_yaml$raw$fpa) != 0) {
     lst_msg[["vct_raw"]] <- c(
-      "`vct_raw_fdr` and `vct_raw_fpa` are both defined.",
-      "Please define either `vct_raw_fdr` or `vct_raw_fpa`, not both.",
+      "wrist_accelerometer `directories` and `filepaths` are both defined.",
+      "Please define either wrist_accelerometer `directories` or `filepaths`, not both.",
       ""
     )
-  } else if (length(lst_yaml$vct_raw_fdr) != 0 &&
-             !any(fs::is_dir(lst_yaml$vct_raw_fdr))) {
+  } else if (length(lst_yaml$raw$fdr) != 0 &&
+             !any(fs::is_dir(lst_yaml$raw$fdr))) {
     lst_msg[["vct_raw"]] <- c(
-      "`vct_raw_directories` contains a string that is NOT a file directory.",
+      "wrist_accelerometer `directories` contains a string that is NOT a file directory.",
       "Please define as one or more strings corresponding to directories.",
       ""
     )
-  } else if (length(lst_yaml$vct_raw_fpa) != 0 &&
-             !any(fs::is_file(lst_yaml$vct_raw_fpa))) {
+  } else if (length(lst_yaml$raw$fpa) != 0 &&
+             !any(fs::is_file(lst_yaml$raw$fpa))) {
     lst_msg[["vct_raw"]] <- c(
-      "`vct_raw_filepaths` contains a string that is NOT a filepath.",
+      "wrist_accelerometer `filepaths` contains a string that is NOT a filepath.",
       "Please define as one or more strings corresponding to filepaths.",
       ""
     )
   }
 
-  # If vct_raw_fdr is valid, return the files in the directories provided.
-  if (length(lst_yaml$vct_raw_fdr) != 0 &&
-      all(fs::is_dir(lst_yaml$vct_raw_fdr))) {
-    lst_yaml$vct_raw_fpa <- list.files(
-      path       = lst_yaml$vct_raw_fdr,
+  # If raw$fdr is valid, return the files in the directories provided.
+  if (length(lst_yaml$raw$fdr) != 0 &&
+      all(fs::is_dir(lst_yaml$raw$fdr))) {
+    lst_yaml$raw$fpa <- list.files(
+      path       = lst_yaml$raw$fdr,
       pattern    = "\\.bin$|\\.csv$|\\.cwa$|\\.gt3x$",
       full.names = TRUE,
       recursive  = FALSE
@@ -279,7 +332,6 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
   } else {
     ### do ----------------------------------------
     if (!all(simplify_is_null(lst_yaml$ref$do))) {
-      #### directories
       if (length(lst_yaml$ref$do$fpa) == 0) {
         lst_msg[["ref_do_fpa"]] <-
           "Direct observation `filepath` is not defined."
@@ -296,7 +348,6 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
 
     ### img ----------------------------------------
     if (!all(simplify_is_null(lst_yaml$ref$img))) {
-      #### directories
       if (length(lst_yaml$ref$img$fpa) == 0) {
         lst_msg[["ref_img_fpa"]] <-
           "Still-image `filepath` is not defined."
@@ -417,19 +468,35 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
 
     ### pass ---------------------------------------
     if (!all(simplify_is_null(lst_yaml$ref$pass))) {
-      #### directories
-      if (length(lst_yaml$ref$pass$fdr) == 0) {
-        lst_msg[["ref_pass_fdr"]] <-
-          "ActiPass `directories` is not defined."
-      } else if (!any(fs::is_dir(lst_yaml$ref$pass$fdr))) {
-        lst_msg[["ref_pass_fdr"]] <-
-          "ActiPass `directories` contains a string that is NOT a file directory."
+      if (length(lst_yaml$ref$pass$fdr) == 0 &&
+          length(lst_yaml$ref$pass$fpa) == 0) {
+        lst_msg[["vct_pass"]] <- c(
+          "ActiPass `directories` or `filepaths` must be defined.",
+          "Please define either ActiPass `directories` or `filepaths`, not both.",
+          ""
+        )
+      } else if (length(lst_yaml$ref$pass$fdr) != 0 &&
+                 length(lst_yaml$ref$pass$fpa) != 0) {
+        lst_msg[["vct_pass"]] <- c(
+          "ActiPass `directories` and `filepaths` are both defined.",
+          "Please define either ActiPass `directories` or `filepaths`, not both.",
+          ""
+        )
+      } else if (length(lst_yaml$ref$pass$fdr) != 0 &&
+                 !any(fs::is_dir(lst_yaml$ref$pass$fdr))) {
+        lst_msg[["vct_pass"]] <- c(
+          "ActiPass `directories` contains a string that is NOT a file directory.",
+          "Please define as one or more strings corresponding to directories.",
+          ""
+        )
+      } else if (length(lst_yaml$ref$pass$fpa) != 0 &&
+                 !any(fs::is_file(lst_yaml$ref$pass$fpa))) {
+        lst_msg[["vct_pass"]] <- c(
+          "ActiPass `filepaths` contains a string that is NOT a filepath.",
+          "Please define as one or more strings corresponding to filepaths.",
+          ""
+        )
       }
-      lst_msg[["ref_pass_fdr"]] <- format_abort_message(
-        lst_msg[["ref_pass_fdr"]],
-        msg_info =
-          "Please define as one or more strings corresponding to directories."
-      )
 
       #### id_pattern
       if (length(lst_yaml$ref$pass$id_pt) == 0) {

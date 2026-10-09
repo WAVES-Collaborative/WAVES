@@ -1,6 +1,6 @@
-process_reference_file <- function(vct_meta_ref,
-                                   lst_yaml,
-                                   dir_out.ref) {
+process_ref_file <- function(vct_meta_ref,
+                             lst_yaml,
+                             dir_out.ref) {
 
   le_ref <-
     vct_meta_ref |>
@@ -13,10 +13,11 @@ process_reference_file <- function(vct_meta_ref,
     stri_replace(regex       = paste0("_", le_ref, "\\.qs"),
                  replacement = "")
 
-  if (le_ref %in% c("do", "pal", "pass")) {
+  if (le_ref %in% c("do", "img", "pal", "pass")) {
     switch(
       le_ref,
-      "do" = {}, # TODO
+      "do"  = {fread(lst_ref$do)}, # No additional processing needed for DO reference files
+      "img" = {}, # No additional processing needed for IMG reference files
       "pal" = tryCatch(
         process_activpal_file(
           vct_epoch   = lst_yaml$ref$pal$palp_fpa,
@@ -31,12 +32,12 @@ process_reference_file <- function(vct_meta_ref,
   } else {
     # TODO: Flush out more if people want to add own reference processing
     # functions
-    lst_yaml$ref[[le_ref]]$process_file_function(
-      lst_param <- lst_yaml$ref[[le_ref]][
-        !names(lst_yaml$ref[[le_ref]]) %in% c("process_meta_function",
-                                              "process_file_function")
-      ]
-    )
+    # lst_yaml$ref[[le_ref]]$process_file_function(
+    #   lst_param <- lst_yaml$ref[[le_ref]][
+    #     !names(lst_yaml$ref[[le_ref]]) %in% c("process_meta_function",
+    #                                           "process_file_function")
+    #   ]
+    # )
   }
 
 }

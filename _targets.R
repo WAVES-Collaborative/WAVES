@@ -14,6 +14,7 @@ Sys.setenv(
   # change below environment variable if you already have a conda installation readily accessible.
   RETICULATE_MINICONDA_PATH = reticulate::miniconda_path()
 )
+trial_run <- TRUE
 n_workers <- 2 # future::availableCores() - 1
 
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -224,6 +225,14 @@ tar_option_set(
 ####                                                                         %%%%
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+lst_yaml = parse_waves_yaml(fpa_yaml = "_waves.yml")
+
+if (trial_run) {
+  # Choose the id from the first wrist_accelerometer filepath and match to reference
+  # data. Shouldn't have to change activpal input since that needs to work anyways
+  lst_yaml$raw$fpa <- lst_yaml$raw$fpa[1]
+}
+
 # Start logging.
 if (tar_active()) {
   log_start(
@@ -233,12 +242,28 @@ if (tar_active()) {
 }
 
 tar_plan(
-  lst_yaml = parse_waves_yaml(),
   tar_file_read(
     name    = lst_miniconda,
     command = file.path("_targets_config", "objects", "lst_miniconda"),
     read    = qs2::qs_read(!!.x),
     format  = "qs"
+  ),
+  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  ##                                FILE PATHS                              ----
+  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  tar_files_input(
+    name = vct_raw,
+    files = lst_yaml$raw$fpa
+  ),
+  lst_ref = list(
+    do   = lst_yaml$ref$do$fpa,
+    img  = lst_yaml$ref$img$fpa,
+    pal  = list(
+      palp  = lst_yaml$ref$pal$palp_fpa,
+      palv  = lst_yaml$ref$pal$palv_fpa,
+      id_pt = lst_yaml$ref$pal$id_pt
+    ),
+    pass = lst_yaml$ref$pass$fpa
   ),
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                             FILE DIRECTORIES                           ----
@@ -258,24 +283,42 @@ tar_plan(
   dir_actinet     = fdr_actinet,
   dir_merged      = fdr_merged,
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  ##                                FILE PATHS                              ----
-  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  tar_files(
-    name    = vct_raw,
-    command = lst_yaml$vct_raw_fpa
-  ),
-  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                               DEMOGRAPHICS                             ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  ##                               CHECK INPUT                              ----
+  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  lst_chk = check_input_ref(lst_ref),
+  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  ##                          METADATA  - SUPPLIED                         ----
+  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  tar_parquet(
+    name    = df_meta,
+    command = process_meta_sup(
+      meta_fpa = lst_yaml$meta_fpa,
+      de_id    = lst_yaml$de_id,
+      site     = lst_yaml$site
+    )
+  ),
+  vct_de_id = process_de_id(df_meta),
+  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                           METADATA - REFERENCE                         ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  tar_files(
-    name    = vct_meta_ref,
-    command = process_reference_metadata(
-      lst_yaml = lst_yaml,
-      dir_meta = dir_meta
-    )
+  lst_meta = process_meta_ref(lst_chk),
+  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  ##                             PROCESS - REFERENCE                        ----
+  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  # LEFT OFF HERE
+  tar_file(
+    name = lst_out.ref,
+    command = process_ref_file(
+      vct_meta_ref = vct_meta_ref,
+      lst_yaml     = lst_yaml,
+      dir_out.ref  = dir_out.ref
+    ),
+    pattern   = map(vct_meta_ref),
+    iteration = "vector",
+    error     = "null"
   ),
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                              PROCESS - GGIR                            ----
@@ -409,20 +452,6 @@ tar_plan(
     iteration = "vector",
     error = "null",
     deployment = "main" # in order to avoid error of loading two conda environments within the same R session
-  ),
-  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  ##                             PROCESS - REFERENCE                        ----
-  ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  tar_file(
-    name = vct_out.ref,
-    command = process_reference_file(
-      vct_meta_ref = vct_meta_ref,
-      lst_yaml     = lst_yaml,
-      dir_out.ref  = dir_out.ref
-    ),
-    pattern   = map(vct_meta_ref),
-    iteration = "vector",
-    error     = "null"
   ),
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                                   MERGE                                ----
