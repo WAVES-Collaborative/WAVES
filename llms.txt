@@ -209,6 +209,12 @@ Running the configuration, main, and analysis pipelines.
 
   Instructions for running \_targets_config.R.
 
+- [YAML
+  Parameters](https://waves-collaborative.github.io/WAVES/articles/instructions-yaml.md):
+
+  Instructions for defining site-specific parameters needed for the main
+  pipeline.
+
 - [Running the Main
   Pipeline](https://waves-collaborative.github.io/WAVES/articles/instructions-main.md):
 

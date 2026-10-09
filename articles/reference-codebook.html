@@ -39,6 +39,7 @@
 <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Instructions</h6></li>
     <li><a class="dropdown-item" href="../articles/instructions-config.html">Running the Configuration Pipeline</a></li>
+    <li><a class="dropdown-item" href="../articles/instructions-yaml.html">YAML Parameters</a></li>
     <li><a class="dropdown-item" href="../articles/instructions-main.html">Running the Main Pipeline</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Updating Pipeline</h6></li>
@@ -292,7 +293,8 @@ CAPTURE24</td>
 <li><p>Reference measure for sedentary time, step counts and MVPA.</p></li>
 <li><p>Row unit: one record per 1-second epoch of direct observation.</p></li>
 <li><p>Variables listed as required must be provided for the study’s data to be included in the analysis.</p></li>
-<li><p>The data provided to the team should be “clean” with all rows removed for observations that were non-codable/missing.</p></li>
+</ul>
+<!-- - The data provided to the team should be “clean” with all rows removed for observations that were non-codable/missing. --><ul>
 <li>
 <p>intensity3_do and intensity4_do are MET-based classifications and should be internally consistent:</p>
 <ul>
@@ -311,6 +313,246 @@ CAPTURE24</td>
 <li><p>The study does not need to have all three outcomes to be included. If an outcome is missing, the variable should still be included with either NAs or left completely empty.</p></li>
 </ul>
 <section class="level2"><h3 id="data-dictionary-1">Data Dictionary<a class="anchor" aria-label="anchor" href="#data-dictionary-1"></a>
+</h3>
+<table class="table caption-top">
+<thead><tr class="header">
+<th><strong>variable</strong></th>
+<th>definition</th>
+<th>type</th>
+<th>levels/examples</th>
+<th>labels/notes</th>
+<th>missingness</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><strong>study</strong></td>
+<td>Study identifier</td>
+<td>character (nominal)</td>
+<td>ACT24<br>
+FLAC</td>
+<td>Has to be the same for every single participant.</td>
+<td>none (<strong>required</strong> for each included file)</td>
+</tr>
+<tr class="even">
+<td><strong>subject</strong></td>
+<td>Unique participant identifier</td>
+<td>alphanumeric</td>
+<td>-</td>
+<td>Used to link with device data. Preferrably numeric but if letters were also used to identify participants, that is also okay.</td>
+<td>none (<strong>required</strong>)</td>
+</tr>
+<tr class="odd">
+<td><strong>observation</strong></td>
+<td>Observation session identifier</td>
+<td>numeric (count)</td>
+<td>-</td>
+<td>If a participant is only observed once, then default to 1</td>
+<td>none (<strong>required</strong>)</td>
+</tr>
+<tr class="even">
+<td><strong>datetime</strong></td>
+<td>Timestamp of observation in <a href="https://en.wikipedia.org/wiki/ISO_8601" class="external-link">ISO 8601</a> format</td>
+<td>POSIXct</td>
+<td>1990-01-01T18:36:10Z</td>
+<td>Timestamp in coordinated universal time (UTC), “YYYY-mm-ddTHH:MM:SSZ” format</td>
+<td>none (<strong>required</strong>)</td>
+</tr>
+<tr class="odd">
+<td><strong>date</strong></td>
+<td>Local calendar date at the observation site</td>
+<td>date</td>
+<td>-</td>
+<td>In year-month-day format (i.e. YYYY-MM-DD)</td>
+<td>none (<strong>required</strong>)</td>
+</tr>
+<tr class="even">
+<td><strong>time</strong></td>
+<td>Local wall-clock time at the observation site</td>
+<td>character</td>
+<td>-</td>
+<td>In 24-hour hour:minute:second format (i.e. HH:MM:SS)</td>
+<td>none (<strong>required</strong>)</td>
+</tr>
+<tr class="odd">
+<td rowspan="6"> <strong>domain_do</strong>
+</td>
+<td rowspan="6"> Behavioral domain classification</td>
+<td rowspan="6"> character (nominal)</td>
+<td>leisure</td>
+<td>Discretionary time activities including social activities, sports, fitness, recreation, and screen-based leisure activities</td>
+<td rowspan="6"> allowed (treated as non-codable)</td>
+</tr>
+<tr class="even">
+<td>household</td>
+<td>Personal care, housework, lawn and garden work, exterior maintenance</td>
+</tr>
+<tr class="odd">
+<td>transportation</td>
+<td>Traveling to and from places (e.g., work, shopping, place of worship). Includes driving or riding in a car, public motorized transport (bus, train), and active transport</td>
+</tr>
+<tr class="even">
+<td>occupation</td>
+<td>Work or school-related activities including paid or unpaid work, study, and seeking employment</td>
+</tr>
+<tr class="odd">
+<td>other</td>
+<td>Behaviors not categorized above (e.g., purchasing goods, volunteering, other uncategorized activities)</td>
+</tr>
+<tr class="even">
+<td>non-codable</td>
+<td>Behaviors that were not able to be observed or not be reliably labeled due to circumstances</td>
+</tr>
+<tr class="odd">
+<td rowspan="5"> <strong>posture_do</strong>
+</td>
+<td rowspan="5"> Observed posture or movement type</td>
+<td rowspan="5"> character (nominal)</td>
+<td>sedentary</td>
+<td>Sitting or lying</td>
+<td rowspan="5"> allowed</td>
+</tr>
+<tr class="even">
+<td>mixed_movement</td>
+<td>Includes standing, stand_move, sport_movement, stretching, crouching/kneeling/squatting, ascending/descending stairs</td>
+</tr>
+<tr class="odd">
+<td>walking</td>
+<td>L-R-L-R pattern including walking with load</td>
+</tr>
+<tr class="even">
+<td>running</td>
+<td>Running</td>
+</tr>
+<tr class="odd">
+<td>biking</td>
+<td>Cycling</td>
+</tr>
+<tr class="even">
+<td rowspan="4"> <strong>sedtype_do</strong>
+</td>
+<td rowspan="4"> Sedentary subtype classification</td>
+<td rowspan="4"> character (nominal)</td>
+<td>non_sed</td>
+<td>All non-sedentary/active behaviors</td>
+<td rowspan="4"> allowed</td>
+</tr>
+<tr class="odd">
+<td>sitting</td>
+<td>sitting/reclining not in a motor vehicle as a driver/passenger</td>
+</tr>
+<tr class="even">
+<td>lying</td>
+<td>lying</td>
+</tr>
+<tr class="odd">
+<td>vehicle</td>
+<td>Driving a personal motor vehicle or as a passenger in any land-based motor vehicle</td>
+</tr>
+<tr class="even">
+<td rowspan="3"> <strong>intensity3_do</strong>
+</td>
+<td rowspan="3"> 3-level intensity classification based on METs</td>
+<td rowspan="3"> character (ordinal)</td>
+<td>sedentary</td>
+<td>sedentary posture with low energy expenditure</td>
+<td rowspan="3"> allowed</td>
+</tr>
+<tr class="odd">
+<td>light</td>
+<td>non sedentary posture 1.50 - 2.99 METS</td>
+</tr>
+<tr class="even">
+<td>mvpa</td>
+<td>3.00+ METS</td>
+</tr>
+<tr class="odd">
+<td rowspan="4"> <strong>intensity4_do</strong>
+</td>
+<td rowspan="4"> 4-level intensity classification based on METs</td>
+<td rowspan="4"> character (ordinal)</td>
+<td>sedentary</td>
+<td>sedentary posture with low energy expenditure</td>
+<td rowspan="4"> allowed</td>
+</tr>
+<tr class="even">
+<td>light</td>
+<td>non sedentary posture 1.50 - 2.99 METS</td>
+</tr>
+<tr class="odd">
+<td>moderate</td>
+<td>3.00 - 5.99 METS</td>
+</tr>
+<tr class="even">
+<td>vigorous</td>
+<td>6.00+ METS</td>
+</tr>
+<tr class="odd">
+<td><strong>steps_do</strong></td>
+<td>Number of steps recorded during the 1-second epoch</td>
+<td>count</td>
+<td>-</td>
+<td>-</td>
+<td>allowed</td>
+</tr>
+</tbody>
+</table></section><section class="level2"><h3 id="example-1">Example<a class="anchor" aria-label="anchor" href="#example-1"></a>
+</h3>
+<table class="table caption-top">
+<thead><tr class="header">
+<th>study</th>
+<th>subject</th>
+<th>observation</th>
+<th>datetime</th>
+<th>date</th>
+<th>time</th>
+<th>domain_do</th>
+<th>posture_do</th>
+<th>sedtype_do</th>
+<th>intensity3_do</th>
+<th>intensity4_do</th>
+<th>steps_do</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td>ACT24</td>
+<td>101</td>
+<td>1</td>
+<td>1990-01-01T18:36:10Z</td>
+<td>1990-01-01</td>
+<td>10:36:10</td>
+<td>transportation</td>
+<td>walking</td>
+<td>non_sed</td>
+<td>mvpa</td>
+<td>moderate</td>
+<td>2</td>
+</tr></tbody>
+</table></section></section><section class="section level2"><h2 id="ref-img">Wearable Camera Still-Images<a class="anchor" aria-label="anchor" href="#ref-img"></a>
+</h2>
+<p>Notes:</p>
+<ul>
+<li><p>Reference measure for sedentary time and MVPA(?).</p></li>
+<li><p>Row unit: one record per 1-second epoch .</p></li>
+<li><p>Variables listed as required must be provided for the study’s data to be included in the analysis.</p></li>
+</ul>
+<!-- - The data provided to the team should be “clean” with all rows removed for observations that were non-codable/missing. --><ul>
+<li>
+<p>intensity3_do and intensity4_do are MET-based classifications and should be internally consistent:</p>
+<ul>
+<li>“mvpa” in intensity3_do corresponds to “moderate” or “vigorous” in intensity4_do.</li>
+</ul>
+</li>
+<li>
+<p>Sedtype_do provides a sedentary subtype classification and should align with:</p>
+<ul>
+<li><p>posture_do = “sedentary”</p></li>
+<li><p>intensity_do = “sedentary”</p></li>
+<li><p>“non-sed” in Sedtype_do corresponds to all non-sedentary posture/intensity combinations.</p></li>
+</ul>
+</li>
+<li><p>A study must have sedentary time, MVPA or steps labeled in a way consistent with operational definitions to be included in the analysis.</p></li>
+<li><p>The study does not need to have all three outcomes to be included. If an outcome is missing, the variable should still be included with either NAs or left completely empty.</p></li>
+</ul>
+<section class="level2"><h3 id="data-dictionary-2">Data Dictionary<a class="anchor" aria-label="anchor" href="#data-dictionary-2"></a>
 </h3>
 <table class="table caption-top">
 <thead><tr class="header">
@@ -489,7 +731,7 @@ FLAC</td>
 <td>allowed</td>
 </tr>
 </tbody>
-</table></section><section class="level2"><h3 id="example-1">Example<a class="anchor" aria-label="anchor" href="#example-1"></a>
+</table></section><section class="level2"><h3 id="example-2">Example<a class="anchor" aria-label="anchor" href="#example-2"></a>
 </h3>
 <table class="table caption-top">
 <thead><tr class="header">

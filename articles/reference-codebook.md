@@ -90,8 +90,54 @@ Notes:
 - Variables listed as required must be provided for the study’s data to
   be included in the analysis.
 
-- The data provided to the team should be “clean” with all rows removed
-  for observations that were non-codable/missing.
+&nbsp;
+
+- intensity3_do and intensity4_do are MET-based classifications and
+  should be internally consistent:
+
+  - “mvpa” in intensity3_do corresponds to “moderate” or “vigorous” in
+    intensity4_do.
+
+- Sedtype_do provides a sedentary subtype classification and should
+  align with:
+
+  - posture_do = “sedentary”
+
+  - intensity_do = “sedentary”
+
+  - “non-sed” in Sedtype_do corresponds to all non-sedentary
+    posture/intensity combinations.
+
+- A study must have sedentary time, MVPA or steps labeled in a way
+  consistent with operational definitions to be included in the
+  analysis.
+
+- The study does not need to have all three outcomes to be included. If
+  an outcome is missing, the variable should still be included with
+  either NAs or left completely empty.
+
+### Data Dictionary
+
+[TABLE]
+
+### Example
+
+| study | subject | observation | datetime | date | time | domain_do | posture_do | sedtype_do | intensity3_do | intensity4_do | steps_do |
+|----|----|----|----|----|----|----|----|----|----|----|----|
+| ACT24 | 101 | 1 | 1990-01-01T18:36:10Z | 1990-01-01 | 10:36:10 | transportation | walking | non_sed | mvpa | moderate | 2 |
+
+## Wearable Camera Still-Images
+
+Notes:
+
+- Reference measure for sedentary time and MVPA(?).
+
+- Row unit: one record per 1-second epoch .
+
+- Variables listed as required must be provided for the study’s data to
+  be included in the analysis.
+
+&nbsp;
 
 - intensity3_do and intensity4_do are MET-based classifications and
   should be internally consistent:

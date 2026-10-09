@@ -1,9 +1,10 @@
 # Running the Configuration Pipeline
 
-Last Update: 2026-10-08
+## Previous Step
 
 Before continuing, please ensure you have set up your computer according
-to `vignette("WAVES#preliminary-setup")`.
+to [Preliminary
+Setup](https://waves-collaborative.github.io/WAVES/articles/WAVES.html%24preliminary-setup).
 
 ## Configuration Pipeline
 
@@ -87,9 +88,9 @@ to `vignette("WAVES#preliminary-setup")`.
     highlighting these lines and then pressing the “Enter” key. Save the
     script with the keyboard shortcut “Ctrl + s”.
 
-9.  Bring the blinking cursor to the **Console** pane and run
-    `tar_make()`. The “configuration” pipeline is now running, which
-    will print messages out in the Console like the below image.
+9.  Click anywhere within the **Console** pane. Type `tar_make()` and
+    hit the “Enter” key. The configuration pipeline is now running,
+    which will print messages out in the Console like the below image.
 
     ![](images/tar_make.png)
 
@@ -157,16 +158,18 @@ to `vignette("WAVES#preliminary-setup")`.
     \[Quick Description\]” with the .pdf or screenshots attached to the
     issue.
 
+## Next Step
+
 From step 14, if there are no errors, you are ready to run the main
 pipeline. See
-[`vignette("instructions-main")`](https://waves-collaborative.github.io/WAVES/articles/instructions-main.md)
+[`vignette("instructions-yaml")`](https://waves-collaborative.github.io/WAVES/articles/instructions-yaml.md)
 for further instructions.
 
 ## Notes
 
 - Even if a pipeline finishes successfully, you may see in the console
   “There were XX warnings (use warnings() to see them)”. This is normal
-  if working on an R version that is not 4.5.2., as the messages will be
+  if working on an R version that is not 4.6.1., as the messages will be
   warnings that the packages are meant to work on the latest R version.
   As long as the R version being used is R 4.4 or beyond, everything
   should still work. We have not tested the WAVES repository on R
