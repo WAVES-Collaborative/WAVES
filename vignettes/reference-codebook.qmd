@@ -60,12 +60,12 @@ Notes:
 +----------+-------------------------------------------------------------------------------+---------------------+-----------------+-----------------------------------------------------------------------------------------------+--------------------------------------------+
 | variable | definition                                                                    | type                | levels/examples | specific labels/notes                                                                         | missingness                                |
 +==========+===============================================================================+=====================+=================+===============================================================================================+============================================+
-| study    | Study identifier                                                              | character (nominal) | ACT24\          | Has to be the same for every single participant.                                              | none (**required** for each included file) |
+| site     | Study identifier                                                              | character (nominal) | ACT24\          | Has to be the same for every single participant.                                              | none (**required** for each included file) |
 |          |                                                                               |                     | FLAC\           |                                                                                               |                                            |
 |          |                                                                               |                     | PALS\           |                                                                                               |                                            |
 |          |                                                                               |                     | CAPTURE24       |                                                                                               |                                            |
 +----------+-------------------------------------------------------------------------------+---------------------+-----------------+-----------------------------------------------------------------------------------------------+--------------------------------------------+
-| subject  | Unique participant identifier used to link observation data with device data. | alphanumeric        | 1001\           | Used to link with device and reference data.                                                  | none (**required**)                        |
+| pid      | Unique participant identifier used to link observation data with device data. | alphanumeric        | 1001\           | Used to link with device and reference data.                                                  | none (**required**)                        |
 |          |                                                                               |                     | 001\            |                                                                                               |                                            |
 |          |                                                                               |                     | 102\            | Preferably numeric but if letters were also used to identify participants, that is also okay. |                                            |
 |          |                                                                               |                     | 42              |                                                                                               |                                            |
@@ -95,9 +95,9 @@ Notes:
 
 ## Example
 
-| study | subject | age | bmi  | gender | device | sampling | location |
-|-------|---------|-----|------|--------|--------|----------|----------|
-| ACT24 | 101     | 21  | 23.4 | F      | AG3X   | 30       | non_dom  |
+| site  | pid | age | bmi  | gender | device | sampling | location |
+|-------|-----|-----|------|--------|--------|----------|----------|
+| ACT24 | 101 | 21  | 23.4 | F      | AG3X   | 30       | non_dom  |
 
 # Video-Recorded Direct Observation {#ref-do}
 
@@ -137,7 +137,7 @@ Notes:
   - labels/notes
   - missingness
 
-- - **study**
+- - **site**
   - Study identifier
   - character (nominal)
   - ACT24\
@@ -145,7 +145,7 @@ Notes:
   - Has to be the same for every single participant.
   - none (**required** for each included file)
 
-- - **subject**
+- - **pid**
   - Unique participant identifier
   - alphanumeric
   - \- 
@@ -278,7 +278,7 @@ Notes:
 ## Example
 
 ::: {.list-table}
-- - study
+- - site
   - subject
   - observation
   - datetime
@@ -343,7 +343,7 @@ Notes:
   - labels/notes
   - missingness
 
-- - **study**
+- - **site**
   - Study identifier
   - character (nominal)
   - ACT24\
@@ -351,7 +351,7 @@ Notes:
   - Has to be the same for every single participant.
   - none (**required** for each included file)
 
-- - **subject**
+- - **pid**
   - Unique participant identifier
   - alphanumeric
   - \- 
@@ -481,7 +481,7 @@ Notes:
 ## Example
 
 ::: {.list-table}
-- - study
+- - site
   - subject
   - observation
   - datetime

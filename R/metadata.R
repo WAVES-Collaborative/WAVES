@@ -9,7 +9,7 @@ process_meta_sup <- function(meta_fpa,
     names(df) |>
     tolower()
   chk_names <-
-    c("study", "subject", "age", "bmi", "gender", "device", "sampling", "location", "firmware") %in%
+    c("site", "pid", "age", "bmi", "gender", "device", "sampling", "location", "firmware") %in%
     names(df)
 
   if (!all(chk_names)) {
