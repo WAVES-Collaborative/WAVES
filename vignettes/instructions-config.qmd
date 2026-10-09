@@ -13,13 +13,13 @@ vignette: >
 editor: source
 ---
 
-Last Update: `r Sys.Date()`
+# Previous Step
 
-Before continuing, please ensure you have set up your computer according to `vignette("WAVES#preliminary-setup")`.
+Before continuing, please ensure you have set up your computer according to [Preliminary Setup](WAVES.html$preliminary-setup).
 
-## Configuration Pipeline
+# Configuration Pipeline
 
-### renv
+## renv
 
 <!-- 1.  If you are continuing straight from BLANK, then go to Step 2. -->
 
@@ -39,7 +39,7 @@ Before continuing, please ensure you have set up your computer according to `vig
 
     a.  This will download all the R software packages needed for the WAVES repository. It will take a while.
 
-### \_targets_config.R
+## \_targets_config.R
 
 5.  Navigate to the **Files** pane within Rstudio (located either in the bottom right area of the RStudio window *if* you haven't changed the pane layout in "Global Settings"). Click on "\_targets*\_*config.R" to open it. This will open the "\_targets_config.R" script within the **Source** pane in the top left area of your RStudio window.
 
@@ -59,13 +59,13 @@ Before continuing, please ensure you have set up your computer according to `vig
         1.  `n_workers` should always be at least 2!
         2.  If your operating system has more RAM and cores available, feel free to increase the number of workers, with the max being one less than the number of cores available of your system (`future::availableCores() - 1`). In testing, each worker typically requires 2-3GB of memory.
 
-### Running the pipeline
+## Running the pipeline
 
 7.  If any changes were made to the script, save the script with the keyboard shortcut "Ctrl + s".
 
 8.  Run all the code within the "INPUT" section (Line 8 - Line 17) by highlighting these lines and then pressing the "Enter" key. Save the script with the keyboard shortcut "Ctrl + s".
 
-9.  Bring the blinking cursor to the **Console** pane and run `tar_make()`. The "configuration" pipeline is now running, which will print messages out in the Console like the below image.
+9.  Click anywhere within the **Console** pane. Type `tar_make()` and hit the "Enter" key. The configuration pipeline is now running, which will print messages out in the Console like the below image.
 
     ![](images/tar_make.png)
 
@@ -107,11 +107,13 @@ Before continuing, please ensure you have set up your computer according to `vig
 
 15. If the "summary_pipeline_config" report is red for any reason, please post the issue with the title as "Config - Summary Report - \[Quick Description\]" with the .pdf or screenshots attached to the issue.
 
-From step 14, if there are no errors, you are ready to run the main pipeline. See `vignette("instructions-main")` for further instructions.
+# Next Step
 
-## Notes
+From step 14, if there are no errors, you are ready to run the main pipeline. See `vignette("instructions-yaml")` for further instructions.
 
-- Even if a pipeline finishes successfully, you may see in the console "There were XX warnings (use warnings() to see them)". This is normal if working on an R version that is not 4.5.2., as the messages will be warnings that the packages are meant to work on the latest R version. As long as the R version being used is R 4.4 or beyond, everything should still work. We have not tested the WAVES repository on R versions below 4.4.
+# Notes
+
+- Even if a pipeline finishes successfully, you may see in the console "There were XX warnings (use warnings() to see them)". This is normal if working on an R version that is not 4.6.1., as the messages will be warnings that the packages are meant to work on the latest R version. As long as the R version being used is R 4.4 or beyond, everything should still work. We have not tested the WAVES repository on R versions below 4.4.
 
 - If working on a high performance cluster...TODO (work with Hayden, Ben on swarm and batch scripts)
 

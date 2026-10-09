@@ -11,4 +11,6 @@ RoxygenNote: 7.3.3
 URL: https://waves-collaborative.github.io/WAVES/, https://github.com/WAVES-Collaborative/WAVES
 Config/Needs/website: rmarkdown, quarto
 Suggests: 
+    knitr,
     quarto
+VignetteBuilder: quarto

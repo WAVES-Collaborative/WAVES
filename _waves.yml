@@ -1,5 +1,8 @@
 study_timezone: ~
 sampling_frequency: ~
+metadata_filepath: ~
+deidentify: TRUE
+site: ~
 wrist_accelerometer:
   directories:
   - ~
