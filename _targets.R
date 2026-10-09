@@ -309,15 +309,16 @@ tar_plan(
   ##                             PROCESS - REFERENCE                        ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   # LEFT OFF HERE
+  vct_meta_nm = names(lst_meta),
   tar_file(
     name = lst_out.ref,
     command = process_ref_file(
       lst_meta    = lst_meta,
-      le_ref      = names(lst_meta),
+      le_ref      = vct_meta_nm,
       lst_ref     = lst_ref,
       dir_out.ref = dir_out.ref
     ),
-    pattern   = map(lst_meta, names(lst_meta)),
+    pattern   = map(lst_meta, vct_meta_nm),
     # iteration = "vector",
     error     = "null"
   ),
