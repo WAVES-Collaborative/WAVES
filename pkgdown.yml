@@ -13,7 +13,7 @@ articles:
   articles/test: test.html
   update-conda-environments: update-conda-environments.html
   WAVES: WAVES.html
-last_built: 2026-10-09T17:45Z
+last_built: 2026-10-09T17:55Z
 urls:
   reference: https://waves-collaborative.github.io/WAVES/reference
   article: https://waves-collaborative.github.io/WAVES/articles

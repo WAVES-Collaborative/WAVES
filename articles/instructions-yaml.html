@@ -180,9 +180,8 @@
 <p>Boolean where depending on the value:</p>
 <ul>
 <li>
-<p><code>TRUE</code>: Pipeline will create a WAVES-specific ID for each participant listed within the metadata file specified by <code>metadata_filepath</code>.</p>
+<p><code>TRUE</code>: Pipeline will create a WAVES-specific ID for each participant listed within the metadata file specified by <code>metadata_filepath</code>. Option for sites that require additional anonymizing.</p>
 <ul>
-<li><p>The WAVES-specific ID for each participant is needed in order for the merged output to be shared with the WAVES team.</p></li>
 <li><p>Each site will have the “key” that links the participant’s study ID’s with WAVES-specific ID’s, and <strong><em>will not</em></strong> be shared with the WAVES team.</p></li>
 <li>
 <p>As the WAVES-specific ID is generated every time a change to the <code>_waves.yml</code> file is made, it is only applied to:</p>
@@ -196,8 +195,7 @@
 <li>
 <p><code>FALSE</code>: Provided <code>study</code> and <code>subject</code> fields from metadata file will be used.</p>
 <ul>
-<li><p>For the WAVES project, <code>deidentify</code> will never be set to <code>FALSE</code>.</p></li>
-<li><p>This is more relevant for when WAVES repository will eventually be formatted as a package for submission to CRAN.</p></li>
+<li>Not needed if it is okay to share site and original pid of each participant.</li>
 </ul>
 </li>
 </ul></section><section class="level2"><h3 id="site">site<a class="anchor" aria-label="anchor" href="#site"></a>

@@ -75,9 +75,9 @@ Notes:
 
 ### Example
 
-| study | subject | age | bmi  | gender | device | sampling | location |
-|-------|---------|-----|------|--------|--------|----------|----------|
-| ACT24 | 101     | 21  | 23.4 | F      | AG3X   | 30       | non_dom  |
+| site  | pid | age | bmi  | gender | device | sampling | location |
+|-------|-----|-----|------|--------|--------|----------|----------|
+| ACT24 | 101 | 21  | 23.4 | F      | AG3X   | 30       | non_dom  |
 
 ## Video-Recorded Direct Observation
 
@@ -122,7 +122,7 @@ Notes:
 
 ### Example
 
-| study | subject | observation | datetime | date | time | domain_do | posture_do | sedtype_do | intensity3_do | intensity4_do | steps_do |
+| site | subject | observation | datetime | date | time | domain_do | posture_do | sedtype_do | intensity3_do | intensity4_do | steps_do |
 |----|----|----|----|----|----|----|----|----|----|----|----|
 | ACT24 | 101 | 1 | 1990-01-01T18:36:10Z | 1990-01-01 | 10:36:10 | transportation | walking | non_sed | mvpa | moderate | 2 |
 
@@ -169,7 +169,7 @@ Notes:
 
 ### Example
 
-| study | subject | observation | datetime | date | time | domain_do | posture_do | sedtype_do | intensity3_do | intensity4_do | steps_do |
+| site | subject | observation | datetime | date | time | domain_do | posture_do | sedtype_do | intensity3_do | intensity4_do | steps_do |
 |----|----|----|----|----|----|----|----|----|----|----|----|
 | ACT24 | 101 | 1 | 1990-01-01T18:36:10Z | 1990-01-01 | 10:36:10 | transportation | walking | non_sed | mvpa | moderate | 2 |
 

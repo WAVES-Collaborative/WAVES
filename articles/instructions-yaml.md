@@ -77,9 +77,7 @@ Boolean where depending on the value:
 
 - `TRUE`: Pipeline will create a WAVES-specific ID for each participant
   listed within the metadata file specified by `metadata_filepath`.
-
-  - The WAVES-specific ID for each participant is needed in order for
-    the merged output to be shared with the WAVES team.
+  Option for sites that require additional anonymizing.
 
   - Each site will have the “key” that links the participant’s study
     ID’s with WAVES-specific ID’s, and ***will not*** be shared with the
@@ -94,10 +92,8 @@ Boolean where depending on the value:
 - `FALSE`: Provided `study` and `subject` fields from metadata file will
   be used.
 
-  - For the WAVES project, `deidentify` will never be set to `FALSE`.
-
-  - This is more relevant for when WAVES repository will eventually be
-    formatted as a package for submission to CRAN.
+  - Not needed if it is okay to share site and original pid of each
+    participant.
 
 ### site
 
