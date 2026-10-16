@@ -257,23 +257,71 @@
 </ul></section><section class="level3"><h4 id="events_filepaths">events_filepaths<a class="anchor" aria-label="anchor" href="#events_filepaths"></a>
 </h4>
 <p>One or more filepaths that point directly to EventsEx activPAL files. Users will most likely define the filepaths by using the <code>!expr</code> tag to directly use R code. See the <a href="#expr">Values as an Expression section</a> for more information.</p>
-</section><section class="level3"><h4 id="id_pattern">id_pattern<a class="anchor" aria-label="anchor" href="#id_pattern"></a>
+</section><section class="level3"><h4 id="site_pid_observation_pattern">site_pid_observation_pattern<a class="anchor" aria-label="anchor" href="#site_pid_observation_pattern"></a>
 </h4>
-<p>A string that represents the pattern in how activPAL files were named, particularly to identify the numeric identifier for each participant through zeroes. This option is necessary as, during initialization of an activPAL monitor, at most 7(?) characters. For example, the wrist accelerometer files may be named like so:</p>
-<pre><code><span><span class="va">MYSTUDY_9999v1</span></span></code></pre>
-<p>and the activPAL files like so:</p>
+<p>A string that represents the pattern in how activPAL files were named, particularly to identify the numeric identifier for each participant through zeroes. This option is necessary as, during initialization of an activPAL monitor, at most 9(?) characters are allowed.</p>
+<p>For example, the wrist accelerometer files may be named like so:</p>
+<pre><code><span><span class="va">MYSTUDY_9999_visit1</span></span></code></pre>
+<p>but the activPAL files like so:</p>
 <pre><code><span><span class="va">MS9999v1</span></span></code></pre>
-<p>in which case, <code>id_pattern</code> should be:</p>
-<pre><code><span><span class="va">MS0000v1</span></span></code></pre>
-<p>where the zeroes are used to represent the unique numeric identifier of each participant. This will correspond with the <code>subject</code> field from the metadata.</p>
-</section></section><section class="level2"><h3 id="actipass">actipass<a class="anchor" aria-label="anchor" href="#actipass"></a>
+<p>in which case, <code>site_pid_observation_pattern</code> should be:</p>
+<pre><code>(?&lt;site&gt;MS)(?&lt;pid&gt;0000)v(?&lt;obs&gt;0)</code></pre>
+<p>where:</p>
+<ul>
+<li>
+<p><code>(?&lt;site&gt;MS)</code> captures the character string meant to represent the site.</p>
+<ul>
+<li><p>This is <em>optional</em>.</p></li>
+<li><p>The characters do not need to correspond with the <code>site</code> variable from the metadata. Since the <code>site</code> variable is the same across all participants, the pipeline will know to match whatever is captured within <code>(?&lt;site&gt; )</code> to the string provided in the metadata <code>site</code> variable.</p></li>
+<li>
+<p>The characters provided should be the same across ALL files.</p>
+<ul>
+<li>Continuing from the above example, if an activPAL file is named <code>1234v1.csv</code>, then the pipeline will throw an error as it is missing the <code>MS</code> characters.</li>
+</ul>
+</li>
+<li>
+<p>The characters are case sensitive.</p>
+<ul>
+<li>Continuing from the above example, if an activPAL file is named <code>ms5678v1.csv</code>, then the pipeline will throw an error as the <code>ms</code> should be uppercase according to the provided pattern.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><code>(?&lt;pid&gt;0000)</code> captures the unique numeric identifier used per participant.</p>
+<ul>
+<li>This is <strong><em>required</em></strong>.</li>
+<li>Zeroes are used to represent numbers and should correspond with the <code>pid</code> variable from the metadata.</li>
+<li>Note that in the example used, the <code>pid</code> is a 4 digits. In your specific case, the <code>pid</code> may be longer or shorter. Regardless, use the appropriate number of</li>
+</ul>
+</li>
+<li>
+<p><code>(?&lt;obs&gt;0)</code> captures the observation session.</p>
+<ul>
+<li><p>This is <em>optional</em>.</p></li>
+<li><p>If you are not supplying any direct observation data to the pipeline, then you can completely exclude this.</p></li>
+<li>
+<p>If you are supplying direct observation data, but you either:</p>
+<ol type="1">
+<li>Only have one observation session per participant so therefore don’t have anything within the activPAL filename that identifies the observation session.</li>
+<li>Have one activPAL file that corresponds</li>
+</ol>
+<p>then you can also safely omit this as:</p>
+<ol type="1">
+<li>The pipeline will only use <code>pid</code> to match the activPAL file to direct observation data.</li>
+<li>The pipeline will know to “extract” the observation sessions from the provided activPAL file.</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul></section></section><section class="level2"><h3 id="actipass">actipass<a class="anchor" aria-label="anchor" href="#actipass"></a>
 </h3>
 <p>TODO</p>
 <section class="level3"><h4 id="directories">directories<a class="anchor" aria-label="anchor" href="#directories"></a>
 </h4>
 </section><section class="level3"><h4 id="filepaths-1">filepaths<a class="anchor" aria-label="anchor" href="#filepaths-1"></a>
 </h4>
-</section><section class="level3"><h4 id="id_pattern-1">id_pattern<a class="anchor" aria-label="anchor" href="#id_pattern-1"></a>
+</section><section class="level3"><h4 id="site_pid_observation_pattern-1">site_pid_observation_pattern<a class="anchor" aria-label="anchor" href="#site_pid_observation_pattern-1"></a>
 </h4>
 </section></section></section><section class="section level2"><h2 id="expr">Values as an Expression<a class="anchor" aria-label="anchor" href="#expr"></a>
 </h2>

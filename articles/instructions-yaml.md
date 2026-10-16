@@ -210,27 +210,80 @@ Users will most likely define the filepaths by using the `!expr` tag to
 directly use R code. See the [Values as an Expression section](#expr)
 for more information.
 
-#### id_pattern
+#### site_pid_observation_pattern
 
 A string that represents the pattern in how activPAL files were named,
 particularly to identify the numeric identifier for each participant
 through zeroes. This option is necessary as, during initialization of an
-activPAL monitor, at most 7(?) characters. For example, the wrist
-accelerometer files may be named like so:
+activPAL monitor, at most 9(?) characters are allowed.
 
-    MYSTUDY_9999v1
+For example, the wrist accelerometer files may be named like so:
 
-and the activPAL files like so:
+    MYSTUDY_9999_visit1
+
+but the activPAL files like so:
 
     MS9999v1
 
-in which case, `id_pattern` should be:
+in which case, `site_pid_observation_pattern` should be:
 
-    MS0000v1
+    (?<site>MS)(?<pid>0000)v(?<obs>0)
 
-where the zeroes are used to represent the unique numeric identifier of
-each participant. This will correspond with the `subject` field from the
-metadata.
+where:
+
+- `(?<site>MS)` captures the character string meant to represent the
+  site.
+
+  - This is *optional*.
+
+  - The characters do not need to correspond with the `site` variable
+    from the metadata. Since the `site` variable is the same across all
+    participants, the pipeline will know to match whatever is captured
+    within `(?<site> )` to the string provided in the metadata `site`
+    variable.
+
+  - The characters provided should be the same across ALL files.
+
+    - Continuing from the above example, if an activPAL file is named
+      `1234v1.csv`, then the pipeline will throw an error as it is
+      missing the `MS` characters.
+
+  - The characters are case sensitive.
+
+    - Continuing from the above example, if an activPAL file is named
+      `ms5678v1.csv`, then the pipeline will throw an error as the `ms`
+      should be uppercase according to the provided pattern.
+
+- `(?<pid>0000)` captures the unique numeric identifier used per
+  participant.
+
+  - This is ***required***.
+  - Zeroes are used to represent numbers and should correspond with the
+    `pid` variable from the metadata.
+  - Note that in the example used, the `pid` is a 4 digits. In your
+    specific case, the `pid` may be longer or shorter. Regardless, use
+    the appropriate number of
+
+- `(?<obs>0)` captures the observation session.
+
+  - This is *optional*.
+
+  - If you are not supplying any direct observation data to the
+    pipeline, then you can completely exclude this.
+
+  - If you are supplying direct observation data, but you either:
+
+    1.  Only have one observation session per participant so therefore
+        don’t have anything within the activPAL filename that identifies
+        the observation session.
+    2.  Have one activPAL file that corresponds
+
+    then you can also safely omit this as:
+
+    1.  The pipeline will only use `pid` to match the activPAL file to
+        direct observation data.
+    2.  The pipeline will know to “extract” the observation sessions
+        from the provided activPAL file.
 
 ### actipass
 
@@ -240,7 +293,7 @@ TODO
 
 #### filepaths
 
-#### id_pattern
+#### site_pid_observation_pattern
 
 ## Values as an Expression
 

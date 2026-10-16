@@ -149,117 +149,92 @@
 </ul>
 <section class="level2"><h3 id="data-dictionary">Data Dictionary<a class="anchor" aria-label="anchor" href="#data-dictionary"></a>
 </h3>
-<table class="table caption-top" style="width:99%;">
-<colgroup>
-<col style="width: 3%">
-<col style="width: 28%">
-<col style="width: 7%">
-<col style="width: 6%">
-<col style="width: 34%">
-<col style="width: 16%">
-</colgroup>
+<table class="table caption-top">
 <thead><tr class="header">
-<th>variable</th>
+<th><strong>variable</strong></th>
 <th>definition</th>
 <th>type</th>
 <th>levels/examples</th>
-<th>specific labels/notes</th>
+<th>labels/notes</th>
 <th>missingness</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>site</td>
+<td><strong>site</strong></td>
 <td>Study identifier</td>
 <td>character (nominal)</td>
-<td>ACT24<br>
-FLAC<br>
-PALS<br>
-CAPTURE24</td>
-<td>Has to be the same for every single participant.</td>
+<td>CP<br>
+UWM</td>
+<td>Has to be the same for every single participant.<br>
+Ideally 2-3 characters long, can be longer if need be.</td>
 <td>none (<strong>required</strong> for each included file)</td>
 </tr>
 <tr class="even">
-<td>pid</td>
-<td>Unique participant identifier used to link observation data with device data.</td>
+<td><strong>pid</strong></td>
+<td>Unique participant identifier</td>
 <td>alphanumeric</td>
-<td>1001<br>
-001<br>
-102<br>
-42</td>
-<td>
-<p>Used to link with device and reference data.</p>
-<p>Preferably numeric but if letters were also used to identify participants, that is also okay.</p>
-</td>
+<td>-</td>
+<td>Used to link with device data. Preferrably numeric but if letters were also used to identify participants, that is also okay.</td>
 <td>none (<strong>required</strong>)</td>
 </tr>
 <tr class="odd">
-<td>age</td>
+<td><strong>age</strong></td>
 <td>Age of participant in years</td>
 <td>numeric</td>
 <td>-</td>
 <td>round to years</td>
-<td>allowed (missing value = NA)</td>
+<td>allowed</td>
 </tr>
 <tr class="even">
-<td>bmi</td>
-<td>Participant’s BMI (kg/m2)</td>
+<td><strong>BMI</strong></td>
+<td>Participant’s BMI (kg/m<sup>2</sup>)</td>
 <td>numeric</td>
 <td>-</td>
 <td>-</td>
 <td>allowed</td>
 </tr>
 <tr class="odd">
-<td>gender</td>
+<td><strong>gender</strong></td>
 <td>Participant’s gender</td>
 <td>character (nominal)</td>
-<td>
-<p>M</p>
-<p>F</p>
-<p>OTH</p>
-</td>
-<td>
-<p>Male</p>
-<p>Female</p>
-<p>Non-binary or any other categories</p>
-</td>
+<td>M<br>
+F<br>
+OTH</td>
+<td>Male<br>
+Female<br>
+Non-binary or any other categories</td>
 <td>allowed</td>
 </tr>
 <tr class="even">
-<td>device</td>
+<td><strong>device</strong></td>
 <td>Wrist-worn device that was used in this study</td>
 <td>character (nominal)</td>
-<td>
-<p>AG3X</p>
-<p>AXIV</p>
-<p>GA</p>
-</td>
-<td>
-<p>ActiGraph GT3X+</p>
-<p>Axivity</p>
-<p>Geneactiv</p>
-</td>
+<td>AG3X<br>
+AXIV<br>
+GA</td>
+<td>ActiGraph GT3X+<br>
+Axivity<br>
+Geneactiv</td>
 <td>none (<strong>required</strong>)</td>
 </tr>
 <tr class="odd">
-<td>sampling</td>
+<td><strong>sampling</strong></td>
 <td>Sampling frequency of device in Hz</td>
 <td>numeric</td>
-<td>-</td>
+<td>80<br>
+100<br>
+30</td>
 <td>Value in Hz that data was set to sample</td>
 <td>allowed</td>
 </tr>
 <tr class="even">
-<td>location</td>
+<td><strong>location</strong></td>
 <td>Wear location for device (non-dominant or dominant wrist)</td>
 <td>character (nominal)</td>
-<td>
-<p>dom</p>
-<p>non_dom</p>
-</td>
-<td>
-<p>dominant</p>
-<p>non_dominant</p>
-</td>
+<td>dom<br>
+non_dom</td>
+<td>dominant<br>
+non dominant</td>
 <td>none (<strong>required</strong>)</td>
 </tr>
 </tbody>
@@ -276,8 +251,9 @@ CAPTURE24</td>
 <th>sampling</th>
 <th>location</th>
 </tr></thead>
-<tbody><tr class="odd">
-<td>ACT24</td>
+<tbody>
+<tr class="odd">
+<td>CP</td>
 <td>101</td>
 <td>21</td>
 <td>23.4</td>
@@ -285,7 +261,48 @@ CAPTURE24</td>
 <td>AG3X</td>
 <td>30</td>
 <td>non_dom</td>
-</tr></tbody>
+</tr>
+<tr class="even">
+<td>CP</td>
+<td>102</td>
+<td>24</td>
+<td>25.2</td>
+<td>F</td>
+<td>AG3X</td>
+<td>30</td>
+<td>non_dom</td>
+</tr>
+<tr class="odd">
+<td>CP</td>
+<td>107</td>
+<td>22</td>
+<td>22.5</td>
+<td>M</td>
+<td>AG3X</td>
+<td>30</td>
+<td>non_dom</td>
+</tr>
+<tr class="even">
+<td>CP</td>
+<td>111</td>
+<td>34</td>
+<td>27.1</td>
+<td>M</td>
+<td>AG3X</td>
+<td>30</td>
+<td>non_dom</td>
+</tr>
+<tr class="odd">
+<td>CP</td>
+<td>112</td>
+<td>19</td>
+<td>20.3</td>
+<td>F</td>
+<td>AG3X</td>
+<td>30</td>
+<td>non_dom</td>
+</tr>
+</tbody>
 </table></section></section><section class="section level2"><h2 id="ref-do">Video-Recorded Direct Observation<a class="anchor" aria-label="anchor" href="#ref-do"></a>
 </h2>
 <p>Notes:</p>
@@ -354,7 +371,7 @@ FLAC</td>
 <td>Timestamp of observation in <a href="https://en.wikipedia.org/wiki/ISO_8601" class="external-link">ISO 8601</a> format</td>
 <td>POSIXct</td>
 <td>1990-01-01T18:36:10Z</td>
-<td>Timestamp in coordinated universal time (UTC), “YYYY-mm-ddTHH:MM:SSZ” format</td>
+<td>Timestamp in coordinated universal time (UTC), “YYYY-mm-ddTHH:MM:SSZ” format. Should be okay if the “T” and “Z” are missing (i.e. YYYY-mm-dd HH:MM:SS) or the character between the year-month-day are different (i.e. YYYY/mm/dd).</td>
 <td>none (<strong>required</strong>)</td>
 </tr>
 <tr class="odd">
@@ -512,20 +529,78 @@ FLAC</td>
 <th>intensity4_do</th>
 <th>steps_do</th>
 </tr></thead>
-<tbody><tr class="odd">
+<tbody>
+<tr class="odd">
 <td>ACT24</td>
 <td>101</td>
 <td>1</td>
-<td>1990-01-01T18:36:10Z</td>
+<td>1990-01-01T18:36:11Z</td>
 <td>1990-01-01</td>
-<td>10:36:10</td>
+<td>10:36:11</td>
 <td>transportation</td>
 <td>walking</td>
 <td>non_sed</td>
 <td>mvpa</td>
 <td>moderate</td>
 <td>2</td>
-</tr></tbody>
+</tr>
+<tr class="even">
+<td>ACT24</td>
+<td>101</td>
+<td>1</td>
+<td>1990-01-01T18:36:12Z</td>
+<td>1990-01-01</td>
+<td>10:36:12</td>
+<td>transportation</td>
+<td>walking</td>
+<td>non_sed</td>
+<td>mvpa</td>
+<td>moderate</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td>ACT24</td>
+<td>101</td>
+<td>1</td>
+<td>1990-01-01T18:36:13Z</td>
+<td>1990-01-01</td>
+<td>10:36:13</td>
+<td>transportation</td>
+<td>walking</td>
+<td>non_sed</td>
+<td>mvpa</td>
+<td>moderate</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>ACT24</td>
+<td>101</td>
+<td>1</td>
+<td>1990-01-01T18:36:14Z</td>
+<td>1990-01-01</td>
+<td>10:36:14</td>
+<td>transportation</td>
+<td>mixed_movement</td>
+<td>non_sed</td>
+<td>light</td>
+<td>light</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>ACT24</td>
+<td>101</td>
+<td>1</td>
+<td>1990-01-01T18:36:15Z</td>
+<td>1990-01-01</td>
+<td>10:36:15</td>
+<td>transportation</td>
+<td>mixed_movement</td>
+<td>non_sed</td>
+<td>light</td>
+<td>light</td>
+<td>0</td>
+</tr>
+</tbody>
 </table></section></section><section class="section level2"><h2 id="ref-img">Wearable Camera Still-Images<a class="anchor" aria-label="anchor" href="#ref-img"></a>
 </h2>
 <p>Notes:</p>
@@ -594,7 +669,7 @@ FLAC</td>
 <td>Timestamp of observation in <a href="https://en.wikipedia.org/wiki/ISO_8601" class="external-link">ISO 8601</a> format</td>
 <td>POSIXct</td>
 <td>1990-01-01T18:36:10Z</td>
-<td>Timestamp in coordinated universal time (UTC), “YYYY-mm-ddTHH:MM:SSZ” format</td>
+<td>Timestamp in coordinated universal time (UTC), “YYYY-mm-ddTHH:MM:SSZ” format. Should be okay if the “T” and “Z” are missing (i.e. YYYY-mm-dd HH:MM:SS) or the character between the year-month-day are different (i.e. YYYY/mm/dd).</td>
 <td>none (<strong>required</strong>)</td>
 </tr>
 <tr class="odd">

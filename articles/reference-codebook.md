@@ -75,9 +75,13 @@ Notes:
 
 ### Example
 
-| site  | pid | age | bmi  | gender | device | sampling | location |
-|-------|-----|-----|------|--------|--------|----------|----------|
-| ACT24 | 101 | 21  | 23.4 | F      | AG3X   | 30       | non_dom  |
+| site | pid | age | bmi  | gender | device | sampling | location |
+|------|-----|-----|------|--------|--------|----------|----------|
+| CP   | 101 | 21  | 23.4 | F      | AG3X   | 30       | non_dom  |
+| CP   | 102 | 24  | 25.2 | F      | AG3X   | 30       | non_dom  |
+| CP   | 107 | 22  | 22.5 | M      | AG3X   | 30       | non_dom  |
+| CP   | 111 | 34  | 27.1 | M      | AG3X   | 30       | non_dom  |
+| CP   | 112 | 19  | 20.3 | F      | AG3X   | 30       | non_dom  |
 
 ## Video-Recorded Direct Observation
 
@@ -124,7 +128,11 @@ Notes:
 
 | site | subject | observation | datetime | date | time | domain_do | posture_do | sedtype_do | intensity3_do | intensity4_do | steps_do |
 |----|----|----|----|----|----|----|----|----|----|----|----|
-| ACT24 | 101 | 1 | 1990-01-01T18:36:10Z | 1990-01-01 | 10:36:10 | transportation | walking | non_sed | mvpa | moderate | 2 |
+| ACT24 | 101 | 1 | 1990-01-01T18:36:11Z | 1990-01-01 | 10:36:11 | transportation | walking | non_sed | mvpa | moderate | 2 |
+| ACT24 | 101 | 1 | 1990-01-01T18:36:12Z | 1990-01-01 | 10:36:12 | transportation | walking | non_sed | mvpa | moderate | 1 |
+| ACT24 | 101 | 1 | 1990-01-01T18:36:13Z | 1990-01-01 | 10:36:13 | transportation | walking | non_sed | mvpa | moderate | 1 |
+| ACT24 | 101 | 1 | 1990-01-01T18:36:14Z | 1990-01-01 | 10:36:14 | transportation | mixed_movement | non_sed | light | light | 0 |
+| ACT24 | 101 | 1 | 1990-01-01T18:36:15Z | 1990-01-01 | 10:36:15 | transportation | mixed_movement | non_sed | light | light | 0 |
 
 ## Wearable Camera Still-Images
 
