@@ -342,9 +342,9 @@ estimate_steps_oak <- function(df_all,
         fs = as.integer(I$sf),
         min_amp = 0.3,
         step_freq = c(1.4, 2.3),
-        alpha = 0.6,
-        beta = 2.5,
-        min_t = 3L,
+        alpha = 31.7,
+        beta = 1.4,
+        min_t = 6L,
         delta = 20L
       )
 
@@ -399,9 +399,9 @@ estimate_steps_oak <- function(df_all,
       fs = as.integer(I$sf),
       min_amp = 0.3,
       step_freq = c(1.4, 2.3),
-      alpha = 0.6,
-      beta = 2.5,
-      min_t = 3L,
+      alpha = 31.7,
+      beta = 1.4,
+      min_t = 6L,
       delta = 20L
     )
   }
@@ -651,18 +651,23 @@ apply_methods_raw <- function(fpa_read,
         mtx_data[ind_chunk, "y"]^2 +
         mtx_data[ind_chunk, "z"]^2
     )
+    # Convert the input frequency to the 15 Hz expected by Verisense.
+    sf_in <- as.integer(round(I$sf))
+    stopifnot(abs(I$sf - sf_in) < 1e-8, sf_in > 0L)
+    vm_15hz <- signal::resample(vm, p = 15L, q = sf_in)
+
     df_all$steps_verisense.original[ind_steps] <-
       estimate_steps_verisense(
-        data = vm,
-        sample_rate = I$sf
+        data = vm_15hz,
+        sample_rate = 15
       ) |>
       # Since function warns "Assuming data is a vector of VM!" but its fo sho
       # a  vector of VM.
       suppressWarnings()
     le_steps <-
       estimate_steps_verisense(
-        data = vm,
-        sample_rate = I$sf,
+        data = vm_15hz,
+        sample_rate = 15,
         k                      = 4,
         period_min             = 4,
         period_max             = 20,
@@ -758,9 +763,9 @@ apply_methods_raw <- function(fpa_read,
         fs = 10L,
         min_amp = 0.3,
         step_freq = c(1.4, 2.3),
-        alpha = 0.6,
-        beta = 2.5,
-        min_t = 3L,
+        alpha = 31.7,
+        beta = 1.4,
+        min_t = 6L,
         delta = 20L
       )
 
@@ -1060,9 +1065,9 @@ apply_oak.pre <- function(fpa_read,
       fs = 10L,
       min_amp = 0.3,
       step_freq = c(1.4, 2.3),
-      alpha = 0.6,
-      beta = 2.5,
-      min_t = 3L,
+      alpha = 31.7,
+      beta = 1.4,
+      min_t = 6L,
       delta = 20L
     )
 
