@@ -75,13 +75,13 @@ Notes:
 
 ### Example
 
-| site | pid | age | bmi  | gender | device | sampling | location |
-|------|-----|-----|------|--------|--------|----------|----------|
-| CP   | 101 | 21  | 23.4 | F      | AG3X   | 30       | non_dom  |
-| CP   | 102 | 24  | 25.2 | F      | AG3X   | 30       | non_dom  |
-| CP   | 107 | 22  | 22.5 | M      | AG3X   | 30       | non_dom  |
-| CP   | 111 | 34  | 27.1 | M      | AG3X   | 30       | non_dom  |
-| CP   | 112 | 19  | 20.3 | F      | AG3X   | 30       | non_dom  |
+| site | pid | age | bmi  | gender | device | sampling | location | firmware |
+|------|-----|-----|------|--------|--------|----------|----------|----------|
+| CP   | 101 | 21  | 23.4 | F      | AG3X   | 30       | non_dom  | v1.9.2   |
+| CP   | 102 | 24  | 25.2 | F      | AG3X   | 30       | non_dom  | v1.9.2   |
+| CP   | 107 | 22  | 22.5 | M      | AG3X   | 30       | non_dom  | v1.9.2   |
+| CP   | 111 | 34  | 27.1 | M      | AG3X   | 30       | non_dom  | v1.9.2   |
+| CP   | 112 | 19  | 20.3 | F      | AG3X   | 30       | non_dom  | v1.9.2   |
 
 ## Video-Recorded Direct Observation
 
