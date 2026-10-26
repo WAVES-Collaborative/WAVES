@@ -1,10 +1,19 @@
 # YAML Parameters
 
+## What
+
 WAVES uses a YAML file (`_waves.yml`) to define parameters needed for
 the main pipeline. For more information on what YAML is, reference
 [`vignette("yaml-2-minute-intro", package = "yaml12")`](https://posit-dev.github.io/r-yaml12/articles/yaml-2-minute-intro.html).
 It is not a necessary read, but may help with troubleshooting if the
 pipeline is erroring at `lst_yaml`.
+
+## Why
+
+By using a YAML file to define parameters, it allows end-users to see at
+a glance the hierarchy of parameters in one place. It also allows users
+to define different YAML files for different studies they may have
+access to (NOTE: this feature is still a work in progress).
 
 ## Previous Step
 
@@ -15,7 +24,7 @@ before proceeding.
 
 ## Keys
 
-The `_waves.yml` file has 6 top-level keys. Below are descriptions and
+The `_waves.yml` file has 7 top-level keys. Below are descriptions and
 examples for each top-level key:
 
 ### study_timezone
@@ -83,6 +92,10 @@ Boolean where depending on the value:
     ID’s with WAVES-specific ID’s, and ***will not*** be shared with the
     WAVES team.
 
+  - NOTE: This creation of a csv file that lists the key is a feature is
+    still in progress. However, the merged output shared with the WAVES
+    team does use WAVES-specific ID’s if `deidentify` is set to TRUE.
+
   - As the WAVES-specific ID is generated every time a change to the
     `_waves.yml` file is made, it is only applied to:
 
@@ -95,9 +108,9 @@ Boolean where depending on the value:
   - Not needed if it is okay to share site and original pid of each
     participant.
 
-### site
+### site_deid
 
-2-3 letter identifier given to each site that will be used within the
+Optional alphanumeric site identifier that will be used within the
 WAVES-specific ID. Usually an acronym of the university or lab where the
 study data is being held.
 
@@ -107,7 +120,7 @@ Sequence of mappings that define where raw wrist accelerometer files are
 in your computer system. Only the `directories` key or `filepaths` key
 should be defined, not both.
 
-### directories
+#### directories
 
 One or more directories where the raw accelerometer files are being
 held. The directories should only hold raw files that are all the same
@@ -128,45 +141,113 @@ If the directory contains multiple formats of the same recording/session
 or contains raw files from different wear locations, then the
 `filepaths` key should be defined instead.
 
-### filepaths
+#### filepaths
 
 One or more filepaths that point directly to the raw files. Users will
 most likely define the filepaths by using the `!expr` tag to directly
 use R code. See the [values as an Expression section](#expr) for more
 information.
 
+#### site_pid_observation_pattern
+
+A string that represents the pattern in how raw accelerometer files were
+named, particularly to identify link the site string and the numeric
+identifier for each participant. This option is necessary in order to
+ensure all accelerometer files provided follow a consistent naming
+format and that the site and pid can be linked to the metadata provided.
+
+For example, the wrist accelerometer files may be named like so:
+
+    MYSTUDY_9999_visit1
+
+in which case, `site_pid_observation_pattern` should be:
+
+    (?<site>MYSTUDY)(?<pid>0000)visit(?<obs>0)
+
+where:
+
+- `(?<site>MYSTUDY)` captures the character string meant to represent
+  the site.
+
+  - This is *required* and should match the `site` variable from the
+    provided metadata.
+
+  - The characters provided should be the same across ALL files.
+
+    - Continuing from the above example, if a raw accelerometer file is
+      named `MYST_9999_visit1.csv`, then the pipeline will throw an
+      error as it is missing the `MYSTUDY` character specified as the
+      site pattern.
+
+  - The characters are case sensitive.
+
+    - Continuing from the above example, if an activPAL file is named
+      `mystudy_9999_visit1.csv`, then the pipeline will throw an error
+      as the `mystudy` should be uppercase according to the provided
+      pattern.
+
+- `(?<pid>0000)` captures the unique numeric identifier used per
+  participant.
+
+  - This is ***required***.
+  - Zeroes are used to represent numbers and should correspond with the
+    `pid` variable from the metadata.
+  - Note that in the example used, the `pid` is a 4 digits. In your
+    specific case, the `pid` may be longer or shorter. Regardless, use
+    the appropriate number of zeroes should be used and remain
+    consistent across files.
+
+- `(?<obs>0)` captures the observation session.
+
+  - This is *optional*.
+
+  - If you are not supplying any direct observation data to the
+    pipeline, then you can completely exclude this.
+
+  - If you are supplying direct observation data, but you have one raw
+    accelerometer file that includes all observation sessions, then you
+    can also safely omit this as:
+
+    1.  The pipeline will only use `site` and `pid` to match the raw
+        accelerometer file to direct observation data.
+    2.  The pipeline will know to “extract” the observation sessions
+        from the provided raw accelerometer file.
+
+Finally, the pipeline assumes the provided string is at the very
+beginning of the filename.
+
 ### reference
 
 Sequence of mappings that define the reference measures being used and
 where they are located in your computer system.
 
-### direct_observation
+#### direct_observation
 
-#### filepath
+##### filepath
 
 Filepath that points directly to 3rd-person or 1st-person video-recorded
 direction observation labels formatted according to Reference Codebook
 [Direct Observation
-section](https://waves-collaborative.github.io/WAVES/articles/articles/reference-codebook.html%24ref-do)
+section](https://waves-collaborative.github.io/WAVES/articles/articles/reference-codebook.html$ref-do)
 in `.csv` format.
 
-### still_image
+#### still_image
 
-#### filepath
+##### filepath
 
 Filepath that points directly to 1st-person still-image labels formatted
 according to Reference Codebook [Wearable Camera
-section](https://waves-collaborative.github.io/WAVES/articles/articles/reference-codebook.html%24ref-img)
+section](https://waves-collaborative.github.io/WAVES/articles/articles/reference-codebook.html$ref-img)
 in `csv` format.
 
-### activpal
+#### activpal
 
 See [Thigh-worn activPAL
 section](https://waves-collaborative.github.io/WAVES/articles/articles/reference-codebook.html#ref-ap)
 for guidance on exporting 1-second epoch files and EventsEx files from
 PAL Batch.
 
-#### 1secEpochs_directories
+##### 1secEpochs_directories
 
 One or more directories where 1-second epoch activPAL files are located.
 The directories:
@@ -181,14 +262,14 @@ The directories:
   than that specified within Reference Codebook [Thigh-worn activPAL
   section](https://waves-collaborative.github.io/WAVES/articles/articles/reference-codebook.html#ref-ap).
 
-#### 1secEpochs_filepaths
+##### 1secEpochs_filepaths
 
 One or more filepaths that point directly to 1-second epoch activPAL
 files. Users will most likely define the filepaths by using the `!expr`
 tag to directly use R code. See the [Values as an Expression
 section](#expr) for more information.
 
-#### events_directories
+##### events_directories
 
 One or more directories where 1-second epoch activPAL files are located.
 The directories:
@@ -203,14 +284,14 @@ The directories:
   than that specified within Reference Codebook [Thigh-worn activPAL
   section](https://waves-collaborative.github.io/WAVES/articles/articles/reference-codebook.html#ref-ap).
 
-#### events_filepaths
+##### events_filepaths
 
 One or more filepaths that point directly to EventsEx activPAL files.
 Users will most likely define the filepaths by using the `!expr` tag to
 directly use R code. See the [Values as an Expression section](#expr)
 for more information.
 
-#### site_pid_observation_pattern
+##### site_pid_observation_pattern
 
 A string that represents the pattern in how activPAL files were named,
 particularly to identify the numeric identifier for each participant
@@ -234,13 +315,15 @@ where:
 - `(?<site>MS)` captures the character string meant to represent the
   site.
 
-  - This is *optional*.
+  - This is *optional* if the `site` alphanumeric string was too long to
+    put as the activPAL identifier AND is the same across all
+    participants.
 
-  - The characters do not need to correspond with the `site` variable
-    from the metadata. Since the `site` variable is the same across all
-    participants, the pipeline will know to match whatever is captured
-    within `(?<site> )` to the string provided in the metadata `site`
-    variable.
+  - If provided, the characters do not need to exactly correspond with
+    the `site` variable from the metadata. Since the `site` variable is
+    assumed to be the same across all participants, the pipeline will
+    know to match whatever is captured within `(?<site> )` to the string
+    provided in the metadata `site` variable.
 
   - The characters provided should be the same across ALL files.
 
@@ -262,7 +345,8 @@ where:
     `pid` variable from the metadata.
   - Note that in the example used, the `pid` is a 4 digits. In your
     specific case, the `pid` may be longer or shorter. Regardless, use
-    the appropriate number of
+    the appropriate number of zeroes should be used and remain
+    consistent across files.
 
 - `(?<obs>0)` captures the observation session.
 
@@ -285,15 +369,18 @@ where:
     2.  The pipeline will know to “extract” the observation sessions
         from the provided activPAL file.
 
-### actipass
+Finally, the pipeline assumes the provided string is at the very
+beginning of the filename.
+
+#### actipass
 
 TODO
 
-#### directories
+##### directories
 
-#### filepaths
+##### filepaths
 
-#### site_pid_observation_pattern
+##### site_pid_observation_pattern
 
 ## Values as an Expression
 

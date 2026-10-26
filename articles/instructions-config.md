@@ -4,7 +4,7 @@
 
 Before continuing, please ensure you have set up your computer according
 to [Preliminary
-Setup](https://waves-collaborative.github.io/WAVES/articles/WAVES.html%24preliminary-setup).
+Setup](https://waves-collaborative.github.io/WAVES/articles/WAVES.html$preliminary-setup).
 
 ## Configuration Pipeline
 
