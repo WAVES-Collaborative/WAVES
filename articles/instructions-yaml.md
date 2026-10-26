@@ -92,6 +92,8 @@ Boolean where depending on the value:
     ID’s with WAVES-specific ID’s, and ***will not*** be shared with the
     WAVES team.
 
+  - The key will be located within the “reports” folder.
+
   - NOTE: This creation of a csv file that lists the key is a feature is
     still in progress. However, the merged output shared with the WAVES
     team does use WAVES-specific ID’s if `deidentify` is set to TRUE.

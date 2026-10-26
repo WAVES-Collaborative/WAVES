@@ -78,9 +78,6 @@ before proceeding.
     share the “3_MERGED” folder with WAVES data team, where files within
     “3_MERGED” will already be renamed with the WAVES-specific ID.
 
-TODO: Have not included metadata within 3_MERGED, have users just send
-over metadata file beforehand or include in 3_MERGED folder.
-
 TODO: Have a vignette that describes all the errors that can be found
 from running the main pipeline and further information.
 

@@ -187,6 +187,7 @@
 <p><code>TRUE</code>: Pipeline will create a WAVES-specific ID for each participant listed within the metadata file specified by <code>metadata_filepath</code>. Option for sites that require additional anonymizing.</p>
 <ul>
 <li><p>Each site will have the “key” that links the participant’s study ID’s with WAVES-specific ID’s, and <strong><em>will not</em></strong> be shared with the WAVES team.</p></li>
+<li><p>The key will be located within the “reports” folder.</p></li>
 <li><p>NOTE: This creation of a csv file that lists the key is a feature is still in progress. However, the merged output shared with the WAVES team does use WAVES-specific ID’s if <code>deidentify</code> is set to TRUE.</p></li>
 <li>
 <p>As the WAVES-specific ID is generated every time a change to the <code>_waves.yml</code> file is made, it is only applied to:</p>
