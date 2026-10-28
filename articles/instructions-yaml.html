@@ -239,7 +239,7 @@
 <li>
 <p><code>(?&lt;site&gt;MYSTUDY)</code> captures the character string meant to represent the site.</p>
 <ul>
-<li><p>This is <em>required</em> and should match the <code>site</code> variable from the provided metadata.</p></li>
+<li><p>This is <em>optional</em> and should match the <code>site</code> variable from the provided metadata if provided.</p></li>
 <li>
 <p>The characters provided should be the same across ALL files.</p>
 <ul>
@@ -276,7 +276,12 @@
 </li>
 </ul>
 </li>
+<li><p>Any characters not within a <code>(? )</code> pattern will be expected to be the same across all files. If there is another variable within the filenames that do change between files (i.e. wrist location) such as below:</p></li>
 </ul>
+<pre><code><span><span class="va">AL_LW_V3_102</span></span>
+<span><span class="va">AL_RW_V3_112</span></span></code></pre>
+<p>then place a <code>.</code> where the character string will change:</p>
+<pre><code>(?&lt;site&gt;AL)_.W_V3_(?&lt;pid&gt;000)</code></pre>
 <p>Finally, the pipeline assumes the provided string is at the very beginning of the filename.</p>
 </section></section><section class="level2"><h3 id="reference">reference<a class="anchor" aria-label="anchor" href="#reference"></a>
 </h3>

@@ -171,8 +171,8 @@ where:
 - `(?<site>MYSTUDY)` captures the character string meant to represent
   the site.
 
-  - This is *required* and should match the `site` variable from the
-    provided metadata.
+  - This is *optional* and should match the `site` variable from the
+    provided metadata if provided.
 
   - The characters provided should be the same across ALL files.
 
@@ -214,6 +214,20 @@ where:
         accelerometer file to direct observation data.
     2.  The pipeline will know to “extract” the observation sessions
         from the provided raw accelerometer file.
+
+- Any characters not within a `(? )` pattern will be expected to be the
+  same across all files. If there is another variable within the
+  filenames that do change between files (i.e. wrist location) such as
+  below:
+
+&nbsp;
+
+    AL_LW_V3_102
+    AL_RW_V3_112
+
+then place a `.` where the character string will change:
+
+    (?<site>AL)_.W_V3_(?<pid>000)
 
 Finally, the pipeline assumes the provided string is at the very
 beginning of the filename.
