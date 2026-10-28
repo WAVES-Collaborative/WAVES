@@ -303,6 +303,8 @@ check_input_pal <- function(vct_fpa_palp,
   if ("obs" %in% names(df_palp)) {
     names(df_palp)[names(df_palp) == "obs"] <- "observation"
     names(df_palv)[names(df_palv) == "obs"] <- "observation"
+    df_palp$observation <- as.integer(df_palp$observation)
+    df_palv$observation <- as.integer(df_palv$observation)
   }
 
   # If the site_pid_observation from a filename is not extracted properly, then
@@ -460,7 +462,10 @@ check_input_raw <- function(vct_raw,
   colnames(mtx_raw)[1] <- "spo"
   df_raw <- as_tibble(mtx_raw)
 
-  if ("obs" %in% names(df_raw)) names(df_raw)[names(df_raw) == "obs"] <- "observation"
+  if ("obs" %in% names(df_raw)) {
+    names(df_raw)[names(df_raw) == "obs"] <- "observation"
+    df_raw$observation <- as.integer(df_raw$observation)
+  }
 
   # If the site_pid_observation from a filename is not extracted properly, then
   # the entire row will be empty. Just use the first column to check then.
