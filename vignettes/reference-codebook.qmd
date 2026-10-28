@@ -265,7 +265,7 @@ Notes:
   - Observation session identifier
   - numeric (count)
   - \- 
-  - If a participant is only observed once, then default to 1
+  - If a participant is only observed once and there is no observation session identifier within the filenames of the wrist accelerometer or reference data, then default to 1.
   - none (**required**)
 
 - - **datetime**
