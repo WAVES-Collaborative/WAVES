@@ -584,7 +584,7 @@ check_input_pid <- function(df_meta,
     ) |>
     arrange(pid) |>
     select(
-      any_of("site"), pid,
+      site, pid,
       site_deid, pid_deid,
       any_of("observation"),
       meta, raw, all_of(vct_ref),

@@ -165,20 +165,6 @@ merge_output <- function(de_id,
           ".parquet"
         )
       )
-    if (chk_obs_raw) {
-      vct_fnm_raw <- paste(
-        df_pid$site,
-        df_pid$pid,
-        df_pid$observation,
-        sep = "_"
-      )
-    } else{
-      vct_fnm_raw <- paste(
-        df_pid$site,
-        df_pid$pid,
-        sep = "_"
-      )
-    }
     vct_complete <- vector("logical", length = length(vct_fpa_write))
     lst_df_ref <-
       vector(mode = "list",
@@ -193,7 +179,7 @@ merge_output <- function(de_id,
       le_site <- df_pid$site[i]
       le_pid  <- df_pid$pid[i]
       le_obs  <- df_pid$observation[i]
-      le_fnm_raw <- vct_fnm_raw[i]
+      le_fnm_raw <- df_pid$fnm_write_raw[i]
       fpa_write <- vct_fpa_write[i]
 
       # Commenting this out for now. Since the repository is constantly being
@@ -351,8 +337,6 @@ merge_output <- function(de_id,
   if (chk_no_do ||
       (!chk_obs_raw && any(!vct_chk_obs_ref))) {
 
-    # df_no_do$pass <- NA_integer_ # REMOVE AFTER TESTING
-
     # Use wrist accelerometer data as "anchor", where all other data, including other
     # reference data, are left_joined to wrist accelerometer data.
 
@@ -373,27 +357,12 @@ merge_output <- function(de_id,
           )
       )
 
-    if (chk_obs_raw) {
-      vct_fnm_raw <- paste(
-        df_no_do$site,
-        df_no_do$pid,
-        df_no_do$observation,
-        sep = "_"
-      )
-    } else{
-      vct_fnm_raw <- paste(
-        df_no_do$site,
-        df_no_do$pid,
-        sep = "_"
-      )
-    }
-
     vct_complete <- vector("logical", length = length(vct_fpa_write))
 
     # Merge ----
     for (i in seq_along(vct_fpa_write)) {
 
-      le_fnm_raw <- vct_fnm_raw[i]
+      le_fnm_raw <- df_pid$fnm_write_raw[i]
       fpa_write  <- vct_fpa_write[i]
       lst_start_tz <-
         df_start_tz |>
