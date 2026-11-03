@@ -278,16 +278,60 @@ tar_plan(
     name = vct_raw,
     files = lst_yaml$raw$fpa
   ),
+  # Direct Observation
+  if (!is.null(lst_yaml$ref$do$fpa)) {
+    tar_files_input(
+    name  = fpa_do,
+    files = lst_yaml$ref$do$fpa
+  )
+  } else {
+    fpa_do = NULL
+  },
+  # Still-image
+  if (!is.null(lst_yaml$ref$img$fpa)) {
+    tar_files_input(
+      name  = vct_img,
+      files = lst_yaml$ref$img$fpa
+    )
+  } else {
+    vct_img = NULL
+  },
+  # activPAL
+  if (!is.null(lst_yaml$ref$pal$palp_fpa)) {
+    tar_files_input(
+      name  = vct_palp,
+      files = lst_yaml$ref$pal$palp_fpa
+    )
+  } else {
+    vct_palp = NULL
+  },
+  if (!is.null(lst_yaml$ref$pal$palv_fpa)) {
+    tar_files_input(
+      name  = vct_palv,
+      files = lst_yaml$ref$pal$palv_fpa
+    )
+  } else {
+    vct_palv = NULL
+  },
+  # ActiPass
+  if (!is.null(lst_yaml$ref$pass$fpa)) {
+    tar_files_input(
+      name  = vct_pass,
+      files = lst_yaml$ref$pass$fpa
+    )
+  } else {
+    vct_pass = NULL
+  },
   lst_ref = list(
-    do   = lst_yaml$ref$do$fpa,
-    img  = lst_yaml$ref$img$fpa,
+    do   = fpa_do,
+    img  = vct_img,
     pal  = list(
-      palp    = lst_yaml$ref$pal$palp_fpa,
-      palv    = lst_yaml$ref$pal$palv_fpa,
+      palp    = vct_palp,
+      palv    = vct_palv,
       spo_pat = lst_yaml$ref$pal$spo_pat
     ),
     pass = list(
-      fpa     = lst_yaml$ref$pass$fpa,
+      fpa     = vct_pass,
       spo_pat = lst_yaml$ref$pass$spo_pat
     )
   ),
