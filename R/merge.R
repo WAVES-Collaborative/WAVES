@@ -79,6 +79,75 @@ merge_wrangler <- function(df) {
       .fns = ~factor(.x, levels = c("sedentary", "light", "moderate", "vigorous", "sleep", "nonwear"))
     ))
 }
+left_join_if <- function(df, fpa, completed, transform = identity) {
+  if (!completed) {
+    # add in empty column
+    switch(
+      names(completed),
+      "nw.sleep" = {
+        df |>
+          mutate(sleep   = NA_integer_,
+                 invalid = NA_integer_)
+      },
+      "cut" = {
+        df |>
+          mutate(
+            intensity_bakrania.enmo.simple  = NA_character_,
+            intensity_bakrania.enmo.average = NA_character_,
+            intensity_hildebrand            = NA_character_,
+            intensity_ggir                  = NA_character_,
+            intensity_mielke                = NA_character_,
+            intensity_white.enmo.lin        = NA_character_,
+            intensity_white.enmo.pol        = NA_character_,
+            intensity_esliger               = NA_character_,
+            intensity_fraysee               = NA_character_,
+            intensity_white.hpfvm.lin       = NA_character_,
+            intensity_white.hpfvm.pol       = NA_character_,
+            intensity_bakrania.mad.simple   = NA_character_,
+            intensity_bakrania.mad.average  = NA_character_,
+            across(
+              .cols = intensity_bakrania.enmo.simple:intensity_bakrania.mad.average,
+              .fns = ~factor(.x,
+                             levels = c("sedentary", "light", "mvpa", "VPA"))
+            )
+          )
+      },
+      "raw" = {
+        df |>
+          mutate(
+            intensity_montoye.rf     = NA_character_,
+            intensity_montoye.nn     = NA_character_,
+            intensity_montoye.dt     = NA_character_,
+            intensity_montoye.svm    = NA_character_,
+            class_trost              = NA_character_,
+            class_ellis              = NA_character_,
+            steps_oak.1.0            = NA_real_,
+            steps_sdt                = NA_integer_,
+            steps_trost              = NA_integer_,
+            steps_verisense.original = NA_integer_,
+            steps_verisense.revised  = NA_integer_
+          )
+      },
+      "oak.pre" = {
+        df$steps_oak.pre <- NA_real_
+      },
+      "ox" = {
+        df |>
+          mutate(
+            intensity_walmsley = NA_character_,
+            intensity_actinet  = NA_character_,
+            steps_stepcount    = NA_integer_
+          )
+      }
+    )
+  } else {
+    df |>
+      left_join(
+        read_parquet(fpa) |> transform(),
+        by = join_by(datetime)
+      )
+  }
+}
 merge_output <- function(de_id,
                          df_pid,
                          spo_pat_raw,
@@ -151,17 +220,21 @@ merge_output <- function(de_id,
 
   if ("do" %in% names(lst_out.ref)) {
 
+    # DO ----
     # Use direct observations data as "anchor", where all other data, including other
     # reference data, are left_joined to direct observation data. Then merge with
     # algorithm output.
-    fs::dir_create(file.path(dir_merged, "ANCHOR_DO"))
+    df_do_only <-
+      df_pid |>
+      dplyr::filter(!is.na(do))
+    fs::dir_create(file.path(dir_merged, "DIRECT_OBSERVATION"))
     vct_fpa_write <- file.path(
         dir_merged,
-        "ANCHOR_DO",
+        "DIRECT_OBSERVATION",
         paste0(
-          df_pid[[vct_cols_fnm_write[1]]], "_",
-          df_pid[[vct_cols_fnm_write[2]]], "_",
-          df_pid$observation,
+          df_do_only[[vct_cols_fnm_write[1]]], "_",
+          df_do_only[[vct_cols_fnm_write[2]]], "_",
+          df_do_only$observation,
           ".parquet"
         )
       )
@@ -176,11 +249,19 @@ merge_output <- function(de_id,
 
     for (i in seq_along(vct_fpa_write)) {
 
-      le_site <- df_pid$site[i]
-      le_pid  <- df_pid$pid[i]
-      le_obs  <- df_pid$observation[i]
-      le_fnm_raw <- df_pid$fnm_write_raw[i]
+      le_site <- df_do_only$site[i]
+      le_pid  <- df_do_only$pid[i]
+      le_obs  <- df_do_only$observation[i]
+      le_fnm_raw <- df_do_only$fnm_write_raw[i]
+      vct_out_complete <- sapply(
+        lst_out,
+        \(x) {le_fnm_raw %in% names(x)}
+      )
       fpa_write <- vct_fpa_write[i]
+
+      # If no raw accelerometer steps performed, then no point in merging
+      # with any reference data.
+      if (all(!vct_out_complete)) next
 
       # Commenting this out for now. Since the repository is constantly being
       # updated, I don't want a user to accidently send over merged data that
@@ -192,16 +273,15 @@ merge_output <- function(de_id,
       #   next
       # }
 
+      ## Reference ----
       # Load non-direct observation reference data first so as to not repeatedly
       # load the same file multiple times if (?<obs> ) was not provided (i.e.
       # user has one multiple day file for each direct observation session).
-      for (ii in seq_along(vct_chk_obs_ref)) {
+      for (ii in seq_along(vct_ref_secondary)) {
 
-        chk_obs_ref <- vct_chk_obs_ref[ii]
         le_ref <- vct_ref_secondary[ii]
-
         chk_ref <-
-          df_pid |>
+          df_do_only |>
           dplyr::filter(
             site        == le_site,
             pid         == le_pid,
@@ -212,34 +292,21 @@ merge_output <- function(de_id,
 
         if (chk_ref) next # No other reference data for pid
 
-        if (chk_obs_ref) {
-          le_fnm_ref <- paste(
-            le_site, le_pid, le_obs,
-            sep = "_"
-          )
+        le_col_fnm_write <- paste0("fnm_write_", le_ref)
+        le_fnm_ref <- df_do_only[[le_col_fnm_write]][i]
+
+        if (i == 1) {
           lst_df_ref[[le_ref]] <-
             lst_out.ref[[le_ref]] |>
             stri_subset(regex = le_fnm_ref) |>
             read_parquet()
-        } else {
-          le_fnm_ref <- paste(
-            le_site, le_pid,
-            sep = "_"
-          )
-
-          if (i == 1) {
-            lst_df_ref[[le_ref]] <-
-              lst_out.ref[[le_ref]] |>
-              stri_subset(regex = le_fnm_ref) |>
-              read_parquet()
-            prev_fnm_ref <- le_fnm_ref
-          } else if (prev_fnm_ref != le_fnm_ref) {
-            lst_df_ref[[le_ref]] <-
-              lst_out.ref[[le_ref]] |>
-              stri_subset(regex = le_fnm_ref) |>
-              read_parquet()
-            prev_fnm_ref <- le_fnm_ref
-          }
+          prev_fnm_ref <- le_fnm_ref
+        } else if (prev_fnm_ref != le_fnm_ref) {
+          lst_df_ref[[le_ref]] <-
+            lst_out.ref[[le_ref]] |>
+            stri_subset(regex = le_fnm_ref) |>
+            read_parquet()
+          prev_fnm_ref <- le_fnm_ref
         }
       }
 
@@ -263,36 +330,30 @@ merge_output <- function(de_id,
           suppressMessages()
       }
 
+      ## Raw ----
       # Now the rest of the output.
       df_merge_ref |>
         # Left join non-wear/sleep and cutpoint as they are both based off
         # M$metashort and can just do a down fill for non-wear/sleep.
-        left_join(
-          read_parquet(lst_out$cut[le_fnm_raw]),
-          by = join_by(datetime)
-        ) |>
-        left_join(
-          read_parquet(lst_out$nw.sleep[le_fnm_raw]),
-          by = join_by(datetime)
-        ) |>
-        fill(sleep:invalid,
+        left_join_if(lst_out$cut[le_fnm_raw], completed = vct_out_complete["cut"]) |>
+        left_join_if(lst_out$nw.sleep[le_fnm_raw], completed = vct_out_complete["nw.sleep"]) |>
+        fill(any_of(c("sleep", "invalid")),
              .direction = "down") |>
-        left_join(
-          read_parquet(lst_out$raw[le_fnm_raw]) |> mutate(datetime = as.POSIXct(datetime, tz = "UTC")),
-          by = join_by(datetime)
+        left_join_if(
+          lst_out$raw[le_fnm_raw],
+          completed = vct_out_complete["raw"],
+          transform = \(x) mutate(x, datetime = as.POSIXct(datetime, tz = "UTC"))
         ) |>
-        left_join(
-          read_parquet(lst_out$oak.pre[le_fnm_raw]) |> mutate(datetime = as.POSIXct(datetime, tz = "UTC")),
-          by = join_by(datetime)
+        left_join_if(
+          lst_out$oak.pre[le_fnm_raw],
+          completed = vct_out_complete["oak.pre"],
+          transform = \(x) mutate(x, datetime = as.POSIXct(datetime, tz = "UTC"))
         ) |>
-        left_join(
-          read_parquet(lst_out$ox[le_fnm_raw]),
-          by = join_by(datetime)
-        ) |>
+        left_join_if(lst_out$ox[le_fnm_raw], completed = vct_out_complete["ox"]) |>
         # Update site and pid with de_identified one if necessary.
         mutate(
-          site = df_pid[[vct_cols_fnm_write[1]]][i],
-          pid  = df_pid[[vct_cols_fnm_write[2]]][i]
+          site = df_do_only[[vct_cols_fnm_write[1]]][i],
+          pid  = df_do_only[[vct_cols_fnm_write[2]]][i]
         ) |>
         # wrangle
         merge_wrangler() |>
@@ -318,35 +379,35 @@ merge_output <- function(de_id,
 
   if ("do" %in% names(lst_out.ref)) {
     if (!chk_obs_raw && any(!vct_chk_obs_ref)) {
-      df_no_do <-
+      df_do_none <-
         df_pid |>
         select(-any_of(c("observation", "do"))) |>
         distinct()
       chk_no_do <- FALSE
     } else {
-      df_no_do <-
+      df_do_none <-
         df_pid |>
         dplyr::filter(is.na(do))
-      chk_no_do <- nrow(df_no_do) != 0
+      chk_no_do <- nrow(df_do_none) != 0
     }
   } else {
-    df_no_do  <- df_pid
+    df_do_none  <- df_pid
     chk_no_do <- FALSE
   }
 
   if (chk_no_do ||
       (!chk_obs_raw && any(!vct_chk_obs_ref))) {
 
-    # Use wrist accelerometer data as "anchor", where all other data, including other
-    # reference data, are left_joined to wrist accelerometer data.
-
-    fs::dir_create(file.path(dir_merged, "ANCHOR_RAW"))
+    # Free-living ----
+    # Use other reference data as the "anchor", where all other wrist accelerometer
+    # output is left_joined.
+    fs::dir_create(file.path(dir_merged, "FREE_LIVING"))
     vct_fpa_write <-
       file.path(
         dir_merged,
-        "ANCHOR_RAW",
+        "FREE_LIVING",
         paste0(
-          df_no_do |>
+          df_do_none |>
             unite(
               col = fnm,
               all_of(vct_cols_fnm_write),
@@ -359,15 +420,22 @@ merge_output <- function(de_id,
 
     vct_complete <- vector("logical", length = length(vct_fpa_write))
 
-    # Merge ----
     for (i in seq_along(vct_fpa_write)) {
 
-      le_fnm_raw <- df_pid$fnm_write_raw[i]
+      le_fnm_raw <- df_do_none$fnm_write_raw[i]
+      vct_out_complete <- sapply(
+        lst_out,
+        \(x) {le_fnm_raw %in% names(x)}
+      )
       fpa_write  <- vct_fpa_write[i]
       lst_start_tz <-
         df_start_tz |>
         dplyr::filter(fnm == le_fnm_raw) |>
         as.list()
+
+      # If no raw accelerometer steps performed, then no point in merging
+      # with any reference data.
+      if (all(!vct_out_complete)) next
 
       # Commenting this out for now. Since the repository is constantly being
       # updated, I don't want a user to accidently send over merged data that
@@ -381,28 +449,15 @@ merge_output <- function(de_id,
 
       cnt_read <- 0
 
-      ## Merge reference data together ----
+      ## Reference ----
       for (ii in seq_along(vct_ref_secondary)) {
 
-        chk_obs_ref <- vct_chk_obs_ref[ii]
         le_ref <- vct_ref_secondary[ii]
 
-        if (chk_obs_ref) {
-          le_fnm_ref <- paste(
-            df_no_do$site[i],
-            df_no_do$pid[i],
-            df_no_do$observation[i],
-            sep = "_"
-          )
-        } else {
-          le_fnm_ref <- paste(
-            df_no_do$site[i],
-            df_no_do$pid[i],
-            sep = "_"
-          )
-        }
+        if (is.na(df_do_none[[le_ref]][i])) next
 
-        if (is.na(df_no_do[[le_ref]][i])) next
+        le_col_fnm_write <- paste0("fnm_write_", le_ref)
+        le_fnm_ref <- df_do_none[[le_col_fnm_write]][i]
 
         if (cnt_read == 0) {
           df_ref <-
@@ -423,37 +478,33 @@ merge_output <- function(de_id,
 
       }
 
+      ## Raw ----
       # read & merge
-      # Left join first reference output then with non-wear/sleep and cutpoint as
-      # they are both based off M$metashort and can just do a down fill for non-wear/sleep.
-      left_join(
-        read_parquet(lst_out$cut[le_fnm_raw]),
-        read_parquet(lst_out$nw.sleep[le_fnm_raw]),
-        by = join_by(datetime)
-      ) |>
-        fill(sleep:invalid,
+      # Left join first ref as it will always be present (the loop wouldn't start
+      # if the ref was missing).
+      df_ref |>
+        # Left join non-wear/sleep and cutpoint as they are both based off
+        # M$metashort and can just do a down fill for non-wear/sleep.
+        left_join_if(lst_out$cut[le_fnm_raw], completed = vct_out_complete["cut"]) |>
+        left_join_if(lst_out$nw.sleep[le_fnm_raw], completed = vct_out_complete["nw.sleep"]) |>
+        fill(any_of(c("sleep", "invalid")),
              .direction = "down") |>
-        left_join(
-          read_parquet(lst_out$raw[le_fnm_raw]) |> mutate(datetime = as.POSIXct(datetime, tz = "UTC")),
-          by = join_by(datetime)
+        left_join_if(
+          lst_out$raw[le_fnm_raw],
+          completed = vct_out_complete["raw"],
+          transform = \(x) mutate(x, datetime = as.POSIXct(datetime, tz = "UTC"))
         ) |>
-        left_join(
-          read_parquet(lst_out$oak.pre[le_fnm_raw]) |> mutate(datetime = as.POSIXct(datetime, tz = "UTC")),
-          by = join_by(datetime)
+        left_join_if(
+          lst_out$oak.pre[le_fnm_raw],
+          completed = vct_out_complete["oak.pre"],
+          transform = \(x) mutate(x, datetime = as.POSIXct(datetime, tz = "UTC"))
         ) |>
-        left_join(
-          read_parquet(lst_out$ox[le_fnm_raw]),
-          by = join_by(datetime)
-        ) |>
-        left_join(
-          df_ref,
-          by = join_by(datetime)
-        ) |>
-        # add identifying information, date column and time column in timezone data was collected.
+        left_join_if(lst_out$ox[le_fnm_raw], completed = vct_out_complete["ox"]) |>
+        # Update site and pid with de_identified one if necessary and date, time columns.
         mutate(
-          site = df_no_do[[vct_cols_fnm_write[1]]][i],
-          pid  = df_no_do[[vct_cols_fnm_write[2]]][i],
-          if (chk_obs_raw) {observation =  df_no_do$observation[i]},
+          site = df_do_none[[vct_cols_fnm_write[1]]][i],
+          pid  = df_do_none[[vct_cols_fnm_write[2]]][i],
+          if (chk_obs_raw) {observation =  df_do_none$observation[i]},
           date =
             with_tz(datetime, tzone = lst_start_tz$tz) |>
             date(),

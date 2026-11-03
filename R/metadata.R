@@ -88,8 +88,9 @@ process_meta_ref <- function(lst_chk) {
         "pal" = {
           lst_out <- purrr::pmap(
             lst_chk$pal,
-            \(spo, fpa_epoch, fpa_event, ...) {rlang::try_fetch(
+            \(spo, fnm, fpa_epoch, fpa_event, ...) {rlang::try_fetch(
               process_meta_ap(spo,
+                              fnm,
                               fpa_epoch,
                               fpa_event),
               error = \(cnd) {cnd}
@@ -325,6 +326,7 @@ extract_pal_header <- function(fpa) {
   return(lst_header)
 }
 process_meta_ap <- function(spo,
+                            fnm,
                             fpa_epoch,
                             fpa_event) {
 
@@ -441,7 +443,7 @@ process_meta_ap <- function(spo,
 
   lst_header_epoch |>
     as_tibble() |>
-    mutate(id = spo,
+    mutate(fnm = fnm,
            .before = 1)
 
 }

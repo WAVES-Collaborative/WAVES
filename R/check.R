@@ -563,7 +563,8 @@ check_input_pid <- function(df_meta,
               any_of("observation"),
               pal,
               fpa_epoch,
-              fpa_event
+              fpa_event,
+              fnm_write_pal = fnm
             )
         },
         "pass" = {} # TODO
@@ -594,7 +595,8 @@ check_input_pid <- function(df_meta,
       any_of("observation"),
       meta, raw, all_of(vct_ref),
       type_raw, fnm_write_raw, fpa_raw,
-      starts_with("fpa")
+      starts_with("fpa"),
+      starts_with("fnm_write")
     )
 
   if (trial_run) {

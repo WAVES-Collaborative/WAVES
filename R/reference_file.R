@@ -18,8 +18,9 @@ process_ref_file <- function(lst_chk,
         "pal" = {
           lst_out <- purrr::pmap(
             lst_chk$pal,
-            \(fnm, fpa_epoch, fpa_event, ...) {rlang::try_fetch(
-              process_activpal_file(fnm,
+            \(spo, fnm, fpa_epoch, fpa_event, ...) {rlang::try_fetch(
+              process_activpal_file(spo,
+                                    fnm,
                                     fpa_epoch,
                                     fpa_event,
                                     dir_out.ref),
@@ -95,7 +96,8 @@ process_ref_file <- function(lst_chk,
   return(lst_out.ref)
 
 }
-process_activpal_file <- function(fnm,
+process_activpal_file <- function(spo,
+                                  fnm,
                                   fpa_epoch,
                                   fpa_event,
                                   dir_out.ref) {
@@ -162,7 +164,7 @@ process_activpal_file <- function(fnm,
         "`process_activpal` function:",
         "x" = "Epoch file has a data error. Double-check events file to see what corresponding {.var class_palv} is.",
         "i" = "Can be fixed, please reach out to WAVES team.",
-        "i" = glue::glue("ID: {fnm}"),
+        "i" = glue::glue("ID: {spo}"),
         "i" = glue::glue("File: {basename(vct_event[fnm])}")
       ),
       class = "waves_process_pal_epoch",
@@ -251,7 +253,7 @@ process_activpal_file <- function(fnm,
         "`process_activpal` function:",
         "x" = "Events file has NA in events type column after renaming.",
         "i" = "Can be fixed, please reach out to WAVES team.",
-        "i" = "ID: {fnm}",
+        "i" = "ID: {spo}",
         "i" = "File: {basename(vct_event[fnm])}"
       ),
       class = "waves_process_pal_event",
