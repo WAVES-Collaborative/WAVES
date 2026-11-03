@@ -278,7 +278,7 @@ estimate_steps_oak <- function(mtx_data, I, start_sec, forest, np,
   )
 
   # TODO addressed: Limit memory usage through chunking.
-  # Use one-hour chunks, matching the original working Oak implementations.
+  # Limit memory usage with one-hour chunks.
   chunk_size <- sf * 60L * 60L
   starts <- seq.int(chunk_begin, chunk_end, by = chunk_size)
 
