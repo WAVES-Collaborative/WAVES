@@ -283,7 +283,7 @@ config_miniconda <- function(df_module_stepcount,
         envname        = le_env,
         packages       = lst_module_creation[[le_env]],
         python_version = vct_python_version[le_env],
-        forge          = FALSE
+        forge          = TRUE
       )
       chk_successful <- dir.exists(
         file.path(miniconda_path(), "envs", le_env)
