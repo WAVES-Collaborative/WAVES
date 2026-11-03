@@ -55,7 +55,8 @@ tar_load(vct_ox)
 # tar_load(vct_ox_wlms)
 # tar_load(vct_ox_acti)
 tar_load(vct_merge)
-
+lst_info <- jsonlite::fromJSON(Sys.getenv("QUARTO_EXECUTE_INFO"))
+target_format <- lst_info$format$identifier$`target-format`
 len_raw <- length(vct_raw)
 df_out <- summarize_accelerometer_steps(
   de_id,
@@ -84,11 +85,11 @@ lgl_all <-
   pull(all)
 chk_do <- any(
   stri_detect(vct_merge,
-              regex = "ANCHOR_DO")
+              regex = "DIRECT_OBSERVATION")
 )
 chk_raw <- any(
   stri_detect(vct_merge,
-              regex = "ANCHOR_RAW")
+              regex = "FREE_LIVING")
 )
 
 ```
@@ -151,12 +152,17 @@ gt(df_out) |>
 #| output: asis
 
 if (chk_do) {
-cat("The following tables show, within each observation session:\n
-- The total number of minutes captured by each method that measured physical activity intensity (i.e. the number of minutes where there is available data).\n
-- The total number of minutes captured by each method that measured steps.\n
-- The total number of moderate-to-vigorous minutes estimated by each method.\n
-- The total number of sedentary minutes estimated by each method.\n
-- The total number of steps estimated by each method.\n")
+  cat("The following tables show, within each observation session:\n
+  - The total number of minutes captured by each method that measured physical activity intensity (i.e. the number of minutes where there is available data).\n
+  - The total number of minutes captured by each method that measured steps.\n
+  - The total number of moderate-to-vigorous minutes estimated by each method.\n
+  - The total number of sedentary minutes estimated by each method.\n
+  - The total number of steps estimated by each method.\n")
+  lst_summary <- summarize_metrics_main(
+    vct_anchor = stri_subset(vct_merge,
+                             regex = "DIRECT_OBSERVATION"),
+    target_format = target_format
+  )
 } else {
   cat("\n\nNo direct observation data supplied.\n\n")
 }
@@ -165,33 +171,191 @@ cat("The following tables show, within each observation session:\n
 
 ```{r}
 #| label: do_summary
-#| eval: !expr chk_do
+#| output: asis
+#| eval: false
+
+if (chk_do) {
+  lst_summary <- summarize_metrics_main(
+    vct_anchor = stri_subset(vct_merge,
+                             regex = "DIRECT_OBSERVATION"),
+    target_format = target_format
+  )
+  
+  cat("## Available Data: Intensity (minutes)\n\n")
+  lst_summary$total_session_int3 |>
+    as_raw_html() |> 
+    print()
+  
+  cat("## Available Data: Steps (minutes)\n\n")
+  lst_summary$total_session_step |>
+    as_raw_html() |>
+    print()
+
+  cat("## MVPA (minutes)\n\n")
+  lst_summary$total_mvpa |>
+    as_raw_html() |>
+    print()
+
+  cat("## Sedentary (minutes)\n\n")
+  lst_summary$total_sed |>
+    as_raw_html() |>
+    print()
+
+  cat("## Steps\n\n")
+  lst_summary$total_step |>
+    as_raw_html() |>
+    print()
+}
+
+```
+
+```{r}
+#| label: do_total_session_int3
 #| output: asis
 
-lst_summary <- summarize_metrics_main(
-    vct_anchor = stri_subset(vct_merge,
-                             regex = "ANCHOR_DO")
-  )
+if (chk_do) {
+  cat("## Available Data: Intensity (minutes)\n\n")
+  if (target_format == "html") {
+    lst_summary$total_session_int3
+  } else if (target_format == "typst") {
+    for (i in seq_along(lst_summary$total_session_int3)) {
+      le_gt <- lst_summary$total_session_int3[[i]]
+      cat(
+        knitr::knit_child(
+          text = c(
+            "```{r}",
+            "#| echo: false",
+            paste0("#| label: ", names(lst_summary)[1], "_", random_id()),
+            "le_gt",
+            "```"
+          ),
+          quiet = TRUE
+        ),
+        sep = "\n"
+      )
+    }
+  }
+}
 
-cat("## Available Data: Intensity (minutes)\n\n")
+```
 
-lst_summary$total_session_int3
+```{r}
+#| label: do_total_session_step
+#| output: asis
 
-cat("## Available Data: Steps (minutes)\n\n")
+if (chk_do) {
+  cat("## Available Data: Steps (minutes)\n\n")
+  if (target_format == "html") {
+    lst_summary$total_session_step
+  } else if (target_format == "typst") {
+    for (i in seq_along(lst_summary$total_session_step)) {
+      le_gt <- lst_summary$total_session_step[[i]]
+      cat(
+        knitr::knit_child(
+          text = c(
+            "```{r}",
+            "#| echo: false",
+            paste0("#| label: ", names(lst_summary)[2], "_", random_id()),
+            "le_gt",
+            "```"
+          ),
+          quiet = TRUE
+        ),
+        sep = "\n"
+      )
+    }
+  }
+}
 
-lst_summary$total_session_step
+```
 
-cat("## MVPA (minutes)\n\n")
+```{r}
+#| label: do_total_mvpa
+#| output: asis
 
-lst_summary$total_mvpa
+if (chk_do) {
+  cat("## MVPA (minutes)\n\n")
+  if (target_format == "html") {
+    lst_summary$total_mvpa
+  } else if (target_format == "typst") {
+    for (i in seq_along(lst_summary$total_mvpa)) {
+      le_gt <- lst_summary$total_mvpa[[i]]
+      cat(
+        knitr::knit_child(
+          text = c(
+            "```{r}",
+            "#| echo: false",
+            paste0("#| label: ", names(lst_summary)[3], "_", random_id()),
+            "le_gt",
+            "```"
+          ),
+          quiet = TRUE
+        ),
+        sep = "\n"
+      )
+    }
+  }
+}
 
-cat("## Sedentary (minutes)\n\n")
+```
 
-lst_summary$total_sed
+```{r}
+#| label: do_total_sed
+#| output: asis
 
-cat("## Steps\n\n")
+if (chk_do) {
+  cat("## Sedentary (minutes)\n\n")
+  if (target_format == "html") {
+    lst_summary$total_sed
+  } else if (target_format == "typst") {
+    for (i in seq_along(lst_summary$total_sed)) {
+      le_gt <- lst_summary$total_sed[[i]]
+      cat(
+        knitr::knit_child(
+          text = c(
+            "```{r}",
+            "#| echo: false",
+            paste0("#| label: ", names(lst_summary)[4], "_", random_id()),
+            "le_gt",
+            "```"
+          ),
+          quiet = TRUE
+        ),
+        sep = "\n"
+      )
+    }
+  }
+}
 
-lst_summary$total_step
+```
+
+```{r}
+#| label: do_total_step
+#| output: asis
+
+if (chk_do) {
+  cat("## Steps\n\n")
+  if (target_format == "html") {
+    lst_summary$total_step
+  } else if (target_format == "typst") {
+    for (i in seq_along(lst_summary$total_step)) {
+      le_gt <- lst_summary$total_step[[i]]
+      cat(
+        knitr::knit_child(
+          text = c(
+            "```{r}",
+            "#| echo: false",
+            paste0("#| label: ", names(lst_summary)[5], "_", random_id()),
+            "le_gt",
+            "```"
+          ),
+          quiet = TRUE
+        ),
+        sep = "\n"
+      )
+    }
+  }
+}
 
 ```
 
@@ -208,71 +372,165 @@ cat("The following tables show, within each free-living session, by date:\n
 - The total number of moderate-to-vigorous hours estimated by each method.\n
 - The total number of sedentary hours estimated by each method.\n
 - The total number of steps estimated by each method.\n")
+  lst_summary <- summarize_metrics_main(
+    vct_anchor = stri_subset(vct_merge,
+                             regex = "FREE_LIVING"),
+    target_format = target_format
+  )
 } else {
   cat("\n\nNo free-living data supplied.\n\n")
 }
 ```
 
-
 ```{r}
-#| label: raw_summary
-#| eval: !expr chk_raw
+#| label: raw_total_session_int3
 #| output: asis
 
-lst_summary <- summarize_metrics_main(
-    vct_anchor = stri_subset(vct_merge,
-                             regex = "ANCHOR_RAW")
-  )
-
-cat("## Available Data: Intensity (hours)\n\n")
-
-lst_summary$total_session_int3
-
-cat("## Available Data: Steps (hours)\n\n")
-
-lst_summary$total_session_step
-
-cat("## MVPA (hours)\n\n")
-
-lst_summary$total_mvpa
-
-cat("## Sedentary (hours)\n\n")
-
-lst_summary$total_sed
-
-cat("## Steps\n\n")
-
-lst_summary$total_step
+if (chk_raw) {
+  cat("## Available Data: Intensity (hours)\n\n")
+  if (target_format == "html") {
+    lst_summary$total_session_int3
+  } else if (target_format == "typst") {
+    for (i in seq_along(lst_summary$total_session_int3)) {
+      le_gt <- lst_summary$total_session_int3[[i]]
+      cat(
+        knitr::knit_child(
+          text = c(
+            "```{r}",
+            "#| echo: false",
+            paste0("#| label: ", names(lst_summary)[1], "_", random_id()),
+            "le_gt",
+            "```"
+          ),
+          quiet = TRUE
+        ),
+        sep = "\n"
+      )
+    }
+  }
+}
 
 ```
 
+```{r}
+#| label: raw_total_session_step
+#| output: asis
 
-<!-- ## MVPA (minutes) -->
+if (chk_raw) {
+  cat("## Available Data: Steps (hours)\n\n")
+  if (target_format == "html") {
+    lst_summary$total_session_step
+  } else if (target_format == "typst") {
+    for (i in seq_along(lst_summary$total_session_step)) {
+      le_gt <- lst_summary$total_session_step[[i]]
+      cat(
+        knitr::knit_child(
+          text = c(
+            "```{r}",
+            "#| echo: false",
+            paste0("#| label: ", names(lst_summary)[2], "_", random_id()),
+            "le_gt",
+            "```"
+          ),
+          quiet = TRUE
+        ),
+        sep = "\n"
+      )
+    }
+  }
+}
 
-<!-- ```{r} -->
-<!-- #| label: tbl-mvpa_total  -->
-<!-- #| echo: false  -->
-<!-- lst_summary$total_mvpa -->
+```
 
-<!-- ``` -->
+```{r}
+#| label: raw_total_mvpa
+#| output: asis
 
-<!-- ## Sedentary (minutes) -->
+if (chk_raw) {
+  cat("## MVPA (hours)\n\n")
+  if (target_format == "html") {
+    lst_summary$total_mvpa
+  } else if (target_format == "typst") {
+    for (i in seq_along(lst_summary$total_mvpa)) {
+      le_gt <- lst_summary$total_mvpa[[i]]
+      cat(
+        knitr::knit_child(
+          text = c(
+            "```{r}",
+            "#| echo: false",
+            paste0("#| label: ", names(lst_summary)[3], "_", random_id()),
+            "le_gt",
+            "```"
+          ),
+          quiet = TRUE
+        ),
+        sep = "\n"
+      )
+    }
+  }
+}
 
-<!-- ```{r} -->
-<!-- #| label: tbl-sed_total  -->
-<!-- #| echo: false  -->
-<!-- lst_summary$total_sed -->
+```
 
-<!-- ``` -->
+```{r}
+#| label: raw_total_sed
+#| output: asis
 
-<!-- ## Steps -->
+if (chk_raw) {
+  cat("## Sedentary (hours)\n\n")
+  if (target_format == "html") {
+    lst_summary$total_sed
+  } else if (target_format == "typst") {
+    for (i in seq_along(lst_summary$total_sed)) {
+      le_gt <- lst_summary$total_sed[[i]]
+      cat(
+        knitr::knit_child(
+          text = c(
+            "```{r}",
+            "#| echo: false",
+            paste0("#| label: ", names(lst_summary)[4], "_", random_id()),
+            "le_gt",
+            "```"
+          ),
+          quiet = TRUE
+        ),
+        sep = "\n"
+      )
+    }
+  }
+}
 
-<!-- ```{r} -->
-<!-- #| label: tbl-step_total  -->
-<!-- #| echo: false  -->
-<!-- lst_summary$total_step -->
+```
 
-<!-- ``` -->
+```{r}
+#| label: raw_total_step
+#| output: asis
+
+if (chk_raw) {
+  cat("## Steps\n\n")
+  if (target_format == "html") {
+    lst_summary$total_step
+  } else if (target_format == "typst") {
+    for (i in seq_along(lst_summary$total_step)) {
+      le_gt <- lst_summary$total_step[[i]]
+      cat(
+        knitr::knit_child(
+          text = c(
+            "```{r}",
+            "#| echo: false",
+            paste0("#| label: ", names(lst_summary)[5], "_", random_id()),
+            "le_gt",
+            "```"
+          ),
+          quiet = TRUE
+        ),
+        sep = "\n"
+      )
+    }
+  }
+}
+
+```
 
 # tar_meta
 

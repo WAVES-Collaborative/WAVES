@@ -14,7 +14,7 @@ summarize_reference_steps <- function(df_pid,
   # this function for anything.
   # df_do <-
     stri_subset(vct_merge,
-                regex = "ANCHOR_DO") |>
+                regex = "DIREC_OBSERVATION") |>
     basename() |>
     file_path_sans_ext() |>
     stri_split(regex = "_") |>
@@ -877,9 +877,9 @@ summarize_metrics_config <- function(df_pipe) {
       .cols = everything(),
       .fns =
         ~(factor(.x,
-                levels = c("sedentary", "light", "mvpa", "sleep", "nonwear", "9999"),
-                labels = c("sedentary", rep("not sedentary", times = 5))) |>
-        as.numeric() - 1)
+                 levels = c("sedentary", "light", "mvpa", "sleep", "nonwear", "9999"),
+                 labels = c("sedentary", rep("not sedentary", times = 5))) |>
+            as.numeric() - 1)
     ))
   df_agr <- df_agr[complete.cases(df_agr), ]
   nrow_agr <- nrow(df_agr)
@@ -1108,8 +1108,8 @@ metrics_summarizer <- function(df,
                                le_anchor) {
   le_divider <- switch(
     le_anchor,
-    "ANCHOR_DO" = 60,
-    "ANCHOR_RAW" = 3600
+    "DIRECT_OBSERVATION" = 60,
+    "FREE_LIVING" = 3600
   )
   le_across_fun <- switch(
     le_metric,
@@ -1118,7 +1118,7 @@ metrics_summarizer <- function(df,
     "mvpa"      = {\(x) sum(x == "mvpa", na.rm = TRUE) / le_divider},
     "steps"     = {\(x) sum(x, na.rm = TRUE)}
   )
-  if (le_anchor == "ANCHOR_DO") {
+  if (le_anchor == "DIRECT_OBSERVATION") {
     df_summarized <-
       df |>
       summarise(
@@ -1133,7 +1133,7 @@ metrics_summarizer <- function(df,
         .cols = !id,
         .fns = ~formatC(.x, format = "f", digits = 1)
       ))
-  } else if (le_anchor == "ANCHOR_RAW") {
+  } else if (le_anchor == "FREE_LIVING") {
     df_summarized <-
       df |>
       summarise(
@@ -1154,9 +1154,256 @@ metrics_summarizer <- function(df,
   }
   df_summarized[, sort(names(df_summarized))]
 }
-summarize_metrics_main <- function(vct_anchor) {
+format_summary <- function(lst,
+                           vct_label,
+                           le_anchor,
+                           target_format) {
 
-  le_anchor <- stri_extract(vct_anchor[1], regex = "ANCHOR_DO|ANCHOR_RAW")
+  tbl_id <- paste0(le_anchor, random_id())
+  if (le_anchor == "FREE_LIVING") {
+    le_df <-
+      rbindlist(lst) |>
+      select(
+        ID   = id,
+        Date = date,
+        any_of(c("Hours" = "hours", "Non-Wear" = "non_wear", "Sleep" = "sleep")),
+        starts_with("do"),
+        starts_with("img"),
+        starts_with("pal"),
+        starts_with("pass"),
+        any_of(names(vct_label))
+      ) |>
+      rename_with(
+        .cols = names(vct_label),
+        .fn = ~unname(vct_label[.x])
+      )
+    switch(
+      target_format,
+      "html" = {
+        le_df |>
+          reactable::reactable(
+            elementId = tbl_id,
+            columns   = list(
+              # Grouping variable: hide it as a regular data column
+              ID = reactable::colDef(
+                name      = "ID",
+                sticky    = "left",
+                width     = 150,
+                rowHeader = TRUE,
+                grouped   = reactable::JS("
+              function(cellInfo) {
+                return cellInfo.value
+              }
+            ")
+              ),
+              # Frozen first data column
+              Date = reactable::colDef(
+                sticky      = "left",
+                width       = 110,
+                style       = list(
+                  boxShadow = "4px 0 6px rgba(0, 0, 0, 0.12)"
+                ),
+                headerStyle = list(
+                  boxShadow = "4px 4px 6px rgba(0, 0, 0, 0.12)"
+                )
+              )
+            ),
+            # Applies to all non-frozen columns and all column headers
+            defaultColDef = reactable::colDef(
+              # minWidth = 100,
+              headerStyle = list(
+                # backgroundColor = "white",
+                boxShadow = "0 4px 6px -3px rgba(0, 0, 0, 0.28)"
+              )
+            ),
+            groupBy         = "ID",
+            sortable        = TRUE,
+            resizable       = TRUE,
+            filterable      = FALSE,
+            pagination      = FALSE,
+            defaultExpanded = TRUE,
+            striped         = TRUE,
+            compact         = TRUE,
+            height          = 500,
+            theme           = reactable::reactableTheme(
+              style = list(
+                fontFamily = "system-ui, sans-serif"
+              )
+            )
+          )
+      },
+      "typst" = {
+        le_df <-
+          le_df |>
+          mutate(
+            Date = case_when(
+              row_number() == 1L ~ format(Date, "%Y-%m-%d"),
+              lubridate::year(Date) != lag(lubridate::year(Date)) ~
+                format(Date, "%Y-%m-%d"),
+              .default = format(Date, "%m-%d")
+            ),
+            .by = ID
+          )
+        vct_id <- unique(le_df$ID)
+        lapply(vct_id, function(x) {
+          le_df |>
+            dplyr::filter(ID == x) |>
+            select(!ID) |>
+            data.table::transpose(
+              keep.names = x,
+              make.names = "Date"
+            ) |>
+            gt() |>
+            # TODO It doesnt seem that text size or padding styling is preserved
+            # to Typst, only bolding.
+            opt_table_font(size = 10) |>
+            opt_vertical_padding(scale = 0) |>
+            tab_style(
+              style = cell_text(weight = "bold"),
+              locations = cells_column_labels(columns = 1)
+            )
+        })
+      }
+    )
+  } else if (le_anchor == "DIRECT_OBSERVATION") {
+    le_df <-
+      rbindlist(lst) |>
+      select(
+        ID = id,
+        any_of(c("Minutes" = "minutes")),
+        starts_with("do"),
+        starts_with("img"),
+        starts_with("pal"),
+        starts_with("pass"),
+        any_of(names(vct_label))
+      ) |>
+      rename_with(
+        .cols = names(vct_label),
+        .fn = ~unname(vct_label[.x])
+      )
+    switch(
+      target_format,
+      "html" = {
+        le_df <-
+          le_df |>
+          separate_wider_delim(
+            cols = ID,
+            delim = "_",
+            names = c("site", "pid", "Obs")
+          ) |>
+          unite(
+            col = ID,
+            site:pid,
+            sep = "_"
+          )
+        le_df |>
+          reactable::reactable(
+            elementId = tbl_id,
+            columns   = list(
+              # Grouping variable: hide it as a regular data column
+              ID = reactable::colDef(
+                name      = "ID",
+                sticky    = "left",
+                width     = 150,
+                rowHeader = TRUE,
+                grouped   = reactable::JS("
+              function(cellInfo) {
+                return cellInfo.value
+              }
+            ")
+              ),
+              # Frozen first data column
+              Obs = reactable::colDef(
+                sticky      = "left",
+                width       = 50,
+                style       = list(
+                  boxShadow = "4px 0 6px rgba(0, 0, 0, 0.12)"
+                ),
+                headerStyle = list(
+                  boxShadow = "4px 4px 6px rgba(0, 0, 0, 0.12)"
+                )
+              )
+            ),
+            # Applies to all non-frozen columns and all column headers
+            defaultColDef = reactable::colDef(
+              # minWidth = 100,
+              headerStyle = list(
+                # backgroundColor = "white",
+                boxShadow = "0 4px 6px -3px rgba(0, 0, 0, 0.28)"
+              )
+            ),
+            groupBy         = "ID",
+            sortable        = TRUE,
+            resizable       = TRUE,
+            filterable      = FALSE,
+            pagination      = FALSE,
+            defaultExpanded = TRUE,
+            striped         = TRUE,
+            compact         = TRUE,
+            height          = 500,
+            theme           = reactable::reactableTheme(
+              style = list(
+                fontFamily = "system-ui, sans-serif"
+              )
+            )
+          )
+      },
+      "typst" = {
+        le_metric <- case_when(
+          "Bakrania (ENMO Avg)" %in% names(le_df) ~ "sed",
+          "Stepcount" %in% names(le_df)           ~ "step",
+          .default                                = "mvpa"
+        )
+        le_font_size <- switch(
+          le_metric,
+          "sed" = "small",
+          "step" = "small",
+          "mvpa" = "medium"
+        )
+        lst_split <- split_in_seq(le_df$ID,
+                                  size = 10)
+        lapply(lst_split, function(x) {
+          le_df |>
+            dplyr::filter(ID %in% x) |>
+            data.table::transpose(
+              keep.names = "Method",
+              make.names = "ID"
+            ) |>
+            gt() |>
+            tab_spanner_delim(
+              delim   = "_",
+              columns = everything(),
+              split   = "last",
+              limit   = 1
+            ) |>
+            # TODO It doesnt seem that text size or padding styling is preserved
+            # to Typst, only bolding.
+            tab_style(
+              style     = cell_text(size = "small"),
+              locations = cells_column_labels(columns = !Method)
+            ) |>
+            tab_style(
+              style     = cell_text(size = "small"),
+              locations = cells_body()
+            ) |>
+            # opt_table_font(size = 10) |>
+            opt_vertical_padding(scale = 0) |>
+            tab_style(
+              style     = cell_text(weight = "bold"),
+              locations = list(
+                cells_column_spanners(),
+                cells_column_labels(columns = 1)
+              )
+            )
+        })
+      }
+    )
+  }
+}
+summarize_metrics_main <- function(vct_anchor,
+                                   target_format) {
+
+  le_anchor <- stri_extract(vct_anchor[1], regex = "DIRECT_OBSERVATION|FREE_LIVING")
   lst_tot_int3 <- vector(mode = "list", length(vct_anchor))
   lst_tot_step <- vector(mode = "list", length(vct_anchor))
   lst_sed  <- vector(mode = "list", length(vct_anchor))
@@ -1263,125 +1510,35 @@ summarize_metrics_main <- function(vct_anchor) {
 
   # gt tables ----
   list(
-    total_session_int3 =
-      rbindlist(lst_tot_int3) |>
-      select(
-        id,
-        any_of(c("date", "minutes", "hours", "non_wear", "sleep")),
-        starts_with("do"),
-        starts_with("img"),
-        starts_with("pal"),
-        starts_with("pass"),
-        everything()
-      ) |>
-      gt(groupname_col = if (le_anchor == "ANCHOR_RAW") "id" else NULL) |>
-      # TOOO: Test more to make html tables interactive
-      opt_interactive(
-        active = if (le_anchor == "ANCHOR_RAW") TRUE else FALSE,
-        # height = 500,
-        # use_pagination = FALSE
-        use_compact_mode = TRUE
-      ) |>
-      tab_style(
-        style = cell_text(weight = "bold"),
-        locations = cells_row_groups()
-      ) |>
-      cols_label(.list = vct_label_tot_int3),
-    total_session_step =
-      rbindlist(lst_tot_step) |>
-      select(
-        id,
-        any_of(c("date", "minutes", "hours", "non_wear", "sleep")),
-        starts_with("do"),
-        starts_with("img"),
-        starts_with("pal"),
-        starts_with("pass"),
-        everything()
-      ) |>
-      gt(groupname_col = if (le_anchor == "ANCHOR_RAW") "id" else NULL) |>
-      # TOOO: Test more to make html tables interactive
-      opt_interactive(
-        active = if (le_anchor == "ANCHOR_RAW") TRUE else FALSE,
-        # height = 500,
-        # use_pagination = FALSE
-        use_compact_mode = TRUE
-      ) |>
-      tab_style(
-        style = cell_text(weight = "bold"),
-        locations = cells_row_groups()
-      ) |>
-      cols_label(.list = vct_label_tot_step),
-    total_sed =
-      rbindlist(lst_sed) |>
-      select(
-        id,
-        any_of("date"),
-        starts_with("do"),
-        starts_with("img"),
-        starts_with("pal"),
-        starts_with("pass"),
-        everything()
-      ) |>
-      gt(groupname_col = if (le_anchor == "ANCHOR_RAW") "id" else NULL) |>
-      # TOOO: Test more to make html tables interactive
-      opt_interactive(
-        active = if (le_anchor == "ANCHOR_RAW") TRUE else FALSE,
-        # height = 500,
-        # use_pagination = FALSE
-        use_compact_mode = TRUE
-      ) |>
-      tab_style(
-        style = cell_text(weight = "bold"),
-        locations = cells_row_groups()
-      ) |>
-      cols_label(.list = vct_label_sed),
-    total_mvpa =
-      rbindlist(lst_mvpa) |>
-      select(
-        id,
-        any_of("date"),
-        starts_with("do"),
-        starts_with("img"),
-        starts_with("pal"),
-        starts_with("pass"),
-        everything()
-      ) |>
-      gt(groupname_col = if (le_anchor == "ANCHOR_RAW") "id" else NULL) |>
-      # TOOO: Test more to make html tables interactive
-      opt_interactive(
-        active = if (le_anchor == "ANCHOR_RAW") TRUE else FALSE,
-        # height = 500,
-        # use_pagination = FALSE
-        use_compact_mode = TRUE
-      ) |>
-      tab_style(
-        style = cell_text(weight = "bold"),
-        locations = cells_row_groups()
-      ) |>
-      cols_label(.list = vct_label_mvpa),
-    total_step =
-      rbindlist(lst_step) |>
-      select(
-        id,
-        any_of("date"),
-        starts_with("do"),
-        starts_with("img"),
-        starts_with("pal"),
-        starts_with("pass"),
-        everything()
-      ) |>
-      gt(groupname_col = if (le_anchor == "ANCHOR_RAW") "id" else NULL) |>
-      # TOOO: Test more to make html tables interactive
-      opt_interactive(
-        active = if (le_anchor == "ANCHOR_RAW") TRUE else FALSE,
-        # height = 500,
-        # use_pagination = FALSE
-        use_compact_mode = TRUE
-      ) |>
-      tab_style(
-        style = cell_text(weight = "bold"),
-        locations = cells_row_groups()
-      ) |>
-      cols_label(.list = vct_label_step)
+    total_session_int3 = format_summary(
+      lst           = lst_tot_int3,
+      vct_label     = vct_label_tot_int3,
+      le_anchor     = le_anchor,
+      target_format = target_format
+    ),
+    total_session_step = format_summary(
+      lst           = lst_tot_step,
+      vct_label     = vct_label_tot_step,
+      le_anchor     = le_anchor,
+      target_format = target_format
+    ),
+    total_sed = format_summary(
+      lst           = lst_sed,
+      vct_label     = vct_label_sed,
+      le_anchor     = le_anchor,
+      target_format = target_format
+    ),
+    total_mvpa = format_summary(
+      lst           = lst_mvpa,
+      vct_label     = vct_label_mvpa,
+      le_anchor     = le_anchor,
+      target_format = target_format
+    ),
+    total_step = format_summary(
+      lst           = lst_step,
+      vct_label     = vct_label_step,
+      le_anchor     = le_anchor,
+      target_format = target_format
+    )
   )
 }
