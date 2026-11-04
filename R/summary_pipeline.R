@@ -199,6 +199,8 @@ summarize_accelerometer_steps <- function(de_id,
                                           # vct_ox_acti,
                                           vct_ox) {
 
+  chk_site_raw <- stri_detect(spo_pat_raw,
+                              regex = "\\(\\?\\<site\\>")
   chk_obs_raw <- stri_detect(spo_pat_raw,
                              regex = "\\(\\?\\<obs\\>")
 
@@ -208,11 +210,15 @@ summarize_accelerometer_steps <- function(de_id,
     vct_cols_fnm_merged <- c("site", "pid")
   }
 
+  if (chk_site_raw) {
+    vct_cols_fnm_raw <- c("site", "pid")
+  } else {
+    vct_cols_fnm_raw <- "pid"
+  }
+
   if (chk_obs_raw) {
     vct_cols_fnm_merged <- c(vct_cols_fnm_merged, "observation")
-    vct_cols_fnm_raw    <- c("site", "pid", "observation")
-  } else {
-    vct_cols_fnm_raw    <- c("site", "pid")
+    vct_cols_fnm_raw    <- c(vct_cols_fnm_raw, "observation")
   }
 
   df <-
