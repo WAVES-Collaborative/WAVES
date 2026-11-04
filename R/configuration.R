@@ -283,7 +283,10 @@ config_miniconda <- function(df_module_stepcount,
         envname        = le_env,
         packages       = lst_module_creation[[le_env]],
         python_version = vct_python_version[le_env],
-        forge          = TRUE
+        forge          = TRUE,
+        # Only conda-forge: ignore channels from the user's .condarc (e.g.
+        # Anaconda defaults, which needs its terms of service accepted).
+        additional_create_args = "--override-channels"
       )
       chk_successful <- dir.exists(
         file.path(miniconda_path(), "envs", le_env)
