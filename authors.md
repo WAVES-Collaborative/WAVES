@@ -7,7 +7,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/WAVES-Collaborative/WAVES/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/WAVES-Collaborative/WAVES/blob/v0.10.0-beta/DESCRIPTION)
 
 Martinez J (2026). *WAVES: Wrist Algorithms: Verification, Evaluation,
 and Surveillance*. R package version 0.0.0.9000,
