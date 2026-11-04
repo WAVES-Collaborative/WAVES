@@ -223,13 +223,14 @@ summarize_accelerometer_steps <- function(de_id,
       col = id,
       all_of(vct_cols_fnm_merged),
       sep = "_",
-      remove =  if (all(vct_cols_fnm_merged == vct_cols_fnm_raw)) FALSE else TRUE
+      remove = FALSE
     ) |>
     unite(
       col = fnm_raw,
       all_of(vct_cols_fnm_raw),
       sep = "_"
-    )
+    ) |>
+    select(!any_of(vct_cols_fnm_merged))
   vct_nm_ggir <-
     basename(vct_basic) |>
     file_path_sans_ext()
