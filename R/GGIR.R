@@ -179,7 +179,10 @@ wrapper_GGIR_config <- function(df_pid_raw) {
         pattern    = le_regex,
         full.names = TRUE
       ),
-      to   = paste0(df_pid_raw$fnm_write_raw[vct_chk_incomplete], ".RData")
+      to   = file.path(
+        "data", "0_CONFIG", "GGIR", "output_config", "meta", "basic",
+        paste0(df_pid_raw$fnm_write_raw[vct_chk_incomplete], ".RData")
+      )
     )
     list.files(
       file.path("data", "0_CONFIG", "GGIR", "output_config", "meta", "basic"),
