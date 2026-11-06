@@ -179,10 +179,7 @@ wrapper_GGIR_config <- function(df_pid_raw) {
         pattern    = le_regex,
         full.names = TRUE
       ),
-      to   = file.path(
-        "data", "0_CONFIG", "GGIR", "output_config", "meta", "basic",
-        paste0(df_pid_raw$fnm_write_raw[vct_chk_incomplete], ".RData")
-      )
+      to   = paste0(df_pid_raw$fnm_write_raw[vct_chk_incomplete], ".RData")
     )
     list.files(
       file.path("data", "0_CONFIG", "GGIR", "output_config", "meta", "basic"),
@@ -233,6 +230,14 @@ find_offset <- function(tz) {
 get_start_tz_df <- function(vct_basic,
                             my_tz) {
 
+  # Since I specify "desiredtz" GGIR argument to "UTC", the start time value will already
+  # be in "UTC" timezone. However, the start time within the header of files will
+  # actually be in the local timezone of the file. Whenever possible, will try
+  # to use the timezone present within the header of the raw file, in case an
+  # end user collects data across multiple timezones. Default to `my_tz` if not
+  # possible. Ideally, will need to add a feature where `my_tz` is part of the
+  # metadata file, which will allow the pipeline to account for Axivity and CSV
+  # files of varying timezones.
   vct_fnm <-
     vct_basic |>
     basename() |>
@@ -262,13 +267,19 @@ get_start_tz_df <- function(vct_basic,
         as.numeric()
       le_tz <-
         find_timezone_by_offset(le_offset, le_start_dttm)
+      le_start_dttm <-
+        le_start_dttm |>
+        force_tz(tzone = le_tz) |>
+        with_tz(tzone = "UTC")
 
     } else if (I$dformn == "cwa") {
 
-      # timezone information not saved in Axivity data. Since I specify
-      # "desiredtz" GGIR argument to "UTC", the start time value will already
-      # be in "UTC" timezone. Default to my_tz for Axivity files.
-      le_start_dttm <- I$header["start", "value"]$start
+      # timezone information not saved in Axivity data.
+      # Default to my_tz for Axivity files.
+      le_start_dttm <-
+        I$header["start", "value"]$start |>
+        force_tz(tzone = my_tz) |>
+        with_tz(tzone = "UTC")
       le_offset <- find_offset(my_tz)
       le_tz <- my_tz
 
@@ -285,15 +296,21 @@ get_start_tz_df <- function(vct_basic,
         3600
       le_tz <-
         find_timezone_by_offset(le_offset, le_start_dttm)
+      le_start_dttm <-
+        le_start_dttm |>
+        force_tz(tzone = le_tz) |>
+        with_tz(tzone = "UTC")
 
     } else if (I$monn == "actigraph" && I$dformn == "csv") {
 
       # Timezone information not saved in csv header.
+      # Default to my_tz for ActiGrpah csv files.
       le_start_dttm <-
         paste0(I$header["Start Date", "value"] |> stri_trim(side = "left"),
                I$header["Start Time", "value"]) |>
         strptime(format = "%m/%d/%Y %H:%M:%OS",
-                 tz     = "UTC")
+                 tz     = my_tz) |>
+        with_tz(tzone = "UTC")
       le_offset <- find_offset(my_tz)
       le_tz <- my_tz
 
@@ -406,7 +423,7 @@ get_nonwear_sleep <- function(fpa_basic,
     I,
     params_cleaning   = GGIR::extract_params()[["params_cleaning"]],
     dayborder         = 0,               # default is 0 (day starts at 12am)
-    desiredtz         = lst_start_tz$tz, # generic timezone from df_start_tz
+    desiredtz         = lst_start_tz$tz, # generic timezone from df_start_tz used in g.weardec()
     TimeSegments2Zero = c(),             # default c()
     acc.metric        = "ENMO",          # default "ENMO"
     ID                = ID,
@@ -535,7 +552,14 @@ get_nonwear_sleep <- function(fpa_basic,
     # Will be NULL for files that are from direct observation sessions (less than
     # a day). In that case just fill variables with no non-wear and no sleep.
     SLE$output <- data.frame(
-      datetime = ymd_hms(M$metashort$timestamp, tz = "UTC"),
+      # GGIR goes to the next quarter of an hour for safety. Regardless, keep
+      # in UTC time until merging. Keep in mind comments from get_df_start_tz
+      # function.
+      datetime =
+        M$metashort$timestamp |>
+        ymd_hms(tz = "UTC") |>
+        force_tz(tzone = df_start_tz$tz[df_start_tz$fnm == le_fnm]) |>
+        with_tz(tzone = "UTC"),
       sleep    = 0L,
       invalid  = 0L
     )
@@ -546,7 +570,9 @@ get_nonwear_sleep <- function(fpa_basic,
       mutate(
         datetime =
           as.character(time) |>
-          ymd_hms(tz = "UTC"),,
+          ymd_hms(tz = "UTC") |>
+          force_tz(tzone = df_start_tz$tz[df_start_tz$fnm == le_fnm]) |>
+          with_tz(tzone = "UTC"),
         invalid = as.integer(invalid),
         sleep = ifelse(
           spt_crude_estimate == 2,

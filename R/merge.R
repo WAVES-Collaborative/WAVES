@@ -258,6 +258,10 @@ merge_output <- function(de_id,
         \(x) {le_fnm_raw %in% names(x)}
       )
       fpa_write <- vct_fpa_write[i]
+      lst_start_tz <-
+        df_start_tz |>
+        dplyr::filter(fnm == le_fnm_raw) |>
+        as.list()
 
       # If no raw accelerometer steps performed, then no point in merging
       # with any reference data.
@@ -342,12 +346,26 @@ merge_output <- function(de_id,
         left_join_if(
           lst_out$raw[le_fnm_raw],
           completed = vct_out_complete["raw"],
-          transform = \(x) mutate(x, datetime = as.POSIXct(datetime, tz = "UTC"))
+          transform = \(x) mutate(
+            x,
+            datetime =
+              datetime |>
+              as.POSIXct(tz = "UTC") |>
+              force_tz(tzone = lst_start_tz$tz) |>
+              with_tz(tzone = "UTC")
+          )
         ) |>
         left_join_if(
           lst_out$oak.pre[le_fnm_raw],
           completed = vct_out_complete["oak.pre"],
-          transform = \(x) mutate(x, datetime = as.POSIXct(datetime, tz = "UTC"))
+          transform = \(x) mutate(
+            x,
+            datetime =
+              datetime |>
+              as.POSIXct(tz = "UTC") |>
+              force_tz(tzone = lst_start_tz$tz) |>
+              with_tz(tzone = "UTC")
+          )
         ) |>
         left_join_if(lst_out$ox[le_fnm_raw], completed = vct_out_complete["ox"]) |>
         # Update site and pid with de_identified one if necessary.
@@ -492,12 +510,26 @@ merge_output <- function(de_id,
         left_join_if(
           lst_out$raw[le_fnm_raw],
           completed = vct_out_complete["raw"],
-          transform = \(x) mutate(x, datetime = as.POSIXct(datetime, tz = "UTC"))
+          transform = \(x) mutate(
+            x,
+            datetime =
+              datetime |>
+              as.POSIXct(tz = "UTC") |>
+              force_tz(tzone = lst_start_tz$tz) |>
+              with_tz(tzone = "UTC")
+          )
         ) |>
         left_join_if(
           lst_out$oak.pre[le_fnm_raw],
           completed = vct_out_complete["oak.pre"],
-          transform = \(x) mutate(x, datetime = as.POSIXct(datetime, tz = "UTC"))
+          transform = \(x) mutate(
+            x,
+            datetime =
+              datetime |>
+              as.POSIXct(tz = "UTC") |>
+              force_tz(tzone = lst_start_tz$tz) |>
+              with_tz(tzone = "UTC")
+          )
         ) |>
         left_join_if(lst_out$ox[le_fnm_raw], completed = vct_out_complete["ox"]) |>
         # Update site and pid with de_identified one if necessary and date, time columns.

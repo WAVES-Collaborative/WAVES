@@ -99,6 +99,7 @@
 #'
 #' @examples
 apply_methods_cutpoints <- function(fpa_basic,
+                                    df_start_tz,
                                     dir_write) {
 
   if (is.null(fpa_basic)) return(NULL)
@@ -134,8 +135,13 @@ apply_methods_cutpoints <- function(fpa_basic,
     M$metashort |>
     mutate(
       # GGIR goes to the next quarter of an hour for safety. Regardless, keep
-      # in UTC time until merging.
-      datetime = ymd_hms(timestamp, tz = "UTC"),
+      # in UTC time until merging. Keep in mind comments from get_df_start_tz
+      # function.
+      datetime =
+        timestamp |>
+        ymd_hms(tz = "UTC") |>
+        force_tz(tzone = df_start_tz$tz[df_start_tz$fnm == fnm_sans_ext]) |>
+        with_tz(tzone = "UTC"),
       # To millig
       ENMO = ENMO * 1000,
       ENMOa = ENMOa * 1000,

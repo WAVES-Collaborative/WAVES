@@ -350,20 +350,13 @@ merge_ox <- function(vct_ox_step,
       ) |>
       mutate(
         # If the file was .gt3x, then the time, when read by accProcess, will
-        # be treated as local time and then changed to UTC. This does not
-        # happen for .bin and .cwa files.
+        # be correctly shown as UTC time.
+        # TODO Double check this happens for .cwa files with Ahmadi and Alyona.
+        # TODO Double check this happens for .bin files with Keadle's COMPARE
         datetime =
           if (le_type %in% c("ACTIGRAPH - GT3X", "ACTIGRAPH - CSV")) {
-            seq.POSIXt(
-              from =
-                (ymd_hms(time)[1] |>
-                   floor_date(unit = "seconds")) +
-                df_start_tz |>
-                dplyr::filter(fnm == le_fnm) |>
-                pull(offset) * 60 * 60,
-              length.out = n(),
-              by = "30 sec"
-            )
+            ymd_hms(time, tz = "UTC", quiet = TRUE) |>
+              floor_date(unit = "seconds")
           } else {
             ymd_hms(time, tz = "UTC", quiet = TRUE) |>
               floor_date(unit = "seconds")
@@ -397,8 +390,12 @@ merge_ox <- function(vct_ox_step,
       ) |>
       mutate(
         # time column when read with fread() function is automatically UTC
-        # and actinet already exports in UTC.
-        datetime = floor_date(time, unit = "seconds"),
+        # but actinet exports in local time.
+        datetime =
+          time |>
+          force_tz(tzone = df_start_tz$tz[df_start_tz$fnm == le_fnm]) |>
+          with_tz(tzone = "") |>
+          floor_date(unit = "seconds"),
         intensity = case_when(
           # actinet will be NA for epochs that had idle-sleep mode on. Just
           # make them sedentary as we will use nonwear/sleep from other methods.
@@ -429,6 +426,14 @@ merge_ox <- function(vct_ox_step,
         sep = ","
       ) |>
       mutate(
+        # time column when read with fread() function is automatically UTC
+        # but stepcount exports in local time. Contains fractional seconds
+        # though so floor it to the nearest second.
+        datetime =
+          time |>
+          force_tz(tzone = df_start_tz$tz[df_start_tz$fnm == le_fnm]) |>
+          with_tz(tzone = "") |>
+          floor_date(unit = "seconds"),
         # time column when read with fread() function is automatically UTC
         # and stepcount already exports in UTC. Contains fractional seconds
         # though so floor it to the nearest second
