@@ -421,8 +421,9 @@ tar_plan(
   tar_file(
     name      = vct_out.cut,
     command   = apply_methods_cutpoints(
-      fpa_basic = vct_basic,
-      dir_write = dir_out.cut
+      fpa_basic   = vct_basic,
+      df_start_tz = df_start_tz,
+      dir_write   = dir_out.cut
     ),
     pattern   = map(vct_basic),
     iteration = "vector"
