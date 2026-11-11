@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# WAVES
+# Youth WAVES
 
 Thank you for your collaboration in Youth WAVES, the youth (children and
 adolescents) arm of the Wrist Algorithm Verification and Evaluation
