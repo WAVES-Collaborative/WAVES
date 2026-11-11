@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 
 # WAVES
 
-Thank you for your collaboration in the Wrist Algorithm Verification and Evaluation Study (WAVES). This repository contains all the code needed to run multiple wrist algorithms against your raw data.
+Thank you for your collaboration in Youth WAVES, the youth (children and adolescents) arm of the Wrist Algorithm Verification and Evaluation Study (WAVES). This branch of the repository contains all the code needed to run multiple youth-specific wrist algorithms against your raw data.
 
 ## Proposed Flow Diagram
 
@@ -39,7 +39,7 @@ FIGURE showing the "Get Started" page
 |------------------|------------------|------------------|------------------|
 | Chowdhury 2017[@chowdhury2017] Random Forest (school-age wrist classifier) | ✔️ | ✔️ | ❌ |
 | Trost 2014[@trost2014] Regularised Logistic Regression | ✔️ | ✔️ | ❌ |
-| Hildebrand 2014[@hildebrand2014]/2017[@hildebrand2017] (youth validation: Trost 2022[@trost2022]) | ✔️ | ✔️ | ❌ |
+| Hildebrand 2014[@hildebrand2014]/2017[@hildebrand2017] | ✔️ | ✔️ | ❌ |
 
 ## TODO
 
