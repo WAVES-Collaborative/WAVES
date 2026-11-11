@@ -37,29 +37,16 @@ FIGURE showing the "Get Started" page
 
 | Method | MVPA | SED | Steps |
 |------------------|------------------|------------------|------------------|
-| Bakrania 2016[@bakrania2016] | ❌ | ✔️ | ❌ |
-| Ellis 2016[@ellis2016] Extended | ✔️️ | ✔️ | ❌ |
-| Esliger 2011[@esliger2011] | ✔️ | ✔️ | ❌ |
-| Fraysse 2020[@fraysse2021] | ✔️ | ✔️ | ❌ |
-| Hildebrand 2014[@hildebrand2014]/2017[@hildebrand2017] | ✔️ | ✔️ | ❌ |
-| Mielke 2023[@mielke2023] | ✔️ | ✔️ | ❌ |
-| Montoye 2018[@montoye2018] | ✔️ | ✔️ | ❌ |
-| Trost 2017[@pavey2017] Extended | ✔️ | ✔️ | ❌ |
-| Walmsley 2022[@walmsley2022] (accelerometer v7.3.0[@doherty2025]) | ✔️ | ✔️ | ❌ |
-| White 2016[@white2016] ENMO and HPFVM | ✔️ | ✔️ | ❌ |
-| Yuan 2024[@yuan2024] (actinet) | ✔️ | ✔️ | ❌ |
-| Oak[@straczkiewicz2023] | ❌ | ❌ | ✔️ |
-| Small 2024[@small2024] (stepcount v3.17.1[@chan2026]) | ❌ | ❌ | ✔️ |
-| Step Detection Threshold[@ducharme2021] (SDT) | ❌ | ❌ | ✔️ |
-| Verisense (Original)[@gu2017] | ❌ | ❌ | ✔️ |
-| Verisense (Revised)[@maylor2022] | ❌ | ❌ | ✔️ |
+| Chowdhury 2017[@chowdhury2017] Random Forest (school-age wrist classifier) | ✔️ | ✔️ | ❌ |
+| Trost 2014[@trost2014] Regularised Logistic Regression | ✔️ | ✔️ | ❌ |
+| Hildebrand 2014[@hildebrand2014]/2017[@hildebrand2017] (youth validation: Trost 2022[@trost2022]) | ✔️ | ✔️ | ❌ |
 
 ## TODO
 
-- Test WAVES_10006 CSV file against OxWearable methods.
+- Pilot test the Youth WAVES pipeline with the youth algorithms.
 
-  - Stepcount
-  - Walmsley
-  - Actinet
+  - Chowdhury 2017 Random Forest
+  - Trost 2014 Regularised Logistic Regression
+  - Hildebrand 2014/2017 cut-points
 
 ## References for Methods
