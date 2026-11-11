@@ -3,9 +3,11 @@
 
 # WAVES
 
-Thank you for your collaboration in the Wrist Algorithm Verification and
-Evaluation Study (WAVES). This repository contains all the code needed
-to run multiple wrist algorithms against your raw data.
+Thank you for your collaboration in Youth WAVES, the youth (children and
+adolescents) arm of the Wrist Algorithm Verification and Evaluation
+Study (WAVES). This branch of the repository contains all the code
+needed to run multiple youth-specific wrist algorithms against your raw
+data.
 
 ## Proposed Flow Diagram
 
@@ -30,11 +32,11 @@ FIGURE showing the “Get Started” page
 
 ## Methods Implemented
 
-| Method                                                                                  | MVPA | SED | Steps |
-|-----------------------------------------------------------------------------------------|------|-----|-------|
-| Chowdhury 2017<sup>1</sup> Random Forest (school-age wrist classifier)                  | ✔️   | ✔️  | ❌    |
-| Trost 2014<sup>2</sup> Regularised Logistic Regression                                  | ✔️   | ✔️  | ❌    |
-| Hildebrand 2014<sup>3</sup>/2017<sup>4</sup> (youth validation: Trost 2022<sup>5</sup>) | ✔️   | ✔️  | ❌    |
+| Method                                                                 | MVPA | SED | Steps |
+|------------------------------------------------------------------------|------|-----|-------|
+| Chowdhury 2017<sup>1</sup> Random Forest (school-age wrist classifier) | ✔️   | ✔️  | ❌    |
+| Trost 2014<sup>2</sup> Regularised Logistic Regression                 | ✔️   | ✔️  | ❌    |
+| Hildebrand 2014<sup>3</sup>/2017<sup>4</sup>                           | ✔️   | ✔️  | ❌    |
 
 ## TODO
 
@@ -87,16 +89,6 @@ Science in Sports & Exercise* 2014; 46: 1816.</span>
 van, et al. [Evaluation of raw acceleration sedentary thresholds in
 children and adults](https://doi.org/10.1111/sms.12795). *Scandinavian
 Journal of Medicine & Science in Sports* 2017; 27: 1814–1823.</span>
-
-</div>
-
-<div id="ref-trost2022" class="csl-entry">
-
-<span class="csl-left-margin">5.
-</span><span class="csl-right-inline">Trost SG, Brookes DSK, Ahmadi MN.
-[Evaluation of wrist accelerometer cut-points for classifying physical
-activity intensity in youth](https://doi.org/10.3389/fdgth.2022.884307).
-*Frontiers in Digital Health* 2022; 4: 884307.</span>
 
 </div>
 
