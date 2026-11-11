@@ -34,7 +34,7 @@ FIGURE showing the “Get Started” page
 
 | Method                                                                 | MVPA | SED | Steps |
 |------------------------------------------------------------------------|------|-----|-------|
-| Chowdhury 2017<sup>1</sup> Random Forest (school-age wrist classifier) | ✔️   | ✔️  | ❌    |
+| Trost/Chowdhury 2017<sup>1</sup> Random Forest (school-age wrist classifier) | ✔️   | ✔️  | ❌    |
 | Trost 2014<sup>2</sup> Regularised Logistic Regression                 | ✔️   | ✔️  | ❌    |
 | Hildebrand 2014<sup>3</sup>/2017<sup>4</sup>                           | ✔️   | ✔️  | ❌    |
 
@@ -42,7 +42,7 @@ FIGURE showing the “Get Started” page
 
 - Pilot test the Youth WAVES pipeline with the youth algorithms.
 
-  - Chowdhury 2017 Random Forest
+  - Trost/Chowdhury 2017 Random Forest
   - Trost 2014 Regularised Logistic Regression
   - Hildebrand 2014/2017 cut-points
 
