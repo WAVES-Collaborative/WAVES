@@ -1,4 +1,5 @@
 process_ref_file <- function(lst_chk,
+                             my_tz,
                              dir_out.ref) {
 
   lst_out.ref <-
