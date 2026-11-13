@@ -24,6 +24,7 @@ process_ref_file <- function(lst_chk,
                                     fnm,
                                     fpa_epoch,
                                     fpa_event,
+                                    my_tz,
                                     dir_out.ref),
               error = \(cnd) {cnd}
             )}
@@ -101,6 +102,7 @@ process_activpal_file <- function(spo,
                                   fnm,
                                   fpa_epoch,
                                   fpa_event,
+                                  my_tz,
                                   dir_out.ref) {
 
   # EPOCH --------------------------------------------------------------------
