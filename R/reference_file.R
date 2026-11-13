@@ -118,13 +118,20 @@ process_activpal_file <- function(spo,
       # 3) change to seconds since 1970-01-01,
       # 4) round for values that are ever so slightly smaller than what it should be,
       # 5) convert back to POSIXct
+      # 6) force correct timezone
+      # 7) convert back to POSIXct
       datetime =
         (Time * 86400) |>
         as.POSIXct(tz = "UTC", origin = "1899-12-30") |>
         as.numeric() |>
         round(digits = 0) |>
-        as.POSIXct(tz = "UTC"),
-      dttm_palp = `Time(approx)`,
+        as.POSIXct(tz = "UTC") |>
+        force_tz(tzone = my_tz) |>
+        with_tz(tzone = "UTC"),
+      dttm_palp =
+        `Time(approx)` |>
+        force_tz(tzone = my_tz) |>
+        with_tz(tzone = "UTC"),
       mets_palp  = `Activity Score (MET.s)`,
       intensity4_palp = cut(
         mets_palp,
@@ -189,13 +196,20 @@ process_activpal_file <- function(spo,
       # 4) convert back to POSIXct,
       # 5) include floor_date to truncate seconds since `Time(approx)` variable
       #    goes off rounded time.
+      # 6) force correct timezone
+      # 7) convert back to POSIXct
       datetime =
         (Time * 86400) |>
         as.POSIXct(tz = "UTC", origin = "1899-12-30") |>
         as.numeric() |>
         as.POSIXct(tz = "UTC") |>
-        floor_date(unit = "seconds"),
-      dttm_palv = `Time(approx)`,
+        floor_date(unit = "seconds") |>
+        force_tz(tzone = my_tz) |>
+        with_tz(tzone = "UTC"),
+      dttm_palv =
+        `Time(approx)` |>
+        force_tz(tzone = my_tz) |>
+        with_tz(tzone = "UTC"),
       class_palv = factor(
         x = `Event Type`,
         levels = c(0, 1, 2, 2.1, 3, 3.1, 3.2, 4, 5),
