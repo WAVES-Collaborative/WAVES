@@ -434,11 +434,6 @@ merge_ox <- function(vct_ox_step,
           force_tz(tzone = df_start_tz$tz[df_start_tz$fnm == le_fnm]) |>
           with_tz(tzone = "") |>
           floor_date(unit = "seconds"),
-        # time column when read with fread() function is automatically UTC
-        # and stepcount already exports in UTC. Contains fractional seconds
-        # though so floor it to the nearest second
-        datetime =
-          floor_date(time, unit = "seconds")
       ) |>
       summarise(
         steps_stepcount = as.integer(n()),
