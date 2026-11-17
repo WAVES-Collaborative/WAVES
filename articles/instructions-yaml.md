@@ -183,10 +183,10 @@ where:
 
   - The characters are case sensitive.
 
-    - Continuing from the above example, if an activPAL file is named
-      `mystudy_9999_visit1.csv`, then the pipeline will throw an error
-      as the `mystudy` should be uppercase according to the provided
-      pattern.
+    - Continuing from the above example, if a raw accelerometer file is
+      named `mystudy_9999_visit1.csv`, then the pipeline will throw an
+      error as the `mystudy` should be uppercase according to the
+      provided pattern.
 
 - `(?<pid>0000)` captures the unique numeric identifier used per
   participant.
@@ -205,6 +205,11 @@ where:
 
   - If you are not supplying any direct observation data to the
     pipeline, then you can completely exclude this.
+
+  - If you are supplying direct observation data, and you also have free
+    living data that may or may not include direct observation data,
+    then this will be required. See the [observations_w_free_living
+    section](#obs_free) for further information.
 
   - If you are supplying direct observation data, but you have one raw
     accelerometer file that includes all observation sessions, then you
@@ -231,6 +236,22 @@ then place a `.` where the character string will change:
 
 Finally, the pipeline assumes the provided string is at the very
 beginning of the filename.
+
+#### observations_w_free_living
+
+Optional string if your data includes both direct observation data and
+free-living data which may or may not include direct observation data.
+It is assumed then that the free-living data has its own “observation”
+identifier. To help illustrate this, refer to the following image:
+
+![](images/study-designs.png)
+
+If your data was collected following Protocol A, you do not need to
+supply `observations_w_free_living`.
+
+If your data was collected following Protocol B or C, you do need to
+supply `observations_w_free_living`. In the hypothetical Protocol B and
+C from the image, the `observations_w_free_living` would be “3”.
 
 ### reference
 

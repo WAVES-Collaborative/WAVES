@@ -249,7 +249,7 @@
 <li>
 <p>The characters are case sensitive.</p>
 <ul>
-<li>Continuing from the above example, if an activPAL file is named <code>mystudy_9999_visit1.csv</code>, then the pipeline will throw an error as the <code>mystudy</code> should be uppercase according to the provided pattern.</li>
+<li>Continuing from the above example, if a raw accelerometer file is named <code>mystudy_9999_visit1.csv</code>, then the pipeline will throw an error as the <code>mystudy</code> should be uppercase according to the provided pattern.</li>
 </ul>
 </li>
 </ul>
@@ -267,6 +267,7 @@
 <ul>
 <li><p>This is <em>optional</em>.</p></li>
 <li><p>If you are not supplying any direct observation data to the pipeline, then you can completely exclude this.</p></li>
+<li><p>If you are supplying direct observation data, and you also have free living data that may or may not include direct observation data, then this will be required. See the <a href="#obs_free">observations_w_free_living section</a> for further information.</p></li>
 <li>
 <p>If you are supplying direct observation data, but you have one raw accelerometer file that includes all observation sessions, then you can also safely omit this as:</p>
 <ol type="1">
@@ -283,6 +284,12 @@
 <p>then place a <code>.</code> where the character string will change:</p>
 <pre><code>(?&lt;site&gt;AL)_.W_V3_(?&lt;pid&gt;000)</code></pre>
 <p>Finally, the pipeline assumes the provided string is at the very beginning of the filename.</p>
+</section><section class="level3"><h4 id="obs_free">observations_w_free_living<a class="anchor" aria-label="anchor" href="#obs_free"></a>
+</h4>
+<p>Optional string if your data includes both direct observation data and free-living data which may or may not include direct observation data. It is assumed then that the free-living data has its own “observation” identifier. To help illustrate this, refer to the following image:</p>
+<p><img src="images/study-designs.png"></p>
+<p>If your data was collected following Protocol A, you do not need to supply <code>observations_w_free_living</code>.</p>
+<p>If your data was collected following Protocol B or C, you do need to supply <code>observations_w_free_living</code>. In the hypothetical Protocol B and C from the image, the <code>observations_w_free_living</code> would be “3”.</p>
 </section></section><section class="level2"><h3 id="reference">reference<a class="anchor" aria-label="anchor" href="#reference"></a>
 </h3>
 <p>Sequence of mappings that define the reference measures being used and where they are located in your computer system.</p>
