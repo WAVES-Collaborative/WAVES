@@ -343,30 +343,8 @@ merge_output <- function(de_id,
         left_join_if(lst_out$nw.sleep[le_fnm_raw], completed = vct_out_complete["nw.sleep"]) |>
         fill(any_of(c("sleep", "invalid")),
              .direction = "down") |>
-        left_join_if(
-          lst_out$raw[le_fnm_raw],
-          completed = vct_out_complete["raw"],
-          transform = \(x) mutate(
-            x,
-            datetime =
-              datetime |>
-              as.POSIXct(tz = "UTC") |>
-              force_tz(tzone = lst_start_tz$tz) |>
-              with_tz(tzone = "UTC")
-          )
-        ) |>
-        left_join_if(
-          lst_out$oak.pre[le_fnm_raw],
-          completed = vct_out_complete["oak.pre"],
-          transform = \(x) mutate(
-            x,
-            datetime =
-              datetime |>
-              as.POSIXct(tz = "UTC") |>
-              force_tz(tzone = lst_start_tz$tz) |>
-              with_tz(tzone = "UTC")
-          )
-        ) |>
+        left_join_if(lst_out$raw[le_fnm_raw], completed = vct_out_complete["raw"]) |>
+        left_join_if(lst_out$oak.pre[le_fnm_raw], completed = vct_out_complete["oak.pre"]) |>
         left_join_if(lst_out$ox[le_fnm_raw], completed = vct_out_complete["ox"]) |>
         # Update site and pid with de_identified one if necessary.
         mutate(

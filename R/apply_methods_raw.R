@@ -445,11 +445,16 @@ apply_methods_raw <- function(fpa_read,
   chunk_start_dttm <- lst_start_tz$start_dttm
   chunk_start_sec  <- lst_start_tz$start_secs
   df_all <- tibble(
-    datetime = seq.POSIXt(
-      from = lst_start_tz$start_dttm,
-      to   = lst_start_tz$start_dttm + ceiling(nrow_data / I$sf) - 1,
-      by   = "1 sec"
-    ),
+    datetime =
+      seq.POSIXt(
+        from = lst_start_tz$start_dttm,
+        to   = lst_start_tz$start_dttm + ceiling(nrow_data / I$sf) - 1,
+        by   = "1 sec"
+      ) |>
+      # `arrow` only likes POSIXct with an internal type of "double", but
+      # seq.POSIXt creates a vector of POSIXct with an internal type of "integer".
+      as.numeric() |>
+      as.POSIXct(tz = "UTC"),
     intensity_montoye.rf  = NA_character_,
     intensity_montoye.nn  = NA_character_,
     intensity_montoye.dt  = NA_character_,
@@ -743,11 +748,7 @@ apply_methods_raw <- function(fpa_read,
 
   # Shouldn't be any NA for other variables.
   # anyNA(df_all)
-
-  # For some reason, arrow doesn't like the POSIXCT format for datetime. Save
-  # as numeric and check back later to see when they fix this.
   df_all |>
-    mutate(datetime = as.numeric(datetime)) |>
     arrow::write_parquet(sink = fpa_write)
 
   return(fpa_write)
@@ -846,11 +847,16 @@ apply_oak.pre <- function(fpa_read,
   # numba <- import("numba")
 
   df_all <- tibble(
-    datetime = seq.POSIXt(
-      from = lst_start_tz$start_dttm,
-      to   = lst_start_tz$start_dttm + ceiling(nrow_data / I$sf) - 1,
-      by   = "1 sec"
-    ),
+    datetime =
+      seq.POSIXt(
+        from = lst_start_tz$start_dttm,
+        to   = lst_start_tz$start_dttm + ceiling(nrow_data / I$sf) - 1,
+        by   = "1 sec"
+      ) |>
+      # `arrow` only likes POSIXct with an internal type of "double", but
+      # seq.POSIXt creates a vector of POSIXct with an internal type of "integer".
+      as.numeric() |>
+      as.POSIXct(tz = "UTC"),
     steps_oak.pre            = NA
   )
 
@@ -868,10 +874,7 @@ apply_oak.pre <- function(fpa_read,
   gc()
 
   # Return ----
-  # For some reason, arrow doesn't like the POSIXCT format for datetime. Save
-  # as numeric and check back later to see when they fix this.
   df_all |>
-    mutate(datetime = as.numeric(datetime)) |>
     arrow::write_parquet(sink = fpa_write)
 
   return(fpa_write)
