@@ -62,7 +62,8 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
   names(lst_yaml$raw) <- c(
     "fdr",
     "fpa",
-    "spo_pat"
+    "spo_pat",
+    "obs_free"
   )
   names(lst_yaml$ref) <- c(
     "do",
@@ -100,6 +101,9 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
   }
   if (all(simplify_is_null(lst_yaml$raw$spo_pat))) {
     lst_yaml$raw["spo_pat"] <- list(NULL)
+  }
+  if (all(simplify_is_null(lst_yaml$raw$obs_free))) {
+    lst_yaml$raw["obs_free"] <- list(NULL)
   }
   # do
   if (all(simplify_is_null(lst_yaml$ref$do$fpa))) {
@@ -327,8 +331,19 @@ parse_waves_yaml <- function(fpa_yaml = "_waves.yml") {
       "Please define as one or more strings with '0' as a placeholder for numbers in at least `(?<pid> )` to capture pid."
   )
 
-  lst_yaml$raw$spo_pat <- get_id_regex(lst_yaml$raw$spo_pat)
+  ### obs_free
+  if (length(lst_yaml$raw$obs_free) != 0 && !stri_detect(lst_yaml$raw$spo_pat, regex = "\\(\\?\\<obs\\>0*\\)")) {
+    # error if obs_free is defined but obs does not appear in spo_pat
+    lst_msg[["raw_obs_free"]] <-
+      "wrist_accelerometer `observations_w_free_living` is defined but `(?<obs> )` does not appear in `site_pid_observation_pattern`."
+  }
+  lst_msg[["raw_obs_free"]] <- format_abort_message(
+    lst_msg[["raw_obs_free"]],
+    msg_info =
+      "If `(?<obs> )` appears in `site_pid_observation_pattern`, please define as one or more strings that correspond with observation(s) where activity monitors were worn for a full day or more."
+  )
 
+  lst_yaml$raw$spo_pat <- get_id_regex(lst_yaml$raw$spo_pat)
 
   ## ref ------------------------------------------
   # Make sure values are present for at least one reference.

@@ -14,7 +14,7 @@ Sys.setenv(
   # change below environment variable if you already have a conda installation readily accessible.
   RETICULATE_MINICONDA_PATH = reticulate::miniconda_path()
 )
-trial_run <- TRUE
+trial_run <- FALSE
 n_workers <- 2 # future::availableCores() - 1
 
 ####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -272,6 +272,7 @@ tar_plan(
     )
   },
   my_tz = lst_yaml$my_tz,
+  obs_free = lst_yaml$raw$obs_free,
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##                                FILE PATHS                              ----
   ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -535,6 +536,7 @@ tar_plan(
     name    = vct_merge,
     command = merge_output(
       de_id           = de_id,
+      obs_free        = obs_free,
       df_pid          = df_pid,
       spo_pat_raw     = spo_pat_raw,
       spo_pat_ref     = spo_pat_ref,

@@ -149,6 +149,7 @@ left_join_if <- function(df, fpa, completed, transform = identity) {
   }
 }
 merge_output <- function(de_id,
+                         obs_free,
                          df_pid,
                          spo_pat_raw,
                          spo_pat_ref,
@@ -380,10 +381,11 @@ merge_output <- function(de_id,
         select(-any_of(c("observation", "do"))) |>
         distinct()
       chk_no_do <- FALSE
-    } else {
+    } else if (chk_obs_raw && any(vct_chk_obs_ref) && length(obs_free) != 0) {
+      # Only keep `obs_free` observations.
       df_do_none <-
         df_pid |>
-        dplyr::filter(is.na(do))
+        dplyr::filter(observation == obs_free)
       chk_no_do <- nrow(df_do_none) != 0
     }
   } else {

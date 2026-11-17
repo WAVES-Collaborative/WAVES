@@ -10,6 +10,8 @@ wrist_accelerometer:
   - ~
   site_pid_observation_pattern:
   - ~
+  observations_w_free_living:
+  - ~
 reference:
   direct_observation:
     filepath:
