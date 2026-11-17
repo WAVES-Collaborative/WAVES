@@ -365,14 +365,13 @@ merge_output <- function(de_id,
   }
 
   # Only do another merge if:
-  # 1) Direct observation data was provided AND there are entries with secondary
-  #    reference data remaining after removing entries with direct observation
-  #    data. Have to do it this way as its possible an "observation" session is
-  #    actually the free-living "visit", in which case it is assumed there would
-  #    be no direct observation data.
-  # 2) The (?<obs> ) pattern was NOT included within the raw AND secondary
+  # 1) The (?<obs> ) pattern was NOT included within the raw AND secondary
   #    reference spo_pat, regardless if direct observation data was provided or
   #    not.
+  # 2) Direct observation data was provided AND `obs_free` is defined. Have to do
+  #    it this way as its possible an "observation" session is
+  #    actually the free-living "visit", in which case it doesn't matter if there
+  #    was direct observation data or not.
 
   if ("do" %in% names(lst_out.ref)) {
     if (!chk_obs_raw && any(!vct_chk_obs_ref)) {
@@ -390,7 +389,7 @@ merge_output <- function(de_id,
     }
   } else {
     df_do_none  <- df_pid
-    chk_no_do <- FALSE
+    chk_no_do <- nrow(df_do_none) != 0
   }
 
   if (chk_no_do ||
@@ -431,9 +430,9 @@ merge_output <- function(de_id,
         dplyr::filter(fnm == le_fnm_raw) |>
         as.list()
 
-      # If no raw accelerometer steps performed, then no point in merging
-      # with any reference data.
-      if (all(!vct_out_complete)) next
+      # If nw.sleep or cutpoint step was not completed, no point in merging with any reference
+      # data.
+      if (any(!vct_out_complete[c("nw.sleep", "cut")])) next
 
       # Commenting this out for now. Since the repository is constantly being
       # updated, I don't want a user to accidently send over merged data that
@@ -478,39 +477,19 @@ merge_output <- function(de_id,
 
       ## Raw ----
       # read & merge
-      # Left join first ref as it will always be present (the loop wouldn't start
-      # if the ref was missing).
-      df_ref |>
-        # Left join non-wear/sleep and cutpoint as they are both based off
-        # M$metashort and can just do a down fill for non-wear/sleep.
-        left_join_if(lst_out$cut[le_fnm_raw], completed = vct_out_complete["cut"]) |>
-        left_join_if(lst_out$nw.sleep[le_fnm_raw], completed = vct_out_complete["nw.sleep"]) |>
+      # Left join first nw.sleep and cutpoints as the loop is skipped if nw.sleep
+      # is not completed. Then ref as it will always be present (the loop wouldn't
+      # start if the ref was missing).
+      left_join(
+        read_parquet(lst_out$cut[le_fnm_raw]),
+        read_parquet(lst_out$nw.sleep[le_fnm_raw]),
+        by = join_by(datetime)
+      ) |>
         fill(any_of(c("sleep", "invalid")),
              .direction = "down") |>
-        left_join_if(
-          lst_out$raw[le_fnm_raw],
-          completed = vct_out_complete["raw"],
-          transform = \(x) mutate(
-            x,
-            datetime =
-              datetime |>
-              as.POSIXct(tz = "UTC") |>
-              force_tz(tzone = lst_start_tz$tz) |>
-              with_tz(tzone = "UTC")
-          )
-        ) |>
-        left_join_if(
-          lst_out$oak.pre[le_fnm_raw],
-          completed = vct_out_complete["oak.pre"],
-          transform = \(x) mutate(
-            x,
-            datetime =
-              datetime |>
-              as.POSIXct(tz = "UTC") |>
-              force_tz(tzone = lst_start_tz$tz) |>
-              with_tz(tzone = "UTC")
-          )
-        ) |>
+        left_join(df_ref, by = join_by(datetime)) |>
+        left_join_if(lst_out$raw[le_fnm_raw], completed = vct_out_complete["raw"]) |>
+        left_join_if(lst_out$oak.pre[le_fnm_raw], completed = vct_out_complete["oak.pre"]) |>
         left_join_if(lst_out$ox[le_fnm_raw], completed = vct_out_complete["ox"]) |>
         # Update site and pid with de_identified one if necessary and date, time columns.
         mutate(
