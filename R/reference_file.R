@@ -20,6 +20,10 @@ process_ref_file <- function(lst_chk,
           lst_out <- purrr::pmap(
             lst_chk$pal,
             \(spo, fnm, fpa_epoch, fpa_event, ...) {rlang::try_fetch(
+              # spo       = lst_chk$pal$spo[1]
+              # fnm       = lst_chk$pal$fnm[1]
+              # fpa_epoch = lst_chk$pal$fpa_epoch[1]
+              # fpa_event = lst_chk$pal$fpa_event[1]
               process_activpal_file(spo,
                                     fnm,
                                     fpa_epoch,
@@ -114,48 +118,11 @@ process_activpal_file <- function(spo,
       skip   = 12
     ) |>
     mutate(
-      # Time variable is number of days since 1899-12-30 but some of the floating
-      # point values are ever so slightly smaller than what is printed to the console.
-      # 1) Using only first value, change to seconds since 1899-12-30 (multiply by 60 * 60 * 24),
-      # 2) convert to POSIXct,
-      # 3) change to seconds since 1970-01-01,
-      # 4) round for values that are ever so slightly smaller than what it should be,
-      # 5) convert back to POSIXct
-      # 6) force correct timezone
-      # 7) convert back to POSIXct
       datetime =
-        (Time * 86400) |>
-        as.POSIXct(tz = "UTC", origin = "1899-12-30") |>
-        as.numeric() |>
-        round(digits = 0) |>
-        as.POSIXct(tz = "UTC") |>
-        force_tz(tzone = my_tz) |>
-        with_tz(tzone = "UTC"),
-      dttm_palp =
         `Time(approx)` |>
         force_tz(tzone = my_tz) |>
         with_tz(tzone = "UTC"),
       mets_palp  = `Activity Score (MET.s)`,
-      intensity4_palp = cut(
-        mets_palp,
-        breaks = c(0, 1.5, 2.0, 6.0, Inf),
-        labels = c("sedentary",
-                   "light",
-                   "moderate",
-                   "vigorous")
-      ),
-      intensity3_palp = factor(
-        intensity4_palp,
-        levels = c("sedentary",
-                   "light",
-                   "moderate",
-                   "vigorous"),
-        labels = c("sedentary",
-                   "light",
-                   "mvpa",
-                   "mvpa")
-      ),
-      steps_palp = StepCount,
       sed_time = `Sedentary Time (s)`,
       upr_time = `Upright Time (s)`,
       stp_time = `Stepping Time (s)`,
@@ -165,20 +132,74 @@ process_activpal_file <- function(spo,
       non_time = `Nonwear Time (s)`,
       tra_time = `Seated Transport Time (s)`,
       err_time = `Data Errors (s)`,
+      intensity4_palp =
+        case_when(
+          non_time >= 0.5   ~ "non-wear",
+          err_time >= 0.5   ~ "EMPTY",
+          mets_palp == 0.0  ~ NA_character_,
+          (sed_time >= 0.5 | ply_time >= 0.5 | sly_time >= 0.5) &
+            mets_palp < 2.0 ~ "sedentary",
+          mets_palp < 3.0   ~ "light",
+          mets_palp < 6.0   ~ "moderate",
+          mets_palp >= 6.0  ~ "vigorous",
+          .default          = "CHECK ME"
+        ) |>
+        # For some reason, mets will be 0 at times even while activPAL is still
+        # being worn. Just do a downward fill. TODO: This will fill in the non-wear times as well! Need to account for it in case_when
+        # by making it a dummy value like "non-wear", do down fill, then make that value as NA.
+        vctrs::vec_fill_missing(direction = "down") |>
+        replace_values(
+          "non-wear" ~ NA_character_,
+          "EMPTY"    ~ NA_character_
+        ) |>
+        factor(
+          levels = c("sedentary",
+                     "light",
+                     "moderate",
+                     "vigorous",
+                     "CHECK ME")
+        ),
+      intensity3_palp = factor(
+        intensity4_palp,
+        levels = c("sedentary",
+                   "light",
+                   "moderate",
+                   "vigorous",
+                   "CHECK ME"),
+        labels = c("sedentary",
+                   "light",
+                   "mvpa",
+                   "mvpa",
+                   "CHECK ME")
+      ),
+      steps_palp = StepCount,
       .keep = "none"
     )
 
-  if (uniqueN(df_epoch$err_time) > 1) {
+  if (any(df_epoch$intensity3_palp == "CHECK ME", na.rm = TRUE)) {
     cli::cli_abort(
       message = c(
         "`process_activpal` function:",
-        "x" = "Epoch file has a data error. Double-check events file to see what corresponding {.var class_palv} is.",
-        "i" = "Can be fixed, please reach out to WAVES team.",
-        "i" = glue::glue("ID: {spo}"),
-        "i" = glue::glue("File: {basename(vct_event[fnm])}")
+        "x" = "Epoch file intensity variable has a {.val CHECK ME} value",
+        "i" = "ID: {spo}",
+        "i" = "File: {basename(fpa_event)}"
       ),
       class = "waves_process_pal_epoch",
       call   = rlang::caller_env()
+    )
+  } else {
+    df_epoch$intensity4_palp <- factor(
+      df_epoch$intensity4_palp,
+      levels = c("sedentary",
+                 "light",
+                 "moderate",
+                 "vigorous")
+    )
+    df_epoch$intensity3_palp <- factor(
+      df_epoch$intensity3_palp,
+      levels = c("sedentary",
+                 "light",
+                 "mvpa")
     )
   }
 
@@ -209,6 +230,10 @@ process_activpal_file <- function(spo,
         floor_date(unit = "seconds") |>
         force_tz(tzone = my_tz) |>
         with_tz(tzone = "UTC"),
+      # I don't know if the above method is better than using `Time(approx)`. For
+      # now keep it in and from analytic pipeline, see if palv performs better
+      # than palp since using `Time(approx)` is about the same as using `Time(approx)`
+      # from epoch file.
       dttm_palv =
         `Time(approx)` |>
         force_tz(tzone = my_tz) |>
@@ -216,15 +241,15 @@ process_activpal_file <- function(spo,
       class_palv = factor(
         x = `Event Type`,
         levels = c(0, 1, 2, 2.1, 3, 3.1, 3.2, 4, 5),
-        labels = c("Sedentary",
-                   "Upright",
-                   "Stepping",
-                   "Cycling",
-                   "Lying",
-                   "Primary Lying",
-                   "Seconday Lying",
-                   "Non-Wear",
-                   "Travelling")
+        labels = c("sedentary",
+                   "upright",
+                   "stepping",
+                   "cycling",
+                   "lying",
+                   "primary lying",
+                   "seconday lying",
+                   "non_wear",
+                   "travelling")
         # https://github.com/PALkitchen/activPAL/blob/d528217ce423fd2652d1c55f9469883cf147fb9f/R/activity.summary.by.period.R#L122
         # 0   ~ "Sedentary",
         # 1   ~ "Upright",
@@ -237,14 +262,22 @@ process_activpal_file <- function(spo,
         # 5   ~ "Travelling"
       ),
       mets_palv  = `Activity Score (MET.h)` / `Duration (s)` * 3600,
-      intensity4_palv = cut(
-        mets_palv,
-        breaks = c(0, 1.5, 2.0, 6.0, Inf),
-        labels = c("sedentary",
-                   "light",
-                   "moderate",
-                   "vigorous")
-      ),
+      intensity4_palv = case_when(
+        class_palv == "non_wear" ~ NA_character_,
+        class_palv %in% c("sedentary", "primary lying", "secondary lying") &
+          mets_palv < 2.0        ~ "sedentary",
+        mets_palv < 3.0          ~ "light",
+        mets_palv < 6.0          ~ "moderate",
+        mets_palv >= 6.0         ~ "vigorous",
+        .default                 = "CHECK ME"
+      ) |>
+        factor(
+          levels = c("sedentary",
+                     "light",
+                     "moderate",
+                     "vigorous",
+                     "CHECK ME")
+        ),
       intensity3_palv = factor(
         intensity4_palv,
         levels = c("sedentary",
@@ -261,20 +294,41 @@ process_activpal_file <- function(spo,
       steps_palv = c(0, diff(`Cumulative Step Count`)) * 2,
       # steps_cum  = `Cumulative Step Count` * 2,
       waking_day = `Waking Day`,
+      duration = `Duration (s)`,
       .keep = "none"
-    )
+    ) |>
+    # At times, activPAL will have an error where there will be a repeated second
+    # with no data. This is when err_time will be > 1 from the epoch file.
+    # Just remove these rows.
+    filter_out(is.na(class_palv)) |>
+    # Remove duplicated datetimes, which occurs when a class occurs for less than
+    # a second within a datetime.
+    filter_out(duplicated(datetime, fromLast = TRUE))
 
-  if (anyNA(df_event$event_palv)) {
+  if (any(df_event$intensity3_palv == "CHECK ME", na.rm = TRUE)) {
     cli::cli_abort(
       message = c(
         "`process_activpal` function:",
-        "x" = "Events file has NA in events type column after renaming.",
-        "i" = "Can be fixed, please reach out to WAVES team.",
+        "x" = "Event file intensity variable has a {.val CHECK ME} value",
         "i" = "ID: {spo}",
-        "i" = "File: {basename(vct_event[fnm])}"
+        "i" = "File: {basename(fpa_event)}"
       ),
-      class = "waves_process_pal_event",
+      class = "waves_process_pal_epoch",
       call   = rlang::caller_env()
+    )
+  } else {
+    df_event$intensity4_palv <- factor(
+      df_event$intensity4_palv,
+      levels = c("sedentary",
+                 "light",
+                 "moderate",
+                 "vigorous")
+    )
+    df_event$intensity3_palv <- factor(
+      df_event$intensity3_palv,
+      levels = c("sedentary",
+                 "light",
+                 "mvpa")
     )
   }
 
@@ -296,13 +350,11 @@ process_activpal_file <- function(spo,
       steps_palv      = ifelse(is.na(steps_palv),
                                0,
                                steps_palv),
-      # steps_cum       = vctrs::vec_fill_missing(steps_cum,
-      #                                           direction = "down"),
       class_palv      = vctrs::vec_fill_missing(class_palv,
                                                 direction = "down")
     ) |>
     select(
-      datetime, dttm_palp, dttm_palv, waking_day,
+      datetime, dttm_palv, waking_day,
       starts_with("mets"),
       starts_with("intensity3"),
       starts_with("intensity4"),

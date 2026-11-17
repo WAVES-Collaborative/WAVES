@@ -327,7 +327,7 @@ check_input_pal <- function(vct_fpa_palp,
     cli::cli_abort(
       message = c(
         "User error with supplied activPAL data.",
-        "The following activPAl files do not start with supplied {.envvar id_pt} '{id_pt_pretty}':",
+        "The following activPAl files do not start with supplied {.envvar site_pid_observation_pattern} '{spo_pat_pretty}':",
         "i" = "1 second epoch files:",
         indent_cli_message(vct_err_epoch),
         "i" = "Event files:",
@@ -486,7 +486,7 @@ check_input_raw <- function(vct_raw,
     cli::cli_abort(
       message = c(
         "User error with supplied wrist accelerometer data.",
-        "i" = "The following files do not start with supplied {.envvar id_pt} '{id_pt_pretty}':",
+        "i" = "The following files do not start with supplied {.envvar site_pid_observation_pattern} '{spo_pat_pretty}':",
         indent_cli_message(vct_err)
       ),
       class = "waves_chk_raw_id_pt",
