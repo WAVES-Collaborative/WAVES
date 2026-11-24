@@ -351,11 +351,19 @@ merge_ox <- function(vct_ox_step,
       mutate(
         # If the file was .gt3x, then the time, when read by accProcess, will
         # be correctly shown as UTC time.
-        # TODO Double check this happens for .cwa files with Ahmadi and Alyona.
+        # For .cwa files, accProcess (run with --timeZone UTC) writes the device
+        # clock time, which is local time. Convert it with the file's
+        # fixed-offset timezone, as for actinet and stepcount. Checked on ELSA
+        # against camera labels: without this, Walmsley was one hour late.
         # TODO Double check this happens for .bin files with Keadle's COMPARE
         datetime =
           if (le_type %in% c("ACTIGRAPH - GT3X", "ACTIGRAPH - CSV")) {
             ymd_hms(time, tz = "UTC", quiet = TRUE) |>
+              floor_date(unit = "seconds")
+          } else if (le_type %in% "AXIVITY - CWA") {
+            ymd_hms(time, tz = "UTC", quiet = TRUE) |>
+              force_tz(tzone = df_start_tz$tz[df_start_tz$fnm == le_fnm]) |>
+              with_tz(tzone = "UTC") |>
               floor_date(unit = "seconds")
           } else {
             ymd_hms(time, tz = "UTC", quiet = TRUE) |>
