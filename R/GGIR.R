@@ -216,15 +216,22 @@ find_timezone_by_offset <- function(offset_hours,
     value = TRUE
   )
 }
-find_offset <- function(tz) {
+find_offset <- function(tz,
+                        dttm = Sys.time()) {
   # Validate input: tz should be in Olson name format.
   if(!tz %in% OlsonNames()) stop("tz not in Continent/City format")
+  if (length(dttm) != 1 || is.na(dttm)) stop("dttm must be one valid date-time")
 
-  (Sys.time() |>
-      as.POSIXct(tz = tz) |>
-      format("%z") |>
-      as.numeric()) /
-    100
+  # Offset of `tz` in hours at `dttm` (e.g. the recording start), not at the
+  # time the pipeline runs. "+0530" gives 5.5.
+  utc_offset <-
+    dttm |>
+    as.POSIXct() |>
+    with_tz(tzone = tz) |>
+    format("%z")
+  sign_offset <- if (substr(utc_offset, 1, 1) == "-") -1 else 1
+  sign_offset *
+    (as.numeric(substr(utc_offset, 2, 3)) + as.numeric(substr(utc_offset, 4, 5)) / 60)
 
 }
 get_start_tz_df <- function(vct_basic,
@@ -275,13 +282,28 @@ get_start_tz_df <- function(vct_basic,
     } else if (I$dformn == "cwa") {
 
       # timezone information not saved in Axivity data.
-      # Default to my_tz for Axivity files.
+      # Default to my_tz for Axivity files. The device clock keeps one offset
+      # and ignores daylight-saving changes, so use a fixed-offset timezone
+      # (e.g. "Etc/GMT-1", which is UTC+1) instead of my_tz itself.
       le_start_dttm <-
         I$header["start", "value"]$start |>
         force_tz(tzone = my_tz) |>
         with_tz(tzone = "UTC")
-      le_offset <- find_offset(my_tz)
-      le_tz <- my_tz
+      if (is.na(le_start_dttm)) {
+        stop("The start time of '", fnm, "' does not exist in '", my_tz,
+             "' (for example, it is in the hour that a daylight-saving change skips).",
+             call. = FALSE)
+      }
+      le_offset <- find_offset(my_tz, le_start_dttm)
+      le_tz <- find_timezone_by_offset(le_offset, le_start_dttm)
+      # No fixed-offset zone exists for offsets that are not whole hours
+      # (e.g. India). Keep my_tz for these, as before.
+      if (length(le_tz) != 1) {
+        warning("No fixed-offset timezone for '", my_tz, "' at the start of '", fnm,
+                "'. Using '", my_tz, "', which applies daylight-saving rules to each timestamp.",
+                call. = FALSE)
+        le_tz <- my_tz
+      }
 
     } else if (I$dformn == "bin"){
 
@@ -304,15 +326,29 @@ get_start_tz_df <- function(vct_basic,
     } else if (I$monn == "actigraph" && I$dformn == "csv") {
 
       # Timezone information not saved in csv header.
-      # Default to my_tz for ActiGrpah csv files.
+      # Default to my_tz for ActiGrpah csv files, as a fixed-offset timezone
+      # (see the Axivity branch above).
       le_start_dttm <-
         paste0(I$header["Start Date", "value"] |> stri_trim(side = "left"),
                I$header["Start Time", "value"]) |>
         strptime(format = "%m/%d/%Y %H:%M:%OS",
                  tz     = my_tz) |>
         with_tz(tzone = "UTC")
-      le_offset <- find_offset(my_tz)
-      le_tz <- my_tz
+      if (is.na(le_start_dttm)) {
+        stop("The start time of '", fnm, "' does not exist in '", my_tz,
+             "' (for example, it is in the hour that a daylight-saving change skips).",
+             call. = FALSE)
+      }
+      le_offset <- find_offset(my_tz, le_start_dttm)
+      le_tz <- find_timezone_by_offset(le_offset, le_start_dttm)
+      # No fixed-offset zone exists for offsets that are not whole hours
+      # (e.g. India). Keep my_tz for these, as before.
+      if (length(le_tz) != 1) {
+        warning("No fixed-offset timezone for '", my_tz, "' at the start of '", fnm,
+                "'. Using '", my_tz, "', which applies daylight-saving rules to each timestamp.",
+                call. = FALSE)
+        le_tz <- my_tz
+      }
 
     }
 
