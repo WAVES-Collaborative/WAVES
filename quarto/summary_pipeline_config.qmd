@@ -49,8 +49,14 @@ tar_load(vct_ox)
 # tar_load(vct_ox_wlms)
 # tar_load(vct_ox_acti)
 tar_load(df_pipe)
-lst_info <- jsonlite::fromJSON(Sys.getenv("QUARTO_EXECUTE_INFO"))
-target_format <- lst_info$format$identifier$`target-format`
+# QUARTO_EXECUTE_INFO is set only when Quarto renders this file. On Linux,
+# the pipeline renders it with rmarkdown (tar_render) to HTML.
+quarto_info <- Sys.getenv("QUARTO_EXECUTE_INFO")
+target_format <- if (nzchar(quarto_info)) {
+  jsonlite::fromJSON(quarto_info)$format$identifier$`target-format`
+} else {
+  "html"
+}
 
 len_raw <- length(vct_raw)
 df_out <- summarize_accelerometer_steps_config(
